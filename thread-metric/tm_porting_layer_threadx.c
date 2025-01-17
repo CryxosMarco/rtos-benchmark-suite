@@ -19,6 +19,7 @@
 /**************************************************************************/
 
 /* Turn off ThreadX error checking.  */
+#ifdef USING_THREADX
 
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
@@ -380,3 +381,5 @@ VOID tm_thread_entry(ULONG thread_input)
     /* Call the entry function.   */
     (entry_function)();
 }
+
+#endif /* USING_THREADX */

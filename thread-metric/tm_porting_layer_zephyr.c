@@ -38,6 +38,7 @@
 
 
 /* Include necessary files.  */
+#ifdef USING_ZEPHYR
 
 #include    "tm_api.h"
 
@@ -240,3 +241,5 @@ int tm_memory_pool_deallocate(int pool_id, unsigned char *memory_ptr)
 
 	return TM_SUCCESS;
 }
+
+#endif /* USING_ZEPHYR */

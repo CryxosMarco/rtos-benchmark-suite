@@ -46,7 +46,6 @@
 #ifndef TM_API_H
 #define TM_API_H
 
-#include <stdlib.h>
 #ifdef USING_ZEPHYR
 #include <zephyr/kernel.h>
 #include <zephyr/shell/shell.h>
@@ -57,9 +56,21 @@
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/interrupt_controller/intc_vim.h>
+#endif /* USING_ZEPHYR */
+#ifdef USING_FREERTOS
+
+#endif /* USING_FREERTOS */
+#ifdef USING_THREADX
+#ifndef TX_DISABLE_ERROR_CHECKING
+#define TX_DISABLE_ERROR_CHECKING
 #endif
+#define TX_ENABLE_STACK_CHECKING
+#include "tx_api.h"
+
+#endif /* USING_THREADX */
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Determine if a C++ compiler is being used.  If so, ensure that standard
    C is used to process the API information.  */
@@ -76,8 +87,11 @@ extern "C"
 
 #define TM_SUCCESS 0
 #define TM_ERROR 1
+
+#ifdef USING_ZEPHYR
 #define ENABLE_PRINTF
 #define printf printk
+#endif
 
     /* Define the time interval in seconds. This can be changed with a -D compiler option.  */
 

@@ -1,0 +1,3 @@
+// #define USING_ZEPHYR
+// #define USING_FREERTOS
+#define USING_THREADX

@@ -1,4 +1,4 @@
-
+#ifdef USING_ZEPHYR
 
 #include <soc.h>
 #include <stdlib.h>
@@ -83,7 +83,7 @@ void main_task(void *pvParameters)
 // Thread definition
 K_THREAD_DEFINE(main_thread, 512 /* STACKSIZE */, main_task, NULL, NULL, NULL, MAIN_TASK_PRI, K_USER, -1);
 
-int main(void)
+int rtos_main_zephyr(void)
 {
     printk("Initializing Zephyr system...");
 
@@ -124,3 +124,5 @@ int main(void)
 //     TimerP_setup(gTimerBaseAddr[CONFIG_TIMER0], &timerParams);
 //     TimerP_start(gTimerBaseAddr[CONFIG_TIMER0]);
 // }
+
+#endif

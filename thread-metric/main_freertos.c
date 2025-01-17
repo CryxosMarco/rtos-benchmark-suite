@@ -29,6 +29,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifdef USING_FREERTOS
 
 #include <stdlib.h>
 #include <kernel/dpl/DebugP.h>
@@ -117,7 +118,7 @@ void main_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-int main(void)
+int rtos_main_freertos(void)
 {
     printf("Initializing FreeRTOS system...\n");
     /* Initialize board and system */
@@ -147,3 +148,5 @@ int main(void)
         // printf("Scheduler returned unexpectedly\n");
     }
 }
+
+#endif /* USING_FREERTOS */

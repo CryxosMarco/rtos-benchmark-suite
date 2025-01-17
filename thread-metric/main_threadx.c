@@ -29,6 +29,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifdef USING_THREADX
 
 #include <stdlib.h>
 #include <kernel/dpl/DebugP.h>
@@ -108,7 +109,7 @@ void threadx_main(ULONG arg)
     benchmark_main(arg);
 }
 
-int main(void)
+int rtos_main_threadx(void)
 {
     /* init SOC specific modules */
     System_init();
@@ -142,3 +143,5 @@ void tx_application_define(void *first_unused_memory)
 
     DebugP_assertNoLog(status == TX_SUCCESS);
 }
+
+#endif /* USING_THREADX */

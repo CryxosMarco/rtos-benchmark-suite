@@ -17,6 +17,7 @@
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
+#ifdef USING_FREERTOS
 
 /* Include necessary files.  */
 
@@ -356,3 +357,5 @@ int tm_memory_pool_deallocate(int pool_id, unsigned char *memory_ptr)
 
 //     return (uint32_t)(total_ticks & 0xFFFFFFFF);
 // }
+
+#endif /* USING_FREERTOS */
