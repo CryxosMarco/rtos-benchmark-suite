@@ -5,14 +5,8 @@
 #include <kernel/dpl/DebugP.h>
 #include <kernel/dpl/TimerP.h>
 #include "tm_api.h"
-#include <stdio.h>
-#include <stdbool.h>
 
 /* Zephyr includes */
-#include <zephyr/kernel.h>
-#include <zephyr/drivers/sensor.h>
-#include <zephyr/logging/log.h>
-#include <zephyr/drivers/interrupt_controller/intc_vim.h>
 
 #define SOFTWARE_INTERRUPT_ID 10
 

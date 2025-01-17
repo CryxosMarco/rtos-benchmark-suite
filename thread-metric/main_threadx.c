@@ -35,11 +35,11 @@
 #include "ti_drivers_config.h"
 #include "ti_board_config.h"
 #include <tm_api.h>
+#include <HwiP.h>
 #include <stdio.h>
 
 /* ThreadX includes */
 #include <tx_api.h>
-#include <HwiP.h>
 
 #define MAIN_TASK_PRI (1)
 

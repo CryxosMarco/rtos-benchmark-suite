@@ -47,12 +47,19 @@
 #define TM_API_H
 
 #include <stdlib.h>
+#ifdef USING_ZEPHYR
 #include <zephyr/kernel.h>
 #include <zephyr/shell/shell.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/app_memory/app_memdomain.h>
 #include <zephyr/syscalls/libc-hooks.h>
 #include <cmsis_core.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/interrupt_controller/intc_vim.h>
+#endif
+#include <stdbool.h>
+#include <stdio.h>
 
 /* Determine if a C++ compiler is being used.  If so, ensure that standard
    C is used to process the API information.  */
@@ -79,25 +86,63 @@ extern "C"
 #endif
 
     /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the following
-       API. Once this is done the Thread-Metric tests can be successfully run.  */
+        API. Once this is done the Thread-Metric tests can be successfully run.  */
 
+    /* This function called from main performs basic RTOS initialization,
+    calls the test initialization function, and then starts the RTOS function.  */
     void tm_initialize(void (*test_initialization_function)(void));
+    /* This function takes a thread ID and priority and attempts to create the
+    file in the underlying RTOS.  Valid priorities range from 1 through 31,
+    where 1 is the highest priority and 31 is the lowest. If successful,
+    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.   */
     int tm_thread_create(int thread_id, int priority, void (*entry_function)(void *, void *, void *));
+    /* This function resumes the specified thread.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_thread_resume(int thread_id);
+    /* This function suspends the specified thread.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_thread_suspend(int thread_id);
+    /* This function relinquishes to other ready threads at the same
+    priority.  */
     void tm_thread_relinquish(void);
+
     void tm_thread_exit(void);
+    /* This function suspends the specified thread for the specified number
+    of seconds.  If successful, the function should return TM_SUCCESS.
+    Otherwise, TM_ERROR should be returned.  */
     void tm_thread_sleep(int seconds);
+    /* This function creates the specified queue.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_queue_create(int queue_id);
+    /* This function sends a 16-byte message to the specified queue.  If successful,
+    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_queue_send(int queue_id, unsigned long *message_ptr);
+    /* This function receives a 16-byte message from the specified queue.  If successful,
+    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_queue_receive(int queue_id, unsigned long *message_ptr);
+    /* This function creates the specified semaphore.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_semaphore_create(int semaphore_id);
+    /* This function gets the specified semaphore.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_semaphore_get(int semaphore_id);
+
     int tm_semaphore_wait(int semaphore_id);
+    /* This function puts the specified semaphore.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_semaphore_put(int semaphore_id);
     int tm_semaphore_put_from_isr(int semaphore_id);
+    /* This function creates the specified memory pool that can support one or more
+    allocations of 128 bytes.  If successful, the function should
+    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_memory_pool_create(int pool_id);
+    /* This function allocates a 128 byte block from the specified memory pool.
+    If successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR
+    should be returned.  */
     int tm_memory_pool_allocate(int pool_id, unsigned char **memory_ptr);
+    /* This function releases a previously allocated 128 byte block from the specified
+    memory pool. If successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR
+    should be returned.  */
     int tm_memory_pool_deallocate(int pool_id, unsigned char *memory_ptr);
     int tm_mutex_create(int mutex_id);
     int tm_mutex_get(int mutex_id);
@@ -109,6 +154,11 @@ extern "C"
     void tm_interrupt_processing_handler();
     void tm_interrupt_preemption_handler();
 
+#ifdef USING_THREADX
+    /* This is the ThreadX thread entry.  It is going to call the Thread-Metric
+    entry function saved earlier.  */
+    VOID tm_thread_entry(ULONG thread_input);
+#endif
 /* Determine if a C++ compiler is being used.  If so, complete the standard
    C conditional started above.  */
 #ifdef __cplusplus

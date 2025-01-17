@@ -57,6 +57,18 @@ void tm_preemptive_thread_2_entry(void *p1, void *p2, void *p3);
 void tm_preemptive_thread_3_entry(void *p1, void *p2, void *p3);
 void tm_preemptive_thread_4_entry(void *p1, void *p2, void *p3);
 
+/* Define array to remember the test entry function.  */
+
+void *tm_thread_entry_functions[TM_THREADX_MAX_THREADS];
+
+/* Remember the test initialization function.  */
+
+void (*tm_initialization_function)(void);
+
+/* Define our shell entry function to match ThreadX.  */
+
+VOID tm_thread_entry(ULONG thread_input);
+
 /* Define the reporting function prototype.  */
 
 void tm_preemptive_thread_report(void);

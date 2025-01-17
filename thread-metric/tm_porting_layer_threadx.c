@@ -47,6 +47,42 @@
 #include "tx_api.h"
 #include "tm_api.h"
 
+/* Define ThreadX mapping constants.  */
+
+#define TM_THREADX_MAX_THREADS 10
+#define TM_THREADX_MAX_QUEUES 1
+#define TM_THREADX_MAX_SEMAPHORES 1
+#define TM_THREADX_MAX_MEMORY_POOLS 1
+
+/* Define the default ThreadX stack size.  */
+
+#define TM_THREADX_THREAD_STACK_SIZE 2096
+
+/* Define the default ThreadX queue size.  */
+
+#define TM_THREADX_QUEUE_SIZE 200
+
+/* Define the default ThreadX memory pool size.  */
+
+#define TM_THREADX_MEMORY_POOL_SIZE 2048
+
+/* Define the number of timer interrupt ticks per second.  */
+
+#define TM_THREADX_TICKS_PER_SECOND 1000
+
+/* Define ThreadX data structures.  */
+
+TX_THREAD tm_thread_array[TM_THREADX_MAX_THREADS];
+TX_QUEUE tm_queue_array[TM_THREADX_MAX_QUEUES];
+TX_SEMAPHORE tm_semaphore_array[TM_THREADX_MAX_SEMAPHORES];
+TX_BLOCK_POOL tm_block_pool_array[TM_THREADX_MAX_MEMORY_POOLS];
+
+/* Define ThreadX object data areas.  */
+
+unsigned char tm_thread_stack_area[TM_THREADX_MAX_THREADS * TM_THREADX_THREAD_STACK_SIZE];
+unsigned char tm_queue_memory_area[TM_THREADX_MAX_QUEUES * TM_THREADX_QUEUE_SIZE];
+unsigned char tm_pool_memory_area[TM_THREADX_MAX_MEMORY_POOLS * TM_THREADX_MEMORY_POOL_SIZE];
+
 /* This function called from main performs basic RTOS initialization,
    calls the test initialization function, and then starts the RTOS function.  */
 void tm_initialize(void (*test_initialization_function)(void))
