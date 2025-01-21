@@ -1,25 +1,25 @@
-/**************************************************************************/ 
-/*                                                                        */ 
-/*            Copyright (c) 1996-2016 by Express Logic Inc.               */ 
-/*                                                                        */ 
-/*  This Original Work may be modified, distributed, or otherwise used in */ 
-/*  any manner with no obligations other than the following:              */ 
-/*                                                                        */ 
-/*    1. This legend must be retained in its entirety in any source code  */ 
-/*       copies of this Work.                                             */ 
-/*                                                                        */ 
+/**************************************************************************/
+/*                                                                        */
+/*            Copyright (c) 1996-2016 by Express Logic Inc.               */
+/*                                                                        */
+/*  This Original Work may be modified, distributed, or otherwise used in */
+/*  any manner with no obligations other than the following:              */
+/*                                                                        */
+/*    1. This legend must be retained in its entirety in any source code  */
+/*       copies of this Work.                                             */
+/*                                                                        */
 /*    2. This software may not be used in the development of an operating */
-/*       system product.                                                  */ 
-/*                                                                        */  
-/*  This Original Work is hereby provided on an "AS IS" BASIS and WITHOUT */ 
-/*  WARRANTY, either express or implied, including, without limitation,   */ 
-/*  the warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A  */ 
-/*  PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY OF this         */ 
-/*  ORIGINAL WORK IS WITH the user.                                       */ 
-/*                                                                        */ 
-/*  Express Logic, Inc. reserves the right to modify this software        */ 
-/*  without notice.                                                       */ 
-/*                                                                        */ 
+/*       system product.                                                  */
+/*                                                                        */
+/*  This Original Work is hereby provided on an "AS IS" BASIS and WITHOUT */
+/*  WARRANTY, either express or implied, including, without limitation,   */
+/*  the warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A  */
+/*  PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY OF this         */
+/*  ORIGINAL WORK IS WITH the user.                                       */
+/*                                                                        */
+/*  Express Logic, Inc. reserves the right to modify this software        */
+/*  without notice.                                                       */
+/*                                                                        */
 /*  Express Logic, Inc.                     info@expresslogic.com         */
 /*  11423 West Bernardo Court               http://www.expresslogic.com   */
 /*  San Diego, CA  92127                                                  */
@@ -28,7 +28,7 @@
 
 /**************************************************************************/
 /**************************************************************************/
-/**                                                                       */ 
+/**                                                                       */
 /** Thread-Metric Component                                               */
 /**                                                                       */
 /**   Porting Layer (Must be completed with RTOS specifics)               */
