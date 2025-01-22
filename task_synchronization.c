@@ -26,8 +26,10 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 /*******************************************************************************
  * includes
  ******************************************************************************/
+#ifdef USING_FREERTOS || USING_THREADX
 #include "ti_board_open_close.h"
 #include "ti_drivers_open_close.h"
+#endif
 #include "tm_api.h"
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +55,7 @@ static int OpenUART(void) {
 
 /* Write one character (simulated) to the UART by printing. */
 static void putch(char c) {
+#ifndef USING_ZEPHYR /* when using ThreadX or FreeRTOS via CCS */
   Drivers_open();
   Board_driversOpen();
 
@@ -60,7 +63,9 @@ static void putch(char c) {
 
   Board_driversClose();
   Drivers_close();
-  /* printf("%c", c); */
+#else
+  printk("%c", c); /* using Zephyr api for UART */
+#endif
 }
 
 /* Release the UART mutex after finishing the print. */
