@@ -44,7 +44,7 @@
 /**************************************************************************/
 #ifndef TM_API_H
 #define TM_API_H
-#pragma once
+#include "rtos_config.h"
 
 #ifdef USING_ZEPHYR
 #include <zephyr/kernel.h>

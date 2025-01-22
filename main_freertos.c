@@ -29,17 +29,19 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "rtos_config.h"
 #ifdef USING_FREERTOS
 
-#include <stdlib.h>
+#include "ti_board_config.h"
+#include "ti_drivers_config.h"
+#include "tm_api.h"
+#include <HwiP.h>
 #include <kernel/dpl/DebugP.h>
 #include <kernel/dpl/TimerP.h>
-#include "ti_drivers_config.h"
-#include "ti_board_config.h"
-#include <tm_api.h>
-#include <stdio.h>
 #include <stdbool.h>
-#include <HwiP.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"

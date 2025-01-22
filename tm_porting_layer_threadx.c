@@ -19,6 +19,7 @@
 /**************************************************************************/
 
 /* Turn off ThreadX error checking.  */
+#include "rtos_config.h"
 #ifdef USING_THREADX
 
 #ifndef TX_DISABLE_ERROR_CHECKING
@@ -84,39 +85,46 @@ unsigned char tm_thread_stack_area[TM_THREADX_MAX_THREADS * TM_THREADX_THREAD_ST
 unsigned char tm_queue_memory_area[TM_THREADX_MAX_QUEUES * TM_THREADX_QUEUE_SIZE];
 unsigned char tm_pool_memory_area[TM_THREADX_MAX_MEMORY_POOLS * TM_THREADX_MEMORY_POOL_SIZE];
 
+/* Define array to remember the test entry function.  */
+
+void *tm_thread_entry_functions[TM_THREADX_MAX_THREADS];
+
+/* Define our shell entry function to match ThreadX.  */
+
+VOID tm_thread_entry(ULONG thread_input);
+
 /* This function called from main performs basic RTOS initialization,
    calls the test initialization function, and then starts the RTOS function.  */
-void tm_initialize(void (*test_initialization_function)(void))
-{
-    /* Save the test initialization function.  */
-    tm_initialization_function = test_initialization_function;
-
-    /* Call the previously defined initialization function.  */
-    (tm_initialization_function)();
+void tm_initialize(void (*test_initialization_function)(void)) {
+  /* Call initialization function. */
+  test_initialization_function();
 }
 
 /* This function takes a thread ID and priority and attempts to create the
    file in the underlying RTOS.  Valid priorities range from 1 through 31,
    where 1 is the highest priority and 31 is the lowest. If successful,
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.   */
-int tm_thread_create(int thread_id, int priority, void (*entry_function)(void))
-{
+int tm_thread_create(int thread_id, int priority,
+                     void (*entry_function)(void *, void *, void *)) {
 
-    UINT status;
+  UINT status;
 
-    /* Remember the actual thread entry.  */
-    tm_thread_entry_functions[thread_id] = (void *)entry_function;
+  /* Remember the actual thread entry.  */
+  tm_thread_entry_functions[thread_id] = (void *)entry_function;
 
-    /* Create the thread under ThreadX.  */
-    status = tx_thread_create(&tm_thread_array[thread_id], "Thread-Metric test", tm_thread_entry, (ULONG)thread_id,
-                              &tm_thread_stack_area[thread_id * TM_THREADX_THREAD_STACK_SIZE], TM_THREADX_THREAD_STACK_SIZE,
-                              (UINT)priority, (UINT)priority, TX_NO_TIME_SLICE, TX_DONT_START);
+  /* Create the thread under ThreadX.  */
+  status = tx_thread_create(
+      &tm_thread_array[thread_id], "Thread-Metric test", tm_thread_entry,
+      (ULONG)thread_id,
+      &tm_thread_stack_area[thread_id * TM_THREADX_THREAD_STACK_SIZE],
+      TM_THREADX_THREAD_STACK_SIZE, (UINT)priority, (UINT)priority,
+      TX_NO_TIME_SLICE, TX_DONT_START);
 
-    /* Determine if the thread create was successful.  */
-    if (status == TX_SUCCESS)
-        return (TM_SUCCESS);
-    else
-        return (TM_ERROR);
+  /* Determine if the thread create was successful.  */
+  if (status == TX_SUCCESS)
+    return (TM_SUCCESS);
+  else
+    return (TM_ERROR);
 }
 
 /* This function resumes the specified thread.  If successful, the function should

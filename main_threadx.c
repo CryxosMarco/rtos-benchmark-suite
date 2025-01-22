@@ -29,15 +29,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "rtos_config.h"
 #ifdef USING_THREADX
 
-#include <stdlib.h>
-#include <kernel/dpl/DebugP.h>
-#include "ti_drivers_config.h"
 #include "ti_board_config.h"
-#include <tm_api.h>
+#include "ti_drivers_config.h"
+#include "tm_api.h"
 #include <HwiP.h>
+#include <kernel/dpl/DebugP.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* ThreadX includes */
 #include <tx_api.h>
@@ -101,7 +102,7 @@ void setup_interrupt(void)
 
 void benchmark_main(ULONG arg)
 {
-    tm_main_two(); // Startet den Benchmark-Test
+  tm_main_two(); // Startet den Benchmark-Test
 }
 
 void threadx_main(ULONG arg)
@@ -115,8 +116,8 @@ int rtos_main_threadx(void)
     System_init();
     Board_init();
     /* enable this when interrupts are needed. */
-    // test_interrupt_handler = tm_interrupt_processing_handler;
-    // setup_interrupt();
+    test_interrupt_handler = tm_interrupt_processing_handler;
+    setup_interrupt();
 
     /* Enter the ThreadX kernel.  */
     tx_kernel_enter();

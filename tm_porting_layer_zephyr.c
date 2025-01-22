@@ -38,6 +38,7 @@
 
 
 /* Include necessary files.  */
+#include "rtos_config.h"
 #ifdef USING_ZEPHYR
 
 #include    "tm_api.h"

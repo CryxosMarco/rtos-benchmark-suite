@@ -1,3 +1,4 @@
+#include "rtos_config.h"
 #ifdef USING_ZEPHYR
 
 #include <soc.h>

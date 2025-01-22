@@ -26,7 +26,9 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 /*******************************************************************************
  * includes
  ******************************************************************************/
-#include "tm_api.h" /* The header where tm_* functions are declared */
+#include "ti_board_open_close.h"
+#include "ti_drivers_open_close.h"
+#include "tm_api.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -17,6 +17,7 @@
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
+#include "rtos_config.h"
 #ifdef USING_FREERTOS
 
 /* Include necessary files.  */
@@ -53,25 +54,24 @@ void tm_initialize(void (*test_initialization_function)(void))
    file in the underlying RTOS.  Valid priorities range from 1 through 31,
    where 1 is the highest priority and 31 is the lowest. If successful,
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.   */
-int tm_thread_create(int thread_id, int priority, void (*entry_function)(void))
-{
-    int new_priority = configMAX_PRIORITIES - priority + 1;
-    BaseType_t status;
+int tm_thread_create(int thread_id, int priority,
+                     void (*entry_function)(void *, void *, void *)) {
+  int new_priority = configMAX_PRIORITIES - priority + 1;
+  BaseType_t status;
 
-    configASSERT(new_priority <= (configMAX_PRIORITIES - 1));
-    status = xTaskCreate(entry_function, "Thread-Metric test",
-                         configMINIMAL_STACK_SIZE, NULL, /*priority*/ new_priority,
-                         &tm_thread_array[thread_id]);
+  configASSERT(new_priority <= (configMAX_PRIORITIES - 1));
+  status = xTaskCreate(entry_function, "Thread-Metric test",
+                       configMINIMAL_STACK_SIZE, NULL,
+                       /*priority*/ new_priority, &tm_thread_array[thread_id]);
 
-    if (status != pdPASS)
-    {
-        return TM_ERROR;
-    }
-    // vTaskSuspend(tm_thread_array[thread_id]);
-    /* threads start active */
+  if (status != pdPASS) {
+    return TM_ERROR;
+  }
+  // vTaskSuspend(tm_thread_array[thread_id]);
+  /* threads start active */
 
-    // printf("Creating thread ID: %d, Priority: %d\n", thread_id, priority);
-    return TM_SUCCESS;
+  // printf("Creating thread ID: %d, Priority: %d\n", thread_id, priority);
+  return TM_SUCCESS;
 }
 
 /* This function resumes the specified thread.  If successful, the function should
