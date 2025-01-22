@@ -24,7 +24,7 @@ LOG_MODULE_REGISTER(soft_irq);
 
 uint8_t main_thread_stack[MAIN_TASK_STACK_SIZE] __attribute__((aligned(32)));
 
-extern void *test_interrupt_handler = NULL;
+void *test_interrupt_handler = NULL;
 
 /* unused */
 // extern volatile uint32_t gTimerCount = 0;
