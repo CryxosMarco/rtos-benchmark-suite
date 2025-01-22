@@ -42,9 +42,9 @@
 /*  10-15-2021     William E. Lamie         Initial Version 6.1.7         */
 /*                                                                        */
 /**************************************************************************/
-#pragma once
 #ifndef TM_API_H
 #define TM_API_H
+#pragma once
 
 #ifdef USING_ZEPHYR
 #include <zephyr/kernel.h>
@@ -158,15 +158,25 @@ extern "C"
     memory pool. If successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR
     should be returned.  */
     int tm_memory_pool_deallocate(int pool_id, unsigned char *memory_ptr);
+    /* This function creates the specified mutex.  If successful, the function
+      should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_mutex_create(int mutex_id);
+    /* This function gets the specified mutex.  If successful, the function
+      should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_mutex_get(int mutex_id);
+    /* This function puts the specified mutex.  If successful, the function
+       should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
     int tm_mutex_put(int mutex_id);
+    /* This function creates the specified event flags group.  If successful,
+    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be
+    returned.  */
     unsigned long tm_time_get(void);
 
-    /* APIs for interrupt handling -- ertl-liyixiao */
+    /* APIs for interrupt handling */
     void tm_interrupt_raise();
     void tm_interrupt_processing_handler();
     void tm_interrupt_preemption_handler();
+    void tm_interrupt_synchronization_handler();
 
 #ifdef USING_THREADX
     /* This is the ThreadX thread entry.  It is going to call the Thread-Metric
