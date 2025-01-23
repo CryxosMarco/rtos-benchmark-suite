@@ -52,13 +52,14 @@
 /* Define ThreadX mapping constants.  */
 
 #define TM_THREADX_MAX_THREADS 10
-#define TM_THREADX_MAX_QUEUES 1
-#define TM_THREADX_MAX_SEMAPHORES 1
-#define TM_THREADX_MAX_MEMORY_POOLS 1
+#define TM_THREADX_MAX_QUEUES 4
+#define TM_THREADX_MAX_SEMAPHORES 4
+#define TM_THREADX_MAX_MEMORY_POOLS 4
 
 /* Define the default ThreadX stack size.  */
 
-#define TM_THREADX_THREAD_STACK_SIZE 2096
+// #define TM_THREADX_THREAD_STACK_SIZE 1048
+#define TM_THREADX_THREAD_STACK_SIZE 4096 // Increase to a higher value
 
 /* Define the default ThreadX queue size.  */
 
