@@ -39,6 +39,7 @@
 /*  10-15-2021     William E. Lamie         Initial Version 6.1.7         */
 /*                                                                        */
 /**************************************************************************/
+
 #include "tm_api.h"
 
 /* Define the counters used in the demo application...  */
@@ -77,20 +78,19 @@ int tm_main_three(void)
 
 void tm_interrupt_processing_initialize(void)
 {
+  /* Create thread that generates the interrupt at priority 10.  */
+  tm_thread_create(0, 10, tm_interrupt_thread_0_entry);
 
-    /* Create thread that generates the interrupt at priority 10.  */
-    tm_thread_create(0, 10, tm_interrupt_thread_0_entry);
+  /*
+   * Create a semaphore that will be posted from the interrupt
+   * handler.
+   */
+  tm_semaphore_create(0);
 
-    /*
-     * Create a semaphore that will be posted from the interrupt
-     * handler.
-     */
-    tm_semaphore_create(0);
+  /* Resume just thread 0.  */
+  tm_thread_resume(0);
 
-    /* Resume just thread 0.  */
-    tm_thread_resume(0);
-
-    tm_interrupt_thread_report();
+  tm_interrupt_thread_report();
 }
 
 /* Define the thread that generates the interrupt.  */

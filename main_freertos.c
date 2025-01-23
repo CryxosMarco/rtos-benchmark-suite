@@ -60,7 +60,7 @@
 
 uint8_t main_thread_stack[MAIN_TASK_STACK_SIZE] __attribute__((aligned(32)));
 
-extern void *test_interrupt_handler = NULL;
+void *test_interrupt_handler = NULL;
 
 // Define the interrupt handler
 void tm_interrupt_handler(void *args)
@@ -113,8 +113,8 @@ void main_task(void *pvParameters)
     /* Start Thread-Metric tests */
     printf("Starting Thread-Metric tests...\n");
     tm_main_seven();
-    // test_interrupt_handler = tm_interrupt_processing_handler;
-    // setup_interrupt();
+    test_interrupt_handler = tm_interrupt_processing_handler;
+    setup_interrupt();
 
     /* Delete this task when finished */
     vTaskDelete(NULL);
