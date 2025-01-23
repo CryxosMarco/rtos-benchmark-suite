@@ -1,34 +1,32 @@
-/*
- *  Copyright (C) 2018-2024 Texas Instruments Incorporated
+/*[CR]**************************************************************************
+Copyright (c) IBV - Echtzeit- und Embedded GmbH & Co. KG
+All Rights reserved.
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: ThreadX Main Thread
+CONTENTS: Starts Main Thread and system initialization
+*
+/*[CL]**************************************************************************
+10-11-20242 MMI Initial creation of the file
+23-11-2024 MMI Modified Interrupt Handler
+
+---
+MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
+*/
+/*[MP]**************************************************************************
+ * Synchronistation Promblem example using tm_api.h
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
+ * Demonstrates:
+ *   - How to set up a simple "UART" usage protected by a mutex
+ *   - Creating/resuming tasks
+ *   - Printing output with printf (simulating UART output)
  *
- *    Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
  *
- *    Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the
- *    distribution.
- *
- *    Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ ******************************************************************************/
+/*******************************************************************************
+ * includes
+ ******************************************************************************/
 #include "rtos_config.h"
 #ifdef USING_THREADX
 
@@ -46,7 +44,7 @@
 #define MAIN_TASK_PRI (1)
 
 // Choose an appropriate interrupt number
-#define SOFTWARE_INTERRUPT_ID 10 // Example interrupt number
+#define SOFTWARE_INTERRUPT_ID 10
 
 #define MAIN_TASK_STACK_SIZE (8192U)
 
@@ -59,7 +57,7 @@ uint8_t main_thread_stack[MAIN_TASK_STACK_SIZE] __attribute__((aligned(32)));
 
 TX_THREAD main_thread;
 
-extern void *test_interrupt_handler = NULL;
+void *test_interrupt_handler = NULL;
 
 // Define the interrupt handler
 void tm_interrupt_handler(void *args)
@@ -83,9 +81,10 @@ void setup_interrupt(void)
     HwiP_Params hwiParams;
     HwiP_Params_init(&hwiParams);
 
-    hwiParams.intNum = SOFTWARE_INTERRUPT_ID;             // Chosen interrupt ID
-    hwiParams.callback = tm_interrupt_preemption_handler; // Interrupt handler, change for test accordingly
-    hwiParams.priority = 1;                               // Set a valid priority
+    hwiParams.intNum = SOFTWARE_INTERRUPT_ID;  /* Chosen interrupt ID */
+    hwiParams.callback = tm_interrupt_handler; /* Interrupt handler, change for
+                                                  test accordingly */
+    hwiParams.priority = 1;                    /* Set a valid priority */
     hwiParams.isFIQ = false;
 
     HwiP_Object hwiObj;
@@ -93,7 +92,7 @@ void setup_interrupt(void)
     {
         printf("Failed to register interrupt\n");
         while (1)
-            ;
+          ;
     }
 
     HwiP_enableInt(SOFTWARE_INTERRUPT_ID); // Enable this interrupt
@@ -102,7 +101,7 @@ void setup_interrupt(void)
 
 void benchmark_main(ULONG arg)
 {
-  tm_main_two(); // Startet den Benchmark-Test
+  tm_main_three(); // Startet den Benchmark-Test
 }
 
 void threadx_main(ULONG arg)
