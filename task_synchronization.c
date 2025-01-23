@@ -26,7 +26,7 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 /*******************************************************************************
  * includes
  ******************************************************************************/
-#if defined(USING_FREERTOS) || defined(USING_THREADX)
+#ifndef USING_ZEPHYR /* USING_FREERTOS USING_THREADX */
 #include "ti_board_open_close.h"
 #include "ti_drivers_open_close.h"
 #endif
