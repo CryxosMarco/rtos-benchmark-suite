@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 PROJECT: MASTER THESIS
 MODULE: SYNCHRONISATION TEST
 CONTENTS: Short description of the file content
-*
+*/
 /*[CL]**************************************************************************
 21-01-2025 MMI Initial creation of the file
 
