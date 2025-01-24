@@ -99,7 +99,7 @@ extern "C"
 #endif
 
    /* Prototype of the test functions */
-   void tm_main(void);
+   int tm_main(void);
    int tm_main_one(void);
    int tm_main_two(void);
    int tm_main_three(void);
@@ -107,7 +107,7 @@ extern "C"
    int tm_main_five(void);
    int tm_main_six(void);
    int tm_main_seven(void);
-   void main_sync(void);
+   int main_sync(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
