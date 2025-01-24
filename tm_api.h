@@ -98,6 +98,17 @@ extern "C"
 #define TM_TEST_DURATION 30
 #endif
 
+   /* Prototype of the test functions */
+   void tm_main(void);
+   void tm_main_one(void);
+   void tm_main_two(void);
+   void tm_main_three(void);
+   void tm_main_four(void);
+   void tm_main_five(void);
+   void tm_main_six(void);
+   void tm_main_seven(void);
+   void main_sync(void);
+
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
       successfully run.  */
