@@ -49,7 +49,6 @@
 #include "tm_api.h"
 #include "tx_api.h"
 
-
 /* Define ThreadX mapping constants.  */
 
 #define TM_THREADX_MAX_THREADS 10
@@ -60,7 +59,7 @@
 /* Define the default ThreadX stack size.  */
 
 // #define TM_THREADX_THREAD_STACK_SIZE 1048
-#define TM_THREADX_THREAD_STACK_SIZE 4096 // Increase to a higher value
+#define TM_THREADX_THREAD_STACK_SIZE 2096 // Increase to a higher value
 
 /* Define the default ThreadX queue size.  */
 
