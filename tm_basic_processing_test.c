@@ -57,7 +57,7 @@ volatile unsigned long tm_basic_processing_array[1024];
 
 /* Define the test thread prototypes.  */
 
-void tm_basic_processing_thread_0_entry(void *p1, void *p2, void *p3);
+void tm_basic_processing_thread_0_entry(void* p1, void* p2, void* p3);
 
 /* Define the reporting function prototype.  */
 
@@ -71,104 +71,103 @@ void tm_basic_processing_initialize(void);
 
 int tm_main(void)
 {
-    /* Initialize the test.  */
-    tm_initialize(tm_basic_processing_initialize);
+   /* Initialize the test.  */
+   tm_initialize(tm_basic_processing_initialize);
 
-    return 0;
+   return 0;
 }
 
 /* Define the basic processing test initialization.  */
 
 void tm_basic_processing_initialize(void)
 {
-    /* Create thread 0 at priority 10.  */
-    tm_thread_create(0, 10, tm_basic_processing_thread_0_entry);
+   /* Create thread 0 at priority 10.  */
+   tm_thread_create(0, 10, tm_basic_processing_thread_0_entry);
 
-    /* Resume thread 0.  */
-    tm_thread_resume(0);
+   /* Resume thread 0.  */
+   tm_thread_resume(0);
 
-    tm_basic_processing_thread_report();
+   tm_basic_processing_thread_report();
 }
 
 /* Define the basic processing thread.  */
-void tm_basic_processing_thread_0_entry(void *p1, void *p2, void *p3)
+void tm_basic_processing_thread_0_entry(void* p1, void* p2, void* p3)
 {
-    int i;
+   int i;
 
-    (void)p1;
-    (void)p2;
-    (void)p3;
+   (void) p1;
+   (void) p2;
+   (void) p3;
 
-    /* Initialize the test array.   */
-    for (i = 0; i < 1024; i++)
-    {
+   /* Initialize the test array.   */
+   for (i = 0; i < 1024; i++)
+   {
 
-        /* Clear the basic processing array.  */
-        tm_basic_processing_array[i] = 0;
-    }
+      /* Clear the basic processing array.  */
+      tm_basic_processing_array[i] = 0;
+   }
 
-    while (1)
-    {
+   while (1)
+   {
 
-        /*
-         * Loop through the basic processing array, add the previous
-         * contents with the contents of the tm_basic_processing_counter
-         * and xor the result with the previous value...   just to eat
-         * up some time.
-         */
+      /*
+       * Loop through the basic processing array, add the previous
+       * contents with the contents of the tm_basic_processing_counter
+       * and xor the result with the previous value...   just to eat
+       * up some time.
+       */
 
-        for (i = 0; i < 1024; i++)
-        {
+      for (i = 0; i < 1024; i++)
+      {
 
-            /* Update each array entry.  */
-            tm_basic_processing_array[i] =
-                (tm_basic_processing_array[i] + tm_basic_processing_counter) ^
-                tm_basic_processing_array[i];
-        }
+         /* Update each array entry.  */
+         tm_basic_processing_array[i] =
+            (tm_basic_processing_array[i] + tm_basic_processing_counter) ^ tm_basic_processing_array[i];
+      }
 
-        /* Increment the basic processing counter.  */
-        tm_basic_processing_counter++;
-    }
+      /* Increment the basic processing counter.  */
+      tm_basic_processing_counter++;
+   }
 }
 
 /* Define the basic processing reporting function.  */
 void tm_basic_processing_thread_report(void)
 {
 
-    unsigned long last_counter;
-    unsigned long relative_time;
+   unsigned long last_counter;
+   unsigned long relative_time;
 
-    /* Initialize the last counter.  */
-    last_counter = 0;
+   /* Initialize the last counter.  */
+   last_counter = 0;
 
-    /* Initialize the relative time.  */
-    relative_time = 0;
+   /* Initialize the relative time.  */
+   relative_time = 0;
 
-    while (1)
-    {
+   while (1)
+   {
 
-        /* Sleep to allow the test to run.  */
-        tm_thread_sleep(TM_TEST_DURATION);
+      /* Sleep to allow the test to run.  */
+      tm_thread_sleep(TM_TEST_DURATION);
 
-        /* Increment the relative time.  */
-        relative_time = relative_time + TM_TEST_DURATION;
+      /* Increment the relative time.  */
+      relative_time = relative_time + TM_TEST_DURATION;
 
-        /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Basic Single Thread Processing Test **** Relative Time: "
-               "%lu\n",
-               relative_time);
+      /* Print results to the stdio window.  */
+      printf("**** Thread-Metric Basic Single Thread Processing Test **** Relative Time: "
+             "%lu\n",
+             relative_time);
 
-        /* See if there are any errors.  */
-        if (tm_basic_processing_counter == last_counter)
-        {
+      /* See if there are any errors.  */
+      if (tm_basic_processing_counter == last_counter)
+      {
 
-            printf("ERROR: Invalid counter value(s). Basic processing thread died!\n");
-        }
+         printf("ERROR: Invalid counter value(s). Basic processing thread died!\n");
+      }
 
-        /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", tm_basic_processing_counter - last_counter);
+      /* Show the time period total.  */
+      printf("Time Period Total:  %lu\n\n", tm_basic_processing_counter - last_counter);
 
-        /* Save the last counter.  */
-        last_counter = tm_basic_processing_counter;
-    }
+      /* Save the last counter.  */
+      last_counter = tm_basic_processing_counter;
+   }
 }

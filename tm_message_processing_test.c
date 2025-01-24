@@ -49,7 +49,7 @@ unsigned long tm_message_received[4];
 
 /* Define the test thread prototypes.  */
 
-void tm_message_processing_thread_0_entry(void *p1, void *p2, void *p3);
+void tm_message_processing_thread_0_entry(void* p1, void* p2, void* p3);
 
 /* Define the reporting function prototype.  */
 
@@ -64,10 +64,10 @@ void tm_message_processing_initialize(void);
 int tm_main_five(void)
 {
 
-    /* Initialize the test.  */
-    tm_initialize(tm_message_processing_initialize);
+   /* Initialize the test.  */
+   tm_initialize(tm_message_processing_initialize);
 
-    return 0;
+   return 0;
 }
 
 /* Define the message processing test initialization.  */
@@ -75,91 +75,90 @@ int tm_main_five(void)
 void tm_message_processing_initialize(void)
 {
 
-    /* Create thread 0 at priority 10.  */
-    tm_thread_create(0, 10, tm_message_processing_thread_0_entry);
+   /* Create thread 0 at priority 10.  */
+   tm_thread_create(0, 10, tm_message_processing_thread_0_entry);
 
-    /* Resume thread 0.  */
-    tm_thread_resume(0);
+   /* Resume thread 0.  */
+   tm_thread_resume(0);
 
-    /* Create a queue for the message passing.  */
-    tm_queue_create(0);
+   /* Create a queue for the message passing.  */
+   tm_queue_create(0);
 
-    tm_message_processing_thread_report();
+   tm_message_processing_thread_report();
 }
 
 /* Define the message processing thread.  */
-void tm_message_processing_thread_0_entry(void *p1, void *p2, void *p3)
+void tm_message_processing_thread_0_entry(void* p1, void* p2, void* p3)
 {
-    (void)p1;
-    (void)p2;
-    (void)p3;
+   (void) p1;
+   (void) p2;
+   (void) p3;
 
-    /* Initialize the source message.   */
-    tm_message_sent[0] = 0x11112222;
-    tm_message_sent[1] = 0x33334444;
-    tm_message_sent[2] = 0x55556666;
-    tm_message_sent[3] = 0x77778888;
+   /* Initialize the source message.   */
+   tm_message_sent[0] = 0x11112222;
+   tm_message_sent[1] = 0x33334444;
+   tm_message_sent[2] = 0x55556666;
+   tm_message_sent[3] = 0x77778888;
 
-    while (1)
-    {
-        /* Send a message to the queue.  */
-        tm_queue_send(0, tm_message_sent);
+   while (1)
+   {
+      /* Send a message to the queue.  */
+      tm_queue_send(0, tm_message_sent);
 
-        /* Receive a message from the queue.  */
-        tm_queue_receive(0, tm_message_received);
+      /* Receive a message from the queue.  */
+      tm_queue_receive(0, tm_message_received);
 
-        /* Check for invalid message.  */
-        if (tm_message_received[3] != tm_message_sent[3])
-        {
-            break;
-        }
+      /* Check for invalid message.  */
+      if (tm_message_received[3] != tm_message_sent[3])
+      {
+         break;
+      }
 
-        /* Increment the last word of the 16-byte message.  */
-        tm_message_sent[3]++;
+      /* Increment the last word of the 16-byte message.  */
+      tm_message_sent[3]++;
 
-        /* Increment the number of messages sent and received.  */
-        tm_message_processing_counter++;
-    }
+      /* Increment the number of messages sent and received.  */
+      tm_message_processing_counter++;
+   }
 }
 
 /* Define the message test reporting function.  */
 void tm_message_processing_thread_report(void)
 {
 
-    unsigned long last_counter;
-    unsigned long relative_time;
+   unsigned long last_counter;
+   unsigned long relative_time;
 
-    /* Initialize the last counter.  */
-    last_counter = 0;
+   /* Initialize the last counter.  */
+   last_counter = 0;
 
-    /* Initialize the relative time.  */
-    relative_time = 0;
+   /* Initialize the relative time.  */
+   relative_time = 0;
 
-    while (1)
-    {
+   while (1)
+   {
 
-        /* Sleep to allow the test to run.  */
-        tm_thread_sleep(TM_TEST_DURATION);
+      /* Sleep to allow the test to run.  */
+      tm_thread_sleep(TM_TEST_DURATION);
 
-        /* Increment the relative time.  */
-        relative_time = relative_time + TM_TEST_DURATION;
+      /* Increment the relative time.  */
+      relative_time = relative_time + TM_TEST_DURATION;
 
-        /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Message Processing Test **** Relative Time: %lu\n",
-               relative_time);
+      /* Print results to the stdio window.  */
+      printf("**** Thread-Metric Message Processing Test **** Relative Time: %lu\n", relative_time);
 
-        /* See if there are any errors.  */
-        if (tm_message_processing_counter == last_counter)
-        {
+      /* See if there are any errors.  */
+      if (tm_message_processing_counter == last_counter)
+      {
 
-            printf("ERROR: Invalid counter value(s). Error sending/receiving "
-                   "messages!\n");
-        }
+         printf("ERROR: Invalid counter value(s). Error sending/receiving "
+                "messages!\n");
+      }
 
-        /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", tm_message_processing_counter - last_counter);
+      /* Show the time period total.  */
+      printf("Time Period Total:  %lu\n\n", tm_message_processing_counter - last_counter);
 
-        /* Save the last counter.  */
-        last_counter = tm_message_processing_counter;
-    }
+      /* Save the last counter.  */
+      last_counter = tm_message_processing_counter;
+   }
 }

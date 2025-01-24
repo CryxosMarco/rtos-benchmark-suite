@@ -36,20 +36,17 @@
 /**************************************************************************/
 /**************************************************************************/
 
-
 /* Include necessary files.  */
 #include "rtos_config.h"
 #ifdef USING_ZEPHYR
 
-#include    "tm_api.h"
+#include "tm_api.h"
 
-#define TM_TEST_NUM_THREADS        10
-#define TM_TEST_STACK_SIZE         1024
-#define TM_TEST_NUM_SEMAPHORES     4
+#define TM_TEST_NUM_THREADS 10
+#define TM_TEST_STACK_SIZE 1024
+#define TM_TEST_NUM_SEMAPHORES 4
 #define TM_TEST_NUM_MESSAGE_QUEUES 4
-#define TM_TEST_NUM_SLABS          4
-
-
+#define TM_TEST_NUM_SLABS 4
 
 #if (CONFIG_MP_MAX_NUM_CPUS > 1)
 #error "*** Tests are only designed for single processor systems! ***"
@@ -72,7 +69,7 @@ static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
  */
 void tm_initialize(void (*test_initialization_function)(void))
 {
-	test_initialization_function();
+   test_initialization_function();
 }
 
 /*
@@ -81,20 +78,19 @@ void tm_initialize(void (*test_initialization_function)(void))
  * where 1 is the highest priority and 31 is the lowest. If successful,
  * the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
  */
-int tm_thread_create(int thread_id, int priority, void (*entry_function)(void *, void *, void *))
+int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, void*, void*))
 {
-	k_tid_t tid;
+   k_tid_t tid;
 
-	tid = k_thread_create(&test_thread[thread_id], test_stack[thread_id],
-			      TM_TEST_STACK_SIZE, entry_function,
-			      NULL, NULL, NULL, priority, 0, K_FOREVER);
+   tid = k_thread_create(&test_thread[thread_id], test_stack[thread_id], TM_TEST_STACK_SIZE, entry_function, NULL, NULL,
+                         NULL, priority, 0, K_FOREVER);
 
-	/* Thread started in sleeping state. Switch to suspended state */
+   /* Thread started in sleeping state. Switch to suspended state */
 
-	k_thread_suspend(&test_thread[thread_id]);
-	k_wakeup(&test_thread[thread_id]);
+   k_thread_suspend(&test_thread[thread_id]);
+   k_wakeup(&test_thread[thread_id]);
 
-	return (tid == &test_thread[thread_id]) ? TM_SUCCESS : TM_ERROR;
+   return (tid == &test_thread[thread_id]) ? TM_SUCCESS : TM_ERROR;
 }
 
 /*
@@ -103,9 +99,9 @@ int tm_thread_create(int thread_id, int priority, void (*entry_function)(void *,
  */
 int tm_thread_resume(int thread_id)
 {
-	k_thread_resume(&test_thread[thread_id]);
+   k_thread_resume(&test_thread[thread_id]);
 
-	return TM_SUCCESS;
+   return TM_SUCCESS;
 }
 
 /*
@@ -114,9 +110,9 @@ int tm_thread_resume(int thread_id)
  */
 int tm_thread_suspend(int thread_id)
 {
-	k_thread_suspend(&test_thread[thread_id]);
+   k_thread_suspend(&test_thread[thread_id]);
 
-	return TM_SUCCESS;
+   return TM_SUCCESS;
 }
 
 /*
@@ -125,7 +121,7 @@ int tm_thread_suspend(int thread_id)
  */
 void tm_thread_relinquish(void)
 {
-	k_yield();
+   k_yield();
 }
 
 /*
@@ -134,7 +130,7 @@ void tm_thread_relinquish(void)
  */
 void tm_thread_sleep(int seconds)
 {
-	k_sleep(K_SECONDS(seconds));
+   k_sleep(K_SECONDS(seconds));
 }
 
 /*
@@ -143,27 +139,27 @@ void tm_thread_sleep(int seconds)
  */
 int tm_queue_create(int queue_id)
 {
-	k_msgq_init(&test_msgq[queue_id], &test_msgq_buffer[queue_id][0][0], 16, 8);
+   k_msgq_init(&test_msgq[queue_id], &test_msgq_buffer[queue_id][0][0], 16, 8);
 
-	return TM_SUCCESS;
+   return TM_SUCCESS;
 }
 
 /*
  * This function sends a 16-byte message to the specified queue.  If successful,
  * the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
  */
-int tm_queue_send(int queue_id, unsigned long *message_ptr)
+int tm_queue_send(int queue_id, unsigned long* message_ptr)
 {
-	return k_msgq_put(&test_msgq[queue_id], message_ptr, K_FOREVER);
+   return k_msgq_put(&test_msgq[queue_id], message_ptr, K_FOREVER);
 }
 
 /*
  * This function receives a 16-byte message from the specified queue.  If successful,
  * the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
  */
-int tm_queue_receive(int queue_id, unsigned long *message_ptr)
+int tm_queue_receive(int queue_id, unsigned long* message_ptr)
 {
-	return k_msgq_get(&test_msgq[queue_id], message_ptr, K_FOREVER);
+   return k_msgq_get(&test_msgq[queue_id], message_ptr, K_FOREVER);
 }
 
 /*
@@ -172,8 +168,8 @@ int tm_queue_receive(int queue_id, unsigned long *message_ptr)
  */
 int tm_semaphore_create(int semaphore_id)
 {
-	/* Create an available semaphore with max count of 1 */
-	return k_sem_init(&test_sem[semaphore_id], 1, 1);
+   /* Create an available semaphore with max count of 1 */
+   return k_sem_init(&test_sem[semaphore_id], 1, 1);
 }
 
 /*
@@ -182,7 +178,7 @@ int tm_semaphore_create(int semaphore_id)
  */
 int tm_semaphore_get(int semaphore_id)
 {
-	return k_sem_take(&test_sem[semaphore_id], K_NO_WAIT);
+   return k_sem_take(&test_sem[semaphore_id], K_NO_WAIT);
 }
 
 /*
@@ -191,16 +187,16 @@ int tm_semaphore_get(int semaphore_id)
  */
 int tm_semaphore_put(int semaphore_id)
 {
-	k_sem_give(&test_sem[semaphore_id]);
-	return TM_SUCCESS;
+   k_sem_give(&test_sem[semaphore_id]);
+   return TM_SUCCESS;
 }
 
 /* This function is defined by the benchmark. */
-extern void tm_interrupt_handler(const void *);
+extern void tm_interrupt_handler(const void*);
 
 void tm_cause_interrupt(void)
 {
-	irq_offload(tm_interrupt_handler, NULL);
+   irq_offload(tm_interrupt_handler, NULL);
 }
 
 /*
@@ -210,11 +206,11 @@ void tm_cause_interrupt(void)
  */
 int tm_memory_pool_create(int pool_id)
 {
-	int status;
+   int status;
 
-	status = k_mem_slab_init(&test_slab[pool_id], &test_slab_buffer[pool_id][0], 128, 8);
+   status = k_mem_slab_init(&test_slab[pool_id], &test_slab_buffer[pool_id][0], 128, 8);
 
-	return (status == 0) ? TM_SUCCESS : TM_ERROR;
+   return (status == 0) ? TM_SUCCESS : TM_ERROR;
 }
 
 /*
@@ -222,13 +218,13 @@ int tm_memory_pool_create(int pool_id)
  * If successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR
  * should be returned.
  */
-int tm_memory_pool_allocate(int pool_id, unsigned char **memory_ptr)
+int tm_memory_pool_allocate(int pool_id, unsigned char** memory_ptr)
 {
-	int status;
+   int status;
 
-	status = k_mem_slab_alloc(&test_slab[pool_id], (void **)memory_ptr, K_NO_WAIT);
+   status = k_mem_slab_alloc(&test_slab[pool_id], (void**) memory_ptr, K_NO_WAIT);
 
-	return (status == 0) ? TM_SUCCESS : TM_ERROR;
+   return (status == 0) ? TM_SUCCESS : TM_ERROR;
 }
 
 /*
@@ -236,11 +232,11 @@ int tm_memory_pool_allocate(int pool_id, unsigned char **memory_ptr)
  * memory pool. If successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR
  * should be returned.
  */
-int tm_memory_pool_deallocate(int pool_id, unsigned char *memory_ptr)
+int tm_memory_pool_deallocate(int pool_id, unsigned char* memory_ptr)
 {
-	k_mem_slab_free(&test_slab[pool_id], (void *)memory_ptr);
+   k_mem_slab_free(&test_slab[pool_id], (void*) memory_ptr);
 
-	return TM_SUCCESS;
+   return TM_SUCCESS;
 }
 
 #endif /* USING_ZEPHYR */

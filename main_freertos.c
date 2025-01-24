@@ -42,7 +42,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -60,95 +59,90 @@
 
 uint8_t main_thread_stack[MAIN_TASK_STACK_SIZE] __attribute__((aligned(32)));
 
-void *test_interrupt_handler = NULL;
+void* test_interrupt_handler = NULL;
 
-// Define the interrupt handler
-void tm_interrupt_handler(void *args)
+/* Define the interrupt handler */
+void tm_interrupt_handler(void* args)
 {
-    if (test_interrupt_handler != NULL)
-    {
-        // Call the assigned handler function
-        ((void (*)(void))test_interrupt_handler)();
-    }
+   if (test_interrupt_handler != NULL)
+   {
+      /* Call the assigned handler function */
+      ((void (*)(void)) test_interrupt_handler)();
+   }
 }
 
-// Function to trigger the software interrupt
+/* Function to trigger the software interrupt */
 void tm_interrupt_raise(void)
 {
-    // Trigger the software interrupt
-    HwiP_post(SOFTWARE_INTERRUPT_ID);
+   /* Trigger the software interrupt */
+   HwiP_post(SOFTWARE_INTERRUPT_ID);
 }
 
 void setup_interrupt(void)
 {
-    HwiP_Params hwiParams;
+   HwiP_Params hwiParams;
 
-    // Initialize interrupt parameters
-    HwiP_Params_init(&hwiParams);
+   /* Initialize interrupt parameters */
+   HwiP_Params_init(&hwiParams);
 
-    // Set the interrupt parameters
-    hwiParams.intNum = SOFTWARE_INTERRUPT_ID;  // Chosen interrupt ID
-    hwiParams.callback = tm_interrupt_handler; // Interrupt handler
-    hwiParams.priority = 1;                    // Set a valid priority (lower is higher priority)
-    hwiParams.isFIQ = false;                   // This is an IRQ, not an FIQ
+   /* Set the interrupt parameters */
+   hwiParams.intNum = SOFTWARE_INTERRUPT_ID;  /* Chosen interrupt ID */
+   hwiParams.callback = tm_interrupt_handler; /* Interrupt handler */
+   hwiParams.priority = 1;                    /* Set a valid priority (lower is higher priority) */
+   hwiParams.isFIQ = false;                   /* This is an IRQ, not an FIQ */
 
-    static HwiP_Object hwiObj; // Use static to ensure the object persists
+   static HwiP_Object hwiObj; /* Use static to ensure the object persists */
 
-    // Construct the interrupt
-    if (HwiP_construct(&hwiObj, &hwiParams) != SystemP_SUCCESS)
-    {
-        printf("Failed to register interrupt\n");
-        while (1)
-            ; // Halt if interrupt registration fails
-    }
+   /* Construct the interrupt */
+   if (HwiP_construct(&hwiObj, &hwiParams) != SystemP_SUCCESS)
+   {
+      printf("Failed to register interrupt\n");
+      while (1)
+         ; /* Halt if interrupt registration fails */
+   }
 
-    // Enable the specific interrupt and global interrupts
-    HwiP_enableInt(SOFTWARE_INTERRUPT_ID);
-    HwiP_enable();
+   /* Enable the specific interrupt and global interrupts */
+   HwiP_enableInt(SOFTWARE_INTERRUPT_ID);
+   HwiP_enable();
 }
 
-void main_task(void *pvParameters)
+void main_task(void* pvParameters)
 {
 
-    /* Start Thread-Metric tests */
-    printf("Starting Thread-Metric tests...\n");
-    tm_main_three();
-    test_interrupt_handler = tm_interrupt_processing_handler;
-    setup_interrupt();
+   /* Start Thread-Metric tests */
+   printf("Starting Thread-Metric tests...\n");
+   main_sync();
+   test_interrupt_handler = tm_interrupt_processing_handler;
+   setup_interrupt();
 
-    /* Delete this task when finished */
-    vTaskDelete(NULL);
+   /* Delete this task when finished */
+   vTaskDelete(NULL);
 }
 
 int rtos_main_freertos(void)
 {
-    printf("Initializing FreeRTOS system...\n");
-    /* Initialize board and system */
-    System_init();
-    Board_init();
+   printf("Initializing FreeRTOS system...\n");
+   /* Initialize board and system */
+   System_init();
+   Board_init();
 
-    /* Create main task */
-    BaseType_t status = xTaskCreate(main_task,
-                                    "MainTask",
-                                    MAIN_TASK_STACK_SIZE,
-                                    NULL,
-                                    MAIN_TASK_PRI,
-                                    NULL);
+   /* Create main task */
+   BaseType_t status = xTaskCreate(main_task, "MainTask", MAIN_TASK_STACK_SIZE, NULL, MAIN_TASK_PRI, NULL);
 
-    if (status != pdPASS)
-    {
-        /* Handle task creation failure */
-        DebugP_assert(status == pdPASS);
-    }
+   if (status != pdPASS)
+   {
+      /* Handle task creation failure */
+      DebugP_assert(status == pdPASS);
+   }
 
-    /* Start the FreeRTOS scheduler */
-    vTaskStartScheduler();
+   /* Start the FreeRTOS scheduler */
+   vTaskStartScheduler();
 
-    /* If the scheduler returns, it indicates an error */
-    for (;;)
-    {
-        // printf("Scheduler returned unexpectedly\n");
-    }
+   /* If the scheduler returns, it indicates an error */
+   for (;;)
+   {
+      /* printf("Scheduler returned unexpectedly\n"); */
+   }
 }
 
 #endif /* USING_FREERTOS */

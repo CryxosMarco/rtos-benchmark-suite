@@ -43,7 +43,7 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 
 #define MAIN_TASK_PRI (1)
 
-// Choose an appropriate interrupt number
+/* Choose an appropriate interrupt number */
 #define SOFTWARE_INTERRUPT_ID 10
 
 #define MAIN_TASK_STACK_SIZE (8192U)
@@ -57,91 +57,91 @@ uint8_t main_thread_stack[MAIN_TASK_STACK_SIZE] __attribute__((aligned(32)));
 
 TX_THREAD main_thread;
 
-void *test_interrupt_handler = NULL;
+void* test_interrupt_handler = NULL;
 
-// Define the interrupt handler
-void tm_interrupt_handler(void *args)
+/* Define the interrupt handler */
+void tm_interrupt_handler(void* args)
 {
-    if (test_interrupt_handler != NULL)
-    {
-        // Call the assigned handler function
-        ((void (*)(void))test_interrupt_handler)();
-    }
+   if (test_interrupt_handler != NULL)
+   {
+      /* Call the assigned handler function */
+      ((void (*)(void)) test_interrupt_handler)();
+   }
 }
 
-// Function to trigger the software interrupt
+/* Function to trigger the software interrupt */
 void tm_interrupt_raise(void)
 {
-    // Trigger the software interrupt
-    HwiP_post(SOFTWARE_INTERRUPT_ID);
+   /* Trigger the software interrupt */
+   HwiP_post(SOFTWARE_INTERRUPT_ID);
 }
 
 void setup_interrupt(void)
 {
-    HwiP_Params hwiParams;
-    HwiP_Params_init(&hwiParams);
+   HwiP_Params hwiParams;
+   HwiP_Params_init(&hwiParams);
 
-    hwiParams.intNum = SOFTWARE_INTERRUPT_ID;  /* Chosen interrupt ID */
-    hwiParams.callback = tm_interrupt_handler; /* Interrupt handler, change for
-                                                  test accordingly */
-    hwiParams.priority = 1;                    /* Set a valid priority */
-    hwiParams.isFIQ = false;
+   hwiParams.intNum = SOFTWARE_INTERRUPT_ID;  /* Chosen interrupt ID */
+   hwiParams.callback = tm_interrupt_handler; /* Interrupt handler, change for
+                                                 test accordingly */
+   hwiParams.priority = 1;                    /* Set a valid priority */
+   hwiParams.isFIQ = false;
 
-    HwiP_Object hwiObj;
-    if (HwiP_construct(&hwiObj, &hwiParams) != SystemP_SUCCESS)
-    {
-        printf("Failed to register interrupt\n");
-        while (1)
-          ;
-    }
+   HwiP_Object hwiObj;
+   if (HwiP_construct(&hwiObj, &hwiParams) != SystemP_SUCCESS)
+   {
+      printf("Failed to register interrupt\n");
+      while (1)
+         ;
+   }
 
-    HwiP_enableInt(SOFTWARE_INTERRUPT_ID); // Enable this interrupt
-    HwiP_enable();                         // Enable global interrupts
+   HwiP_enableInt(SOFTWARE_INTERRUPT_ID); /* Enable this interrupt */
+   HwiP_enable();                         /* Enable global interrupts */
 }
 
 void benchmark_main(ULONG arg)
 {
-  tm_main_three(); // Startet den Benchmark-Test
+   tm_main_three(); /* Startet den Benchmark-Test */
 }
 
 void threadx_main(ULONG arg)
 {
-    benchmark_main(arg);
+   benchmark_main(arg);
 }
 
 int rtos_main_threadx(void)
 {
-    /* init SOC specific modules */
-    System_init();
-    Board_init();
-    /* enable this when interrupts are needed. */
-    test_interrupt_handler = tm_interrupt_processing_handler;
-    setup_interrupt();
+   /* init SOC specific modules */
+   System_init();
+   Board_init();
+   /* enable this when interrupts are needed. */
+   test_interrupt_handler = tm_interrupt_processing_handler;
+   setup_interrupt();
 
-    /* Enter the ThreadX kernel.  */
-    tx_kernel_enter();
+   /* Enter the ThreadX kernel.  */
+   tx_kernel_enter();
 }
 
-void tx_application_define(void *first_unused_memory)
+void tx_application_define(void* first_unused_memory)
 {
-    UINT status;
+   UINT status;
 
-    printf("Initializing ThreadX system...\n");
+   printf("Initializing ThreadX system...\n");
 
-    printf("Starting Main Thread...\n");
+   printf("Starting Main Thread...\n");
 
-    status = tx_thread_create(&main_thread,         /* Pointer to the main thread object. */
-                              "main_thread",        /* Name of the task for debugging purposes. */
-                              threadx_main,         /* Entry function for the main thread. */
-                              0,                    /* Arguments passed to the entry function. */
-                              main_thread_stack,    /* Main thread stack. */
-                              MAIN_TASK_STACK_SIZE, /* Main thread stack size in bytes. */
-                              MAIN_TASK_PRI,        /* Main task priority. */
-                              MAIN_TASK_PRI,        /* Highest priority level of disabled preemption. */
-                              TX_NO_TIME_SLICE,     /* No time slice. */
-                              TX_AUTO_START);       /* Start immediately. */
+   status = tx_thread_create(&main_thread,         /* Pointer to the main thread object. */
+                             "main_thread",        /* Name of the task for debugging purposes. */
+                             threadx_main,         /* Entry function for the main thread. */
+                             0,                    /* Arguments passed to the entry function. */
+                             main_thread_stack,    /* Main thread stack. */
+                             MAIN_TASK_STACK_SIZE, /* Main thread stack size in bytes. */
+                             MAIN_TASK_PRI,        /* Main task priority. */
+                             MAIN_TASK_PRI,        /* Highest priority level of disabled preemption. */
+                             TX_NO_TIME_SLICE,     /* No time slice. */
+                             TX_AUTO_START);       /* Start immediately. */
 
-    DebugP_assertNoLog(status == TX_SUCCESS);
+   DebugP_assertNoLog(status == TX_SUCCESS);
 }
 
 #endif /* USING_THREADX */
