@@ -199,6 +199,59 @@ void tm_cause_interrupt(void)
    irq_offload(tm_interrupt_handler, NULL);
 }
 
+/* Define an array of mutexes for Zephyr. */
+struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
+
+/* Mutex create function. */
+int tm_mutex_create(int mutex_id)
+{
+   /* Validate the mutex ID. */
+   if (mutex_id < 0 || mutex_id >= TM_TEST_NUM_SEMAPHORES)
+   {
+      return TM_ERROR;
+   }
+
+   /* Initialize the mutex. */
+   k_mutex_init(&tm_mutex_array[mutex_id]);
+
+   /* Return success. */
+   return TM_SUCCESS;
+}
+
+/* Mutex get function. */
+int tm_mutex_get(int mutex_id)
+{
+   int status;
+
+   /* Validate the mutex ID. */
+   if (mutex_id < 0 || mutex_id >= TM_TEST_NUM_SEMAPHORES)
+   {
+      return TM_ERROR;
+   }
+
+   /* Acquire the mutex (wait forever). */
+   status = k_mutex_lock(&tm_mutex_array[mutex_id], K_FOREVER);
+
+   /* Return appropriate status. */
+   return (status == 0) ? TM_SUCCESS : TM_ERROR;
+}
+
+/* Mutex put function. */
+int tm_mutex_put(int mutex_id)
+{
+   /* Validate the mutex ID. */
+   if (mutex_id < 0 || mutex_id >= TM_TEST_NUM_SEMAPHORES)
+   {
+      return TM_ERROR;
+   }
+
+   /* Release the mutex. */
+   k_mutex_unlock(&tm_mutex_array[mutex_id]);
+
+   /* Return success. */
+   return TM_SUCCESS;
+}
+
 /*
  * This function creates the specified memory pool that can support one or more
  * allocations of 128 bytes.  If successful, the function should
