@@ -1,13 +1,12 @@
 /*[CR]**************************************************************************
 Copyright (C) 2018-2024 Texas Instruments Incorporated
 Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
-SPDX-License-Identifier: Apache-2.0
-*/
+SPDX-License-Identifier: Apache-2.0*/
 /*[FH]**************************************************************************
 PROJECT: MASTER THESIS
 MODULE: ThreadX Main Thread
 CONTENTS: Starts Main Thread and system initialization
-*
+*/
 /*[CL]**************************************************************************
 14-11-2024 Initial creation of the file
 

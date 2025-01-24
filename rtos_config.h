@@ -1,13 +1,12 @@
 /*[CR]**************************************************************************
 Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
 SPDX-License-Identifier: Apache-2.0
-.
 */
 /*[FH]**************************************************************************
 PROJECT: MASTER THESIS
 MODULE: RTOS Configuration
 CONTENTS: basic defines for switching between RTOSes
-*
+*/
 /*[CL]**************************************************************************
 21-01-2025 MMI Initial creation of the file
 

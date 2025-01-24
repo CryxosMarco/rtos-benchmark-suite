@@ -1,13 +1,12 @@
 /*[CR]**************************************************************************
 Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
 SPDX-License-Identifier: Apache-2.0
-.
 */
 /*[FH]**************************************************************************
 PROJECT: MASTER THESIS
 MODULE: ThreadX Main Thread
 CONTENTS: Starts Main Thread and system initialization
-*
+*/
 /*[CL]**************************************************************************
 14-11-2024 Initial creation of the file
 
@@ -110,6 +109,7 @@ int rtos_main_threadx(void)
 
    /* Enter the ThreadX kernel.  */
    tx_kernel_enter();
+   return 0;
 }
 
 void tx_application_define(void* first_unused_memory)
