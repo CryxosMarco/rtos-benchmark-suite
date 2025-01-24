@@ -26,13 +26,14 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 /*******************************************************************************
  * includes
  ******************************************************************************/
+ 
+#include "tm_api.h"
+#include <stdio.h>
+#include <string.h>
 #ifndef USING_ZEPHYR /* USING_FREERTOS USING_THREADX */
 #include "ti_board_open_close.h"
 #include "ti_drivers_open_close.h"
 #endif
-#include "tm_api.h"
-#include <stdio.h>
-#include <string.h>
 
 /* We define a unique mutex ID for the UART resource. */
 #define UART_MUTEX_ID 1
