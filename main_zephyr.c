@@ -1,3 +1,27 @@
+/*[CR]**************************************************************************
+Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+.
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Zephyr Main Thread
+CONTENTS: Starts Main Thread and system initialization
+*
+/*[CL]**************************************************************************
+20-12-2024 Initial creation of the file
+
+---
+MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
+*/
+/*[MP]**************************************************************************
+ * ThreadX entry point for the test application
+ *
+ *
+ ******************************************************************************/
+/*******************************************************************************
+ * includes
+ ******************************************************************************/
 #include "rtos_config.h"
 #ifdef USING_ZEPHYR
 

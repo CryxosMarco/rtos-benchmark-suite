@@ -1,6 +1,7 @@
 /*[CR]**************************************************************************
-Copyright (c) IBV - Echtzeit- und Embedded GmbH & Co. KG
-All Rights reserved.
+Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+.
 */
 /*[FH]**************************************************************************
 PROJECT: MASTER THESIS

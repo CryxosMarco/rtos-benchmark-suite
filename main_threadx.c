@@ -1,6 +1,7 @@
 /*[CR]**************************************************************************
-Copyright (c) IBV - Echtzeit- und Embedded GmbH & Co. KG
-All Rights reserved.
+Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+.
 */
 /*[FH]**************************************************************************
 PROJECT: MASTER THESIS
@@ -8,19 +9,13 @@ MODULE: ThreadX Main Thread
 CONTENTS: Starts Main Thread and system initialization
 *
 /*[CL]**************************************************************************
-10-11-20242 MMI Initial creation of the file
-23-11-2024 MMI Modified Interrupt Handler
+14-11-2024 Initial creation of the file
 
 ---
 MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 */
 /*[MP]**************************************************************************
- * Synchronistation Promblem example using tm_api.h
- *
- * Demonstrates:
- *   - How to set up a simple "UART" usage protected by a mutex
- *   - Creating/resuming tasks
- *   - Printing output with printf (simulating UART output)
+ * ThreadX entry point for the test application
  *
  *
  ******************************************************************************/
@@ -99,14 +94,9 @@ void setup_interrupt(void)
    HwiP_enable();                         /* Enable global interrupts */
 }
 
-void benchmark_main(ULONG arg)
-{
-   tm_main_three(); /* Startet den Benchmark-Test */
-}
-
 void threadx_main(ULONG arg)
 {
-   benchmark_main(arg);
+   tm_main_three(); /* Startet den Benchmark-Test */
 }
 
 int rtos_main_threadx(void)
