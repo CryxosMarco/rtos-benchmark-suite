@@ -43,17 +43,6 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
  * OPEN/CLOSE/PUTCH: Abstract "UART" usage
  ********************************************************************************/
 
-static void OpenUARTDrivers(void)
-{
-   Drivers_open();
-}
-
-static void CloseUARTDrivers(void)
-{
-   /* Closing the Drivers */
-   Drivers_close();
-}
-
 /* Acquire the UART mutex so only one task prints at a time. */
 static int OpenUART(void)
 {
