@@ -26,7 +26,7 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 /*******************************************************************************
  * includes
  ******************************************************************************/
- 
+
 #include "tm_api.h"
 #include <stdio.h>
 #include <string.h>
@@ -37,37 +37,35 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 
 /* We define a unique mutex ID for the UART resource. */
 #define UART_MUTEX_ID 1
+#define SEMAPHORE_ID 1
 
 /********************************************************************************
  * OPEN/CLOSE/PUTCH: Abstract "UART" usage
  ********************************************************************************/
 
+static void OpenUARTDrivers(void)
+{
+   Drivers_open();
+}
+
+static void CloseUARTDrivers(void)
+{
+   /* Closing the Drivers */
+   Drivers_close();
+}
+
 /* Acquire the UART mutex so only one task prints at a time. */
 static int OpenUART(void)
 {
-   /* Ensure the mutex is available. If not, we'd potentially block or return
-    * error. */
-   if (tm_mutex_get(UART_MUTEX_ID) == TM_SUCCESS)
-   {
-      return TM_SUCCESS;
-   }
-   else
-   {
-      return TM_ERROR;
-   }
+   /* Ensure the mutex is available.  */
+   return tm_mutex_get(UART_MUTEX_ID) == TM_SUCCESS ? TM_SUCCESS : TM_ERROR;
 }
 
 /* Write one character (simulated) to the UART by printing. */
 static void putch(char c)
 {
 #ifndef USING_ZEPHYR /* when using ThreadX or FreeRTOS via CCS */
-   Drivers_open();
-   Board_driversOpen();
-
-   DebugP_log("%c", c);
-
-   Board_driversClose();
-   Drivers_close();
+   printf("%c", c);
 #else
    printk("%c", c); /* using Zephyr api for UART */
 #endif
@@ -89,6 +87,8 @@ static void CloseUART(void)
 static void vWriterTask1(void* arg1, void* arg2, void* arg3)
 {
    static int callCount = 0;
+   /* Wait for semaphore to be available */
+   tm_semaphore_wait(SEMAPHORE_ID);
 
    if (callCount < 3)
    {
@@ -124,7 +124,7 @@ static void vWriterTask2(void* arg1, void* arg2, void* arg3)
       if (OpenUART() == TM_SUCCESS)
       {
          printf("[WriterTask2] Printing...\n");
-         const char* msg = ">>> WriterTask2 says hi.\r\n";
+         const char* msg = "WriterTask2 says hi!\r\n";
          for (const char* p = msg; *p; p++)
          {
             putch(*p);
@@ -133,7 +133,9 @@ static void vWriterTask2(void* arg1, void* arg2, void* arg3)
          callCount++;
       }
 
-      /* Optional: relinquish or sleep. */
+      /* Release the semaphore. To let task1 start */
+      tm_semaphore_put(SEMAPHORE_ID);
+      /* relinquish or sleep. */
       tm_thread_relinquish();
    }
    else
@@ -152,8 +154,16 @@ static void task_synchronisation_initialize(void)
 {
    /* Create the UART mutex. */
    tm_mutex_create(UART_MUTEX_ID);
+   /* Create the semaphore to snychronize tasks.
+      The implementation calls a semaphore_get()
+      to make it available from the start */
+   tm_semaphore_create(SEMAPHORE_ID);
+   /* Ensure the Semaphore is blocked from the start */
+   tm_semaphore_get(SEMAPHORE_ID);
 
-   /* Create two tasks, each with a unique ID. Priority is arbitrary. */
+   /* Create two tasks, each with a unique ID. Priority is arbitrary.
+      Without synchronisation Task1 would start operating before task2.
+      we use synchronisation to ensure that task2 can finish printing first*/
    tm_thread_create(1, 5, vWriterTask1);
    tm_thread_create(2, 5, vWriterTask2);
 
@@ -167,7 +177,7 @@ static void task_synchronisation_initialize(void)
  ********************************************************************************/
 int main_sync(void)
 {
-   printf("[Main] Starting Abstract Example.\n");
+   printf("[Main] Starting Synchronisation Test.\n");
 
    /* Call tm_initialize(), passing our task_synchronisation_initialize.
     * The real implementation of tm_initialize() will do RTOS setup,
@@ -177,7 +187,7 @@ int main_sync(void)
 
    /* In many RTOSes, tm_initialize() might not return. If it does here,
     * we just print a message. */
-   printf("[Main] tm_initialize returned, example end.\n");
+   printf("[Main] tm_initialize returned, threads started.\n");
 
    return 0;
 }
