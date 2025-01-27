@@ -17,3 +17,5 @@ Makefile
 CMakeCache.txt
 cmake_install.cmake
 output.map
+
+rtos_config.h
