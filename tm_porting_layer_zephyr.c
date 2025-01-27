@@ -62,6 +62,8 @@ static char test_msgq_buffer[TM_TEST_NUM_MESSAGE_QUEUES][8][16];
 
 static struct k_mem_slab test_slab[TM_TEST_NUM_SLABS];
 static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
+/* Define an array of mutexes for Zephyr. */
+struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
 
 /*
  * This function called from main performs basic RTOS initialization,
@@ -198,9 +200,6 @@ void tm_cause_interrupt(void)
 {
    irq_offload(tm_interrupt_handler, NULL);
 }
-
-/* Define an array of mutexes for Zephyr. */
-struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
 
 /* Mutex create function. */
 int tm_mutex_create(int mutex_id)

@@ -79,6 +79,8 @@ TX_THREAD tm_thread_array[TM_THREADX_MAX_THREADS];
 TX_QUEUE tm_queue_array[TM_THREADX_MAX_QUEUES];
 TX_SEMAPHORE tm_semaphore_array[TM_THREADX_MAX_SEMAPHORES];
 TX_BLOCK_POOL tm_block_pool_array[TM_THREADX_MAX_MEMORY_POOLS];
+/* Define an array of mutexes. */
+TX_MUTEX tm_mutex_array[TM_THREADX_MAX_SEMAPHORES];
 
 /* Define ThreadX object data areas.  */
 
@@ -282,9 +284,6 @@ int tm_semaphore_put(int semaphore_id)
    else
       return (TM_ERROR);
 }
-
-/* Define an array of mutexes. */
-TX_MUTEX tm_mutex_array[TM_THREADX_MAX_SEMAPHORES];
 
 /* Mutex create function. */
 int tm_mutex_create(int mutex_id)

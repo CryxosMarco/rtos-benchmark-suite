@@ -30,16 +30,16 @@
 #include <semphr.h>
 #include <task.h>
 
-
 /* Define FreeRTOS mapping constants. */
 #define TM_FREERTOS_MAX_THREADS 10
 #define TM_FREERTOS_MAX_QUEUES 1
-#define TM_FREERTOS_MAX_SEMAPHORES 1
+#define TM_FREERTOS_MAX_SEMAPHORES 2
 
 /* Define FreeRTOS data structures. */
 TaskHandle_t tm_thread_array[TM_FREERTOS_MAX_THREADS];
 QueueHandle_t tm_queue_array[TM_FREERTOS_MAX_QUEUES];
 SemaphoreHandle_t tm_semaphore_array[TM_FREERTOS_MAX_SEMAPHORES];
+SemaphoreHandle_t tm_mutex_array[TM_FREERTOS_MAX_SEMAPHORES];
 
 /* This function called from main performs basic RTOS initialization,
    calls the test initialization function, and then starts the RTOS function.  */
@@ -255,9 +255,6 @@ int tm_semaphore_put_from_isr(int semaphore_id)
 
    return TM_SUCCESS;
 }
-
-/* Define an array of mutexes. */
-SemaphoreHandle_t tm_mutex_array[TM_FREERTOS_MAX_SEMAPHORES];
 
 int tm_mutex_create(int mutex_id)
 {
