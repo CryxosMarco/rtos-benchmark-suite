@@ -184,6 +184,22 @@ int tm_semaphore_get(int semaphore_id)
 }
 
 /*
+ * This funtion waits for the specified semaphore.
+ * if successful return TM_SUCCESS. Otherwithe, TM_ERROR should be returned.
+ */
+int tm_semaphore_wait(int semaphore_id){
+   int rc = k_sem_take(&test_sem[semaphore_id], K_FOREVER);
+    if (rc == 0)
+    {
+        return TM_SUCCESS;
+    }
+    else
+    {
+        return TM_ERROR;
+    }
+}
+
+/*
  * This function puts the specified semaphore.  If successful, the function should
  * return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
  */
