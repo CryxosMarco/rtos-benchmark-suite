@@ -95,7 +95,7 @@ void setup_interrupt(void)
 
 void threadx_main(ULONG arg)
 {
-   tm_main_three(); /* Startet den Benchmark-Test */
+   main_sync(); /* Startet den Benchmark-Test */
 }
 
 int rtos_main_threadx(void)
