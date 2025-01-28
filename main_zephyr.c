@@ -105,7 +105,7 @@ K_THREAD_DEFINE(main_thread, 512 /* STACKSIZE */, main_task, NULL, NULL, NULL, M
 
 int rtos_main_zephyr(void)
 {
-   printk("Initializing Zephyr system...");
+   printk("Initializing Zephyr system...\n");
 
    /* Create main task */
    k_thread_start(main_thread);
