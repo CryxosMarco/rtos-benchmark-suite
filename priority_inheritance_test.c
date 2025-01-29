@@ -78,11 +78,6 @@ static void LowPrioTask(void* p1, void* p2, void* p3)
             the RTOS should boost this task's priority. */
       }
 
-      // for (volatile int i = 0; i < 10; i++)
-      // {
-      //    printf("[LowPrioTask] Some more work to delay the task! \n");
-      // }
-
       /* Optional: record end time. */
       end_time = tm_time_get();
 
@@ -153,10 +148,8 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
    {
       printf("[MedPrioTask] Running (count=%d). Yielding.\n", ++count);
 
-      /* Give a chance for other tasks to run. */
-      tm_thread_relinquish();
-
-      /* FreeRTOs only yields to task with same or higher priority, therefore we need to block the task */
+      /* Tested RTOSes only yield to tasks with same or higher priority, 
+         therefore we need to block the task */
       tm_thread_sleep(1);
 
       if (count > 4)
