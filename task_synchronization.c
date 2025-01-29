@@ -30,10 +30,6 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 #include "tm_api.h"
 #include <stdio.h>
 #include <string.h>
-#ifndef USING_ZEPHYR /* USING_FREERTOS USING_THREADX */
-#include "ti_board_open_close.h"
-#include "ti_drivers_open_close.h"
-#endif
 
 /* We define a unique mutex ID for the UART resource. */
 #define UART_MUTEX_ID 1
@@ -67,8 +63,8 @@ static void CloseUART(void)
 }
 
 /********************************************************************************
- * EXAMPLE TASKS
- * Two tasks that each open the UART, print some text, then close it.
+ * TEST TASKS
+ * Two tasks that get synchrinized by a semaphore and access the UART as shared resource
  * TODO: YIELD or SLEEP to allow other tasks to run. TEST both
  ********************************************************************************/
 
