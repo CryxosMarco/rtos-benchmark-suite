@@ -92,7 +92,8 @@ extern "C"
 #define printf printk
 #endif
 
-   /* Define the time interval in seconds. This can be changed with a -D compiler option.  */
+   /* Define the time interval in seconds. This can be changed with a -D compiler
+    * option.  */
 
 #ifndef TM_TEST_DURATION
 #define TM_TEST_DURATION 30
@@ -108,6 +109,7 @@ extern "C"
    int tm_main_six(void);
    int tm_main_seven(void);
    int main_sync(void);
+   int main_inheritance(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
@@ -182,6 +184,10 @@ extern "C"
    /* This function puts the specified mutex.  If successful, the function
       should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
    int tm_mutex_put(int mutex_id);
+   /* Forward declaration of the ISR callback. */
+   void tm_timer_isr(void* args);
+   /* This function initializes the timer module. */
+   void tm_time_init(void);
    /* This function creates the specified event flags group.  If successful,
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be
    returned.  */

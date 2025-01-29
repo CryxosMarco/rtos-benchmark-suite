@@ -90,8 +90,8 @@ unsigned char tm_thread_stack_area[TM_THREADX_MAX_THREADS * TM_THREADX_THREAD_ST
 unsigned char tm_queue_memory_area[TM_THREADX_MAX_QUEUES * TM_THREADX_QUEUE_SIZE];
 unsigned char tm_pool_memory_area[TM_THREADX_MAX_MEMORY_POOLS * TM_THREADX_MEMORY_POOL_SIZE];
 
-/* Variable for noticing a counter overflow*/
-extern volatile unsigned long overflow_counter;
+/* Global time counter incremented by the timer ISR */
+static volatile uint64_t g_timeCounter = 0ULL;
 
 /* Define array to remember the test entry function.  */
 
@@ -412,27 +412,52 @@ VOID tm_thread_entry(ULONG thread_input)
    (entry_function)();
 }
 
-/* This function returns the number of ticks to estimate a time*/
+/*******************************************************************************
+ * tm_time_init
+ *
+ *  - Configures and starts TimerP in a known mode (periodic or continuous).
+ *  - Ties the ISR callback (tm_time_isr) to increment the global time counter.
+ ******************************************************************************/
+void tm_time_init(void)
+{
+   /* Start the timer */
+   TimerP_start(gTimerBaseAddr[CONFIG_TIMER0]);
+
+   DebugP_log("tm_time_init: Timer started.\r\n");
+}
+
+/*******************************************************************************
+ * tm_time_isr
+ *
+ *  - The ISR callback invoked by TimerP on each timer interrupt.
+ *  - Increments our global counter, which tm_time_get() will read.
+ *
+ *  NOTE: The frequency of increments = (timer frequency).
+ *        So if the timer triggers every 1 ms, g_timeCounter increments every 1
+ *ms.
+ ******************************************************************************/
+void tm_timer_isr(void* args)
+{
+   (void) args;
+   g_timeCounter++;
+}
+
+/*******************************************************************************
+ * tm_time_get
+ *
+ *  - Part of the tm_api.h specification: returns an unsigned long (32 bits).
+ *  - Here we retrieve the lower 32 bits of our 64-bit counter.
+ *  - If your tests need a longer timescale, you could return 64 bits or handle
+ *    overflow logic differently.
+ *
+ *  NOTE: If the timer triggers every 1 ms, tm_time_get() returns "milliseconds
+ *        since timer started" (lower 32 bits).
+ *        You can scale or interpret as needed (e.g., microseconds, ticks).
+ ******************************************************************************/
 unsigned long tm_time_get(void)
 {
-   // static uint32_t last_timer_value = 0;
-   // uint32_t current_timer_value = TimerP_getCount(gTimerBaseAddr[CONFIG_TIMER0]);
-
-   // // Check if the timer has overflowed
-   // if (TimerP_isOverflowed(gTimerBaseAddr[CONFIG_TIMER0]))
-   // {
-   //    TimerP_clearOverflowInt(gTimerBaseAddr[CONFIG_TIMER0]);
-   //    overflow_counter++;
-   // }
-
-   // // Calculate the total time, considering overflows
-   // uint64_t total_ticks = ((uint64_t) overflow_counter << 32) | current_timer_value;
-
-   // // Ensure `last_timer_value` is updated
-   // last_timer_value = current_timer_value;
-
-   // return (uint32_t) (total_ticks & 0xFFFFFFFF);
-   return 5; // dummy value
+   /* Return the lower 32 bits */
+   return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
 }
 
 #endif /* USING_THREADX */
