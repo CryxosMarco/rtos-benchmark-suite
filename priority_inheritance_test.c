@@ -45,6 +45,8 @@ static unsigned long end_time = 0;
  * MediumPrioTask runs to show preemption, etc.
  ******************************************************************************/
 
+static void print_measurement(void);
+
 /*----------------------------------------------------------------------------*/
 /* Low Priority Task: acquires the mutex first, simulates "long" work while
    holding it, to force the High Priority Task to block → triggers inheritance. */
@@ -155,6 +157,7 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
       if (count > 4)
       {
          printf("[MedPrioTask] Enough demonstration, suspending.\n");
+         print_measurement();
          tm_thread_suspend(MED_TASK_ID);
       }
    }
@@ -188,6 +191,8 @@ static void tm_priority_inheritance_initialize(void)
    /* Create the shared mutex. */
    tm_mutex_create(SHARED_MUTEX_ID);
 
+   /* Starting the Timer */
+   tm_time_init();
    /* Create and resume the tasks.
       Priority 5 = high, 10 = medium, 20 = low, as an example. */
 
