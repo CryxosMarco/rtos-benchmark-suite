@@ -103,7 +103,7 @@ void main_task(void* pvParameters)
 
    /* Start Thread-Metric tests */
    printf("Starting Thread-Metric tests...\n");
-   main_sync();
+   main_inheritance();
    test_interrupt_handler = tm_interrupt_processing_handler;
    setup_interrupt();
 
