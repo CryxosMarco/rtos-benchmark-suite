@@ -22,7 +22,9 @@
 
 /* Include necessary files.  */
 
+#include "ti_drivers_config.h"
 #include "tm_api.h"
+#include <kernel/dpl/TimerP.h>
 
 /* Kernel includes */
 #include <FreeRTOS.h>
@@ -30,6 +32,7 @@
 #include <semphr.h>
 #include <task.h>
 
+extern volatile unsigned long overflow_counter;
 /* Define FreeRTOS mapping constants. */
 #define TM_FREERTOS_MAX_THREADS 10
 #define TM_FREERTOS_MAX_QUEUES 1
@@ -330,30 +333,27 @@ int tm_memory_pool_deallocate(int pool_id, unsigned char* memory_ptr)
    return TM_SUCCESS;
 }
 
-// #include <kernel/dpl/TimerP.h>
-// #include "ti_drivers_config.h"
-// extern volatile unsigned long overflow_counter;
+/* This function returns the number of ticks to estimate a time*/
+unsigned long tm_time_get(void)
+{
+   // static uint32_t last_timer_value = 0;
+   // uint32_t current_timer_value = TimerP_getCount(gTimerBaseAddr[CONFIG_TIMER0]);
 
-// /* This function returns the number of ticks to estimate a time*/
-// unsigned long tm_time_get(void)
-// {
-//     static uint32_t last_timer_value = 0;
-//     uint32_t current_timer_value = TimerP_getCount(gTimerBaseAddr[CONFIG_TIMER0]);
+   // // Check if the timer has overflowed
+   // if (TimerP_isOverflowed(gTimerBaseAddr[CONFIG_TIMER0]))
+   // {
+   //    TimerP_clearOverflowInt(gTimerBaseAddr[CONFIG_TIMER0]);
+   //    overflow_counter++;
+   // }
 
-//     // Check if the timer has overflowed
-//     if (TimerP_isOverflowed(gTimerBaseAddr[CONFIG_TIMER0]))
-//     {
-//         TimerP_clearOverflowInt(gTimerBaseAddr[CONFIG_TIMER0]);
-//         overflow_counter++;
-//     }
+   // // Calculate the total time, considering overflows
+   // uint64_t total_ticks = ((uint64_t) overflow_counter << 32) | current_timer_value;
 
-//     // Calculate the total time, considering overflows
-//     uint64_t total_ticks = ((uint64_t)overflow_counter << 32) | current_timer_value;
+   // // Ensure `last_timer_value` is updated
+   // last_timer_value = current_timer_value;
 
-//     // Ensure `last_timer_value` is updated
-//     last_timer_value = current_timer_value;
-
-//     return (uint32_t)(total_ticks & 0xFFFFFFFF);
-// }
+   // return (uint32_t) (total_ticks & 0xFFFFFFFF);
+   return 5; // dummy value
+}
 
 #endif /* USING_FREERTOS */
