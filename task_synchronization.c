@@ -33,7 +33,8 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 
 /* We define a unique mutex ID for the UART resource. */
 #define UART_MUTEX_ID 1
-#define SEMAPHORE_ID 1
+#define SEM_A 1
+#define SEM_B 2
 
 /********************************************************************************
  * OPEN/CLOSE/PUTCH: Abstract "UART" usage
@@ -69,64 +70,75 @@ static void CloseUART(void)
  ********************************************************************************/
 
 /* First writer task: prints "Hello from WriterTask1" a few times. */
-static void vWriterTask1(void* arg1, void* arg2, void* arg3)
+static void WriterTask1(void* arg1, void* arg2, void* arg3)
 {
    static int callCount = 0;
-   /* Wait for semaphore to be available */
-   tm_semaphore_wait(SEMAPHORE_ID);
-
-   if (callCount < 3)
+   while (1)
    {
-      if (OpenUART() == TM_SUCCESS)
+      /* Wait for semaphore to be available */
+      tm_semaphore_wait(SEM_A);
+
+      if (callCount < 3)
       {
-         printf("[WriterTask1] Printing...\n");
-         const char* msg = "Hello from WriterTask1!\r\n";
-         for (const char* p = msg; *p; p++)
+         if (OpenUART() == TM_SUCCESS)
          {
-            putch(*p);
+            printf("[WriterTask1] Printing...\n");
+            const char* msg = "Hello from WriterTask1!\r\n";
+            for (const char* p = msg; *p; p++)
+            {
+               putch(*p);
+            }
+            CloseUART();
+            callCount++;
          }
-         CloseUART();
-         callCount++;
+         /* Release the second semaphore */
+         tm_semaphore_put(SEM_B);
       }
-
-      /* Optional: relinquish or sleep so other tasks can run. */
-      tm_thread_relinquish();
-   }
-   else
-   {
-      printf("[WriterTask1] Done. Suspending.\n");
-      tm_thread_suspend(1); /* Suspends itself (thread ID 1). */
+      else
+      {
+         printf("[WriterTask1] Done. Suspending.\n");
+         tm_semaphore_put(SEM_B);
+         tm_thread_suspend(1); /* Suspends itself (thread ID 1). */
+      }
    }
 }
 
 /* Second writer task: prints a different message. */
-static void vWriterTask2(void* arg1, void* arg2, void* arg3)
+static void WriterTask2(void* arg1, void* arg2, void* arg3)
 {
+   (void) arg1;
+   (void) arg2;
+   (void) arg3;
+
    static int callCount = 0;
 
-   if (callCount < 3)
+   while (1)
    {
-      if (OpenUART() == TM_SUCCESS)
-      {
-         printf("[WriterTask2] Printing...\n");
-         const char* msg = "WriterTask2 says hi!\r\n";
-         for (const char* p = msg; *p; p++)
-         {
-            putch(*p);
-         }
-         CloseUART();
-         callCount++;
-      }
+      /* Block on the same semaphore. */
+      tm_semaphore_wait(SEM_B);
 
-      /* Release the semaphore. To let task1 start */
-      tm_semaphore_put(SEMAPHORE_ID);
-      /* relinquish or sleep. */
-      tm_thread_relinquish();
-   }
-   else
-   {
-      printf("[WriterTask2] Done. Suspending.\n");
-      tm_thread_suspend(2);
+      if (callCount < 3)
+      {
+         if (OpenUART() == TM_SUCCESS)
+         {
+            printf("[WriterTask2] Printing...\n");
+            const char* msg = "WriterTask2 says hi!\r\n";
+            for (const char* p = msg; *p; p++)
+            {
+               putch(*p);
+            }
+            CloseUART();
+            callCount++;
+         }
+         /* Release the first semaphore */
+         tm_semaphore_put(SEM_A);
+      }
+      else
+      {
+         printf("[WriterTask2] Done. Suspending.\n");
+         tm_semaphore_put(SEM_A);
+         tm_thread_suspend(2);
+      }
    }
 }
 
@@ -142,15 +154,16 @@ static void task_synchronisation_initialize(void)
    /* Create the semaphore to snychronize tasks.
       The implementation calls a semaphore_get()
       to make it available from the start */
-   tm_semaphore_create(SEMAPHORE_ID);
-   /* Ensure the Semaphore is blocked from the start */
-   tm_semaphore_get(SEMAPHORE_ID);
+   tm_semaphore_create(SEM_A);
+   tm_semaphore_create(SEM_B);
+   /* guarantee that the semaphore A is blocked so Task2 can start first.*/
+   tm_semaphore_get(SEM_A);
 
    /* Create two tasks, each with a unique ID. Priority is arbitrary.
       Without synchronisation Task1 would start operating before task2.
       we use synchronisation to ensure that task2 can finish printing first*/
-   tm_thread_create(1, 5, vWriterTask1);
-   tm_thread_create(2, 5, vWriterTask2);
+   tm_thread_create(1, 5, WriterTask1);
+   tm_thread_create(2, 5, WriterTask2);
 
    /* Start (resume) both tasks. */
    tm_thread_resume(1);
