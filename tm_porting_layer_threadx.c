@@ -50,7 +50,9 @@
 #include "tx_api.h"
 
 #include "ti_drivers_config.h"
+#include <drivers/pmu.h>
 #include <kernel/dpl/TimerP.h>
+
 /* Define ThreadX mapping constants.  */
 
 #define TM_THREADX_MAX_THREADS 10
@@ -458,6 +460,84 @@ unsigned long tm_time_get(void)
 {
    /* Return the lower 32 bits */
    return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
+}
+
+/*-----------------------------------------------------------
+ * Performance Monitoring Unit (PMU) Configuration
+ *-----------------------------------------------------------
+ * This configuration defines events to be monitored using the
+ * ARM R5 PMU. The selected events track instruction and data
+ * cache activity, providing insights into cache performance.
+ *-----------------------------------------------------------*/
+PMU_EventCfg gPmuEventCfg[3] = {
+   {
+      .name = "ICache Miss", // Tracks instruction cache misses
+      .type = CSL_ARM_R5_PMU_EVENT_TYPE_ICACHE_MISS,
+   },
+   {
+      .name = "DCache Access", // Tracks data cache accesses
+      .type = CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_ACCESS,
+   },
+   {
+      .name = "DCache Miss", // Tracks data cache misses
+      .type = CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_MISS,
+   },
+};
+
+/*-----------------------------------------------------------
+ * Global PMU Configuration
+ *-----------------------------------------------------------
+ * Enables cycle counting and sets up event counters.
+ * The PMU will track the three configured events.
+ *-----------------------------------------------------------*/
+PMU_Config gPmuConfig = {
+   .bCycleCounter = TRUE,         // Enables cycle counter
+   .numEventCounters = 3U,        // Number of event counters
+   .eventCounters = gPmuEventCfg, // Pointer to event configuration
+};
+
+/*-----------------------------------------------------------
+ * Initialize Performance Monitoring Unit (PMU)
+ *-----------------------------------------------------------
+ * This function initializes the PMU with the configured
+ * event counters. It must be called before profiling begins.
+ *-----------------------------------------------------------*/
+void tm_setup_pmu(void)
+{
+   PMU_init(&gPmuConfig);
+}
+
+/*-----------------------------------------------------------
+ * Start PMU Profiling
+ *-----------------------------------------------------------
+ * Begins profiling for a specific section of code.
+ * @param name: Identifier for the profiling session.
+ *-----------------------------------------------------------*/
+void tm_pmu_profile_start(const char* name)
+{
+   PMU_profileStart(name);
+}
+
+/*-----------------------------------------------------------
+ * End PMU Profiling
+ *-----------------------------------------------------------
+ * Stops profiling for the specified session.
+ * @param name: Identifier for the profiling session.
+ *-----------------------------------------------------------*/
+void tm_pmu_profile_end(const char* name)
+{
+   PMU_profileEnd(name);
+}
+
+/*-----------------------------------------------------------
+ * Print PMU Profiling Results
+ *-----------------------------------------------------------
+ * Displays the recorded profiling data for the given session.
+ * @param name: Identifier for the profiling session.
+ *-----------------------------------------------------------*/
+void tm_pmu_profile_print(const char* name)
+{
+   PMU_profilePrintEntry(name);
 }
 
 #endif /* USING_THREADX */

@@ -59,7 +59,7 @@
 
 #endif /* USING_ZEPHYR */
 #ifdef USING_FREERTOS
-
+#include <kernel/dpl/DebugP.h>
 #endif /* USING_FREERTOS */
 #ifdef USING_THREADX
 #ifndef TX_DISABLE_ERROR_CHECKING
@@ -67,7 +67,7 @@
 #endif
 #define TX_ENABLE_STACK_CHECKING
 #include "tx_api.h"
-
+#include <kernel/dpl/DebugP.h>
 #endif /* USING_THREADX */
 #include <stdbool.h>
 #include <stdio.h>
@@ -88,13 +88,16 @@ extern "C"
 #define TM_ERROR 1
 
 #ifdef USING_ZEPHYR
-#define ENABLE_PRINTF
 #define printf printk
-#endif
+#endif /* USING_ZEPHYR */
+#ifdef USING_FREERTOS
+#define printf DebugP_log
+#endif /* USING_FREERTOS */
+#ifdef USING_THREADX
+#define printf DebugP_log
+#endif /* USING_THREADX */
 
-   /* Define the time interval in seconds. This can be changed with a -D compiler
-    * option.  */
-
+/* Define the time interval in seconds. This can be changed with a -D compiler option.  */
 #ifndef TM_TEST_DURATION
 #define TM_TEST_DURATION 30
 #endif
@@ -192,6 +195,14 @@ extern "C"
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be
    returned.  */
    unsigned long tm_time_get(void);
+   /* Configures and initializes the PMU on R5F Core */
+   void tm_setup_pmu(void);
+   /* Start PMU profiling */
+   void tm_pmu_profile_start(const char* name);
+   /* End PMU profiling */
+   void tm_pmu_profile_end(const char* name);
+   /* Print PMU profiling results */
+   void tm_pmu_profile_print(const char* name);
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

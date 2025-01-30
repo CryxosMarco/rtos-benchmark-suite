@@ -75,8 +75,11 @@ static void WriterTask1(void* arg1, void* arg2, void* arg3)
    static int callCount = 0;
    while (1)
    {
-      /* Wait for semaphore to be available */
+      tm_pmu_profile_start("Task1_waiting"); /* Start Profiling */
+      /* wait on SEM_A to put from Task2 */
       tm_semaphore_wait(SEM_A);
+      tm_pmu_profile_end("Task1_waiting");   /* End Profiling */
+      tm_pmu_profile_print("Task1_waiting"); /* Report PMU results */
 
       if (callCount < 3)
       {
@@ -114,15 +117,20 @@ static void WriterTask2(void* arg1, void* arg2, void* arg3)
 
    while (1)
    {
-      /* Block on the same semaphore. */
+      tm_pmu_profile_start("Task2_waiting"); /* Start Profiling */
+      /* wait on SEM_B put form Task1 */
       tm_semaphore_wait(SEM_B);
+      tm_pmu_profile_end("Task2_waiting");   /* End Profiling */
+      tm_pmu_profile_print("Task2_waiting"); /* Report PMU results */
 
       if (callCount < 3)
       {
          if (OpenUART() == TM_SUCCESS)
          {
-            printf("[WriterTask2] Printing...\n");
+            printf("[WriterTask2] printing...\n");
+
             const char* msg = "WriterTask2 says hi!\r\n";
+
             for (const char* p = msg; *p; p++)
             {
                putch(*p);
@@ -137,6 +145,8 @@ static void WriterTask2(void* arg1, void* arg2, void* arg3)
       {
          printf("[WriterTask2] Done. Suspending.\n");
          tm_semaphore_put(SEM_A);
+         /* Print profiling data for a specific entry */
+
          tm_thread_suspend(2);
       }
    }
@@ -149,6 +159,8 @@ static void WriterTask2(void* arg1, void* arg2, void* arg3)
  ********************************************************************************/
 static void task_synchronisation_initialize(void)
 {
+   /* initialze PMU */
+   tm_setup_pmu();
    /* Create the UART mutex. */
    tm_mutex_create(UART_MUTEX_ID);
    /* Create the semaphore to snychronize tasks.
