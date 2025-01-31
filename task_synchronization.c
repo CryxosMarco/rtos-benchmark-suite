@@ -75,11 +75,8 @@ static void WriterTask1(void* arg1, void* arg2, void* arg3)
    static int callCount = 0;
    while (1)
    {
-      tm_pmu_profile_start("Task1_waiting"); /* Start Profiling */
       /* wait on SEM_A to put from Task2 */
       tm_semaphore_wait(SEM_A);
-      tm_pmu_profile_end("Task1_waiting");   /* End Profiling */
-      tm_pmu_profile_print("Task1_waiting"); /* Report PMU results */
 
       if (callCount < 3)
       {
@@ -117,19 +114,17 @@ static void WriterTask2(void* arg1, void* arg2, void* arg3)
 
    while (1)
    {
-      tm_pmu_profile_start("Task2_waiting"); /* Start Profiling */
       /* wait on SEM_B put form Task1 */
       tm_semaphore_wait(SEM_B);
-      tm_pmu_profile_end("Task2_waiting");   /* End Profiling */
-      tm_pmu_profile_print("Task2_waiting"); /* Report PMU results */
-
       if (callCount < 3)
       {
          if (OpenUART() == TM_SUCCESS)
          {
             printf("[WriterTask2] printing...\n");
-
+            tm_pmu_profile_start("Zuweisung");
             const char* msg = "WriterTask2 says hi!\r\n";
+            tm_pmu_profile_end("Zuweisung");
+            tm_pmu_profile_print("Zuweisung ");
 
             for (const char* p = msg; *p; p++)
             {
