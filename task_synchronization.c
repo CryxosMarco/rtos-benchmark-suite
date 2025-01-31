@@ -124,7 +124,7 @@ static void WriterTask2(void* arg1, void* arg2, void* arg3)
             tm_pmu_profile_start("Zuweisung");
             const char* msg = "WriterTask2 says hi!\r\n";
             tm_pmu_profile_end("Zuweisung");
-            tm_pmu_profile_print("Zuweisung ");
+            tm_pmu_profile_print("Zuweisung");
 
             for (const char* p = msg; *p; p++)
             {
