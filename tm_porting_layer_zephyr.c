@@ -329,32 +329,31 @@ unsigned long tm_time_get(void)
 /* --------------------------------------------------------------------------
  * Basic event configuration structure
  * -------------------------------------------------------------------------- */
-typedef struct {
-    const char* name;  /* e.g. "DCache Miss" */
-    uint32_t    type;  /* e.g. 0x03 for DCache Miss event ID */
+typedef struct
+{
+   const char* name; /* e.g. "DCache Miss" */
+   uint32_t type;    /* e.g. 0x03 for DCache Miss event ID */
 } PMU_EventCfg;
 
-typedef struct {
-    bool       bCycleCounter;
-    uint32_t   numEventCounters;
-    PMU_EventCfg* eventCounters;
+typedef struct
+{
+   bool bCycleCounter;
+   uint32_t numEventCounters;
+   PMU_EventCfg* eventCounters;
 } PMU_Config;
 
 /* --------------------------------------------------------------------------
  * Our event configuration (3 events) - adjust as needed
  * -------------------------------------------------------------------------- */
-#define PMU_MAX_EVENT_COUNTERS  (3U)
+#define PMU_MAX_EVENT_COUNTERS (3U)
 static PMU_EventCfg gPmuEventCfg[PMU_MAX_EVENT_COUNTERS] = {
-    { "ICache Miss",   0x01 },
-    { "DCache Access", 0x04 },
-    { "DCache Miss",   0x03 },
+   {"ICache Miss", 0x01},
+   {"DCache Access", 0x04},
+   {"DCache Miss", 0x03},
 };
 
 static PMU_Config gPmuConfig = {
-   .bCycleCounter    = true,
-   .numEventCounters = PMU_MAX_EVENT_COUNTERS,
-   .eventCounters    = gPmuEventCfg
-};
+   .bCycleCounter = true, .numEventCounters = PMU_MAX_EVENT_COUNTERS, .eventCounters = gPmuEventCfg};
 
 /* prototype here for later use*/
 void pmu_init_profile(void);
@@ -363,47 +362,48 @@ void pmu_init_profile(void);
  * -------------------------------------------------------------------------- */
 int tm_setup_pmu(void)
 {
-    printk("Initializing PMU...\n");
+   printk("Initializing PMU...\n");
 
-    /* Disable all counters (PMCR.E=0) */
-    uint32_t pmcr = pmu_read_pmcr();
-    pmcr &= ~0x1;
-    pmu_write_pmcr(pmcr);
+   /* Disable all counters (PMCR.E=0) */
+   uint32_t pmcr = pmu_read_pmcr();
+   pmcr &= ~0x1;
+   pmu_write_pmcr(pmcr);
 
-    /* Clear (disable) all counters at once */
-    pmu_write_cntenclr(0xFFFFFFFF);
+   /* Clear (disable) all counters at once */
+   pmu_write_cntenclr(0xFFFFFFFF);
 
-    /*
-     * Reset cycle and event counters (bits [2]=C, [1]=P), no divider (bit[3]=0)
-     *    If you need a 64x divider, do: pmcr |= (1 << 3);
-     */
-    pmcr = (1 << 2) | (1 << 1);  /* C=1 (reset cycle), P=1 (reset events), D=0 => no divider */
-    pmu_write_pmcr(pmcr);
+   /*
+    * Reset cycle and event counters (bits [2]=C, [1]=P), no divider (bit[3]=0)
+    *    If you need a 64x divider, do: pmcr |= (1 << 3);
+    */
+   pmcr = (1 << 2) | (1 << 1); /* C=1 (reset cycle), P=1 (reset events), D=0 => no divider */
+   pmu_write_pmcr(pmcr);
 
-    /* Reset cycle counter to 0 */
-    pmu_write_pmccntr(0);
+   /* Reset cycle counter to 0 */
+   pmu_write_pmccntr(0);
 
-    /* Configure event counters */
-    for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
-        pmu_select_event_counter(i);
-        pmu_write_evtyper(gPmuConfig.eventCounters[i].type);
-        pmu_write_evcounter(0);
-    }
+   /* Configure event counters */
+   for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++)
+   {
+      pmu_select_event_counter(i);
+      pmu_write_evtyper(gPmuConfig.eventCounters[i].type);
+      pmu_write_evcounter(0);
+   }
 
-    /* Enable cycle counter & event counters */
-    /*    bit31 => cycle counter, plus bits [0..(numEventCounters-1)] => event counters */
-    pmu_write_cntenset((1 << 31) | ((1 << gPmuConfig.numEventCounters) - 1));
+   /* Enable cycle counter & event counters */
+   /*    bit31 => cycle counter, plus bits [0..(numEventCounters-1)] => event counters */
+   pmu_write_cntenset((1 << 31) | ((1 << gPmuConfig.numEventCounters) - 1));
 
-    /* Enable counters in PMCR (bit[0] = E=1) */
-    pmcr = pmu_read_pmcr();
-    pmcr |= 0x1;
-    pmu_write_pmcr(pmcr);
+   /* Enable counters in PMCR (bit[0] = E=1) */
+   pmcr = pmu_read_pmcr();
+   pmcr |= 0x1;
+   pmu_write_pmcr(pmcr);
 
-    /* Allow user mode access to PMU (optional) */
-    pmu_enable_user_access();
-    pmu_init_profile();
-    printk("PMU Initialized.\n");
-    return 0; /* success */
+   /* Allow user mode access to PMU (optional) */
+   pmu_enable_user_access();
+   pmu_init_profile();
+   printk("PMU Initialized.\n");
+   return 0; /* success */
 }
 
 /* Register this init function to run at PRE_KERNEL_1 (or adjust as needed) */
@@ -414,49 +414,52 @@ SYS_INIT(tm_setup_pmu, PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
  * -------------------------------------------------------------------------- */
 
 /* Max number of log entries we can store */
-#define PMU_MAX_LOG_ENTRIES     (64U)
+#define PMU_MAX_LOG_ENTRIES (64U)
 
-typedef struct {
-    const char* name;
-    uint32_t    type;
-    uint32_t    value;  /* final delta of events */
+typedef struct
+{
+   const char* name;
+   uint32_t type;
+   uint32_t value; /* final delta of events */
 } TM_PMUEvent;
 
 /* Each profile point: name, cycle counters, event counters */
-typedef struct {
-    const char     *name;
+typedef struct
+{
+   const char* name;
 
-    /* We store separate start/end for computing a delta */
-    uint32_t        cycleCountStart;
-    uint32_t        cycleCountEnd;
-    uint32_t        cycleCountValue;  /* (End - Start) */
+   /* We store separate start/end for computing a delta */
+   uint32_t cycleCountStart;
+   uint32_t cycleCountEnd;
+   uint32_t cycleCountValue; /* (End - Start) */
 
-    TM_PMUEvent     events[PMU_MAX_EVENT_COUNTERS];
-    uint32_t        eventStart[PMU_MAX_EVENT_COUNTERS];
-    uint32_t        eventEnd[PMU_MAX_EVENT_COUNTERS];
+   TM_PMUEvent events[PMU_MAX_EVENT_COUNTERS];
+   uint32_t eventStart[PMU_MAX_EVENT_COUNTERS];
+   uint32_t eventEnd[PMU_MAX_EVENT_COUNTERS];
 
 } TM_PMUProfilePoint;
 
-typedef struct {
-    uint32_t            logIndex;
-    TM_PMUProfilePoint  point[PMU_MAX_LOG_ENTRIES];
+typedef struct
+{
+   uint32_t logIndex;
+   TM_PMUProfilePoint point[PMU_MAX_LOG_ENTRIES];
 
-    uint32_t            numEvents;
-    uint8_t             bCycleCounter;
+   uint32_t numEvents;
+   uint8_t bCycleCounter;
 } TM_PMUProfileObject;
 
 /* Global object storing the logged profiling data */
 static TM_PMUProfileObject gProfileObject = {0};
 
 /* --------------------------------------------------------------------------
- * Init for the Chache Hits/Misses profile structure 
+ * Init for the Chache Hits/Misses profile structure
  * -------------------------------------------------------------------------- */
 void pmu_init_profile(void)
 {
-    memset(&gProfileObject, 0, sizeof(gProfileObject));
-    gProfileObject.logIndex      = 0;
-    gProfileObject.numEvents     = PMU_MAX_EVENT_COUNTERS;
-    gProfileObject.bCycleCounter = 1; /* We use cycle counter */
+   memset(&gProfileObject, 0, sizeof(gProfileObject));
+   gProfileObject.logIndex = 0;
+   gProfileObject.numEvents = PMU_MAX_EVENT_COUNTERS;
+   gProfileObject.bCycleCounter = 1; /* We use cycle counter */
 }
 
 /* --------------------------------------------------------------------------
@@ -467,32 +470,35 @@ void pmu_init_profile(void)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_start(const char* name)
 {
-    uint32_t idx = gProfileObject.logIndex;
-    if (idx >= PMU_MAX_LOG_ENTRIES) {
-        /* no more space */
-        return;
-    }
+   uint32_t idx = gProfileObject.logIndex;
+   if (idx >= PMU_MAX_LOG_ENTRIES)
+   {
+      /* no more space */
+      return;
+   }
 
-    TM_PMUProfilePoint *p = &gProfileObject.point[idx];
-    p->name = name;
+   TM_PMUProfilePoint* p = &gProfileObject.point[idx];
+   p->name = name;
 
-    /* Reset the counters to 0 */
-    pmu_write_pmccntr(0);
-    for (uint32_t i = 0; i < gProfileObject.numEvents; i++) {
-        pmu_select_event_counter(i);
-        pmu_write_evcounter(0);
-    }
+   /* Reset the counters to 0 */
+   pmu_write_pmccntr(0);
+   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
+   {
+      pmu_select_event_counter(i);
+      pmu_write_evcounter(0);
+   }
 
-    /* Immediately read them as "start" values */
-    p->cycleCountStart = pmu_read_pmccntr();
-    for (uint32_t i = 0; i < gProfileObject.numEvents; i++) {
-        pmu_select_event_counter(i);
-        p->eventStart[i] = pmu_read_evcounter();
+   /* Immediately read them as "start" values */
+   p->cycleCountStart = pmu_read_pmccntr();
+   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
+   {
+      pmu_select_event_counter(i);
+      p->eventStart[i] = pmu_read_evcounter();
 
-        /* Also store name & type */
-        p->events[i].name = gPmuEventCfg[i].name;
-        p->events[i].type = gPmuEventCfg[i].type;
-    }
+      /* Also store name & type */
+      p->events[i].name = gPmuEventCfg[i].name;
+      p->events[i].type = gPmuEventCfg[i].type;
+   }
 }
 
 /* --------------------------------------------------------------------------
@@ -503,35 +509,39 @@ void tm_pmu_profile_start(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_end(const char* name)
 {
-    uint32_t idx = gProfileObject.logIndex;
-    if (idx >= PMU_MAX_LOG_ENTRIES) {
-        return;
-    }
+   uint32_t idx = gProfileObject.logIndex;
+   if (idx >= PMU_MAX_LOG_ENTRIES)
+   {
+      return;
+   }
 
-    TM_PMUProfilePoint *p = &gProfileObject.point[idx];
+   TM_PMUProfilePoint* p = &gProfileObject.point[idx];
 
-    /* Optional: check name matches the start */
-    if (p->name == NULL || strcmp(p->name, name) != 0) {
-        /* mismatch => error or skip */
-        return;
-    }
+   /* Optional: check name matches the start */
+   if (p->name == NULL || strcmp(p->name, name) != 0)
+   {
+      /* mismatch => error or skip */
+      return;
+   }
 
-    /* Read end counters */
-    p->cycleCountEnd = pmu_read_pmccntr();
-    for (uint32_t i = 0; i < gProfileObject.numEvents; i++) {
-        pmu_select_event_counter(i);
-        p->eventEnd[i] = pmu_read_evcounter();
-    }
+   /* Read end counters */
+   p->cycleCountEnd = pmu_read_pmccntr();
+   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
+   {
+      pmu_select_event_counter(i);
+      p->eventEnd[i] = pmu_read_evcounter();
+   }
 
-    /* Compute deltas */
-    p->cycleCountValue = p->cycleCountEnd - p->cycleCountStart;
-    for (uint32_t i = 0; i < gProfileObject.numEvents; i++) {
-        uint32_t diff = p->eventEnd[i] - p->eventStart[i];
-        p->events[i].value = diff;
-    }
+   /* Compute deltas */
+   p->cycleCountValue = p->cycleCountEnd - p->cycleCountStart;
+   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
+   {
+      uint32_t diff = p->eventEnd[i] - p->eventStart[i];
+      p->events[i].value = diff;
+   }
 
-    /* Move to next log slot for future profileStart() */
-    gProfileObject.logIndex++;
+   /* Move to next log slot for future profileStart() */
+   gProfileObject.logIndex++;
 }
 
 /* --------------------------------------------------------------------------
@@ -541,22 +551,23 @@ void tm_pmu_profile_end(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_print(const char* name)
 {
-    for (uint32_t i = 0; i < gProfileObject.logIndex; i++) {
-        TM_PMUProfilePoint *p = &gProfileObject.point[i];
-        if (p->name != NULL && strcmp(p->name, name) == 0) {
-            printk("Profile Entry: %s\n", p->name);
-            printk("Cycle Count: %u\n", p->cycleCountValue);
+   for (uint32_t i = 0; i < gProfileObject.logIndex; i++)
+   {
+      TM_PMUProfilePoint* p = &gProfileObject.point[i];
+      if (p->name != NULL && strcmp(p->name, name) == 0)
+      {
+         printk("Profile Entry: %s\n", p->name);
+         printk("Cycle Count: %u\n", p->cycleCountValue);
 
-            for (uint32_t j = 0; j < gProfileObject.numEvents; j++) {
-                printk("[%s]: %u\n",
-                       p->events[j].name,
-                       p->events[j].value);
-            }
-            printk("\n");
-            return;
-        }
-    }
-    printk("No profile entry found for name: %s\n", name);
+         for (uint32_t j = 0; j < gProfileObject.numEvents; j++)
+         {
+            printk("[%s]: %u\n", p->events[j].name, p->events[j].value);
+         }
+         printk("\n");
+         return;
+      }
+   }
+   printk("No profile entry found for name: %s\n", name);
 }
 
 /* --------------------------------------------------------------------------
@@ -565,18 +576,18 @@ void tm_pmu_profile_print(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_print_all(void)
 {
-    for (uint32_t i = 0; i < gProfileObject.logIndex; i++) {
-        TM_PMUProfilePoint *p = &gProfileObject.point[i];
-        printk("Profile Entry #%u: %s\n", i, p->name);
-        printk("Cycle Count: %u\n", p->cycleCountValue);
+   for (uint32_t i = 0; i < gProfileObject.logIndex; i++)
+   {
+      TM_PMUProfilePoint* p = &gProfileObject.point[i];
+      printk("Profile Entry #%u: %s\n", i, p->name);
+      printk("Cycle Count: %u\n", p->cycleCountValue);
 
-        for (uint32_t j = 0; j < gProfileObject.numEvents; j++) {
-            printk("Event [%s]: %u\n",
-                   p->events[j].name,
-                   p->events[j].value);
-        }
-        printk("\n");
-    }
+      for (uint32_t j = 0; j < gProfileObject.numEvents; j++)
+      {
+         printk("Event [%s]: %u\n", p->events[j].name, p->events[j].value);
+      }
+      printk("\n");
+   }
 }
 
 /* --------------------------------------------------------------------------
@@ -585,12 +596,11 @@ void tm_pmu_profile_print_all(void)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_reset(void)
 {
-    memset(&gProfileObject, 0, sizeof(gProfileObject));
-    /* Reinitialize counts if needed */
-    gProfileObject.numEvents     = PMU_MAX_EVENT_COUNTERS;
-    gProfileObject.bCycleCounter = 1;
-    gProfileObject.logIndex      = 0;
+   memset(&gProfileObject, 0, sizeof(gProfileObject));
+   /* Reinitialize counts if needed */
+   gProfileObject.numEvents = PMU_MAX_EVENT_COUNTERS;
+   gProfileObject.bCycleCounter = 1;
+   gProfileObject.logIndex = 0;
 }
-
 
 #endif /* USING_ZEPHYR */
