@@ -362,7 +362,7 @@ int tm_setup_pmu(void)
 
     /* 3) Reset cycle and event counters, configure no divider */
     pmcr = (1 << 2) | (1 << 1);  /* Reset Cycle & Event Counter */
-    pmcr |= (1 << 3);            /* D = 1 => 64er Divider enabled */
+   // pmcr |= (1 << 3);            /* D = 1 => 64er Divider enabled */
     pmu_write_pmcr(pmcr);
 
     /* 4) Reset cycle counter */
