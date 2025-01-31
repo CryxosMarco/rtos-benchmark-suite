@@ -314,4 +314,115 @@ unsigned long tm_time_get(void)
    return 5; // dummy value
 }
 
+
+LOG_MODULE_REGISTER(pmu, CONFIG_PMU_LOG_LEVEL);
+
+#define PMU_MAX_EVENT_COUNTERS 3
+
+typedef struct {
+    const char* name;
+    uint32_t type;
+} PMU_EventCfg;
+
+typedef struct {
+    bool bCycleCounter;
+    uint32_t numEventCounters;
+    PMU_EventCfg* eventCounters;
+} PMU_Config;
+
+/*-----------------------------------------------------------
+ * Event Configuration
+ *-----------------------------------------------------------*/
+static PMU_EventCfg gPmuEventCfg[PMU_MAX_EVENT_COUNTERS] = {
+   { "ICache Miss", 0x01 },  // CSL_ARM_R5_PMU_EVENT_TYPE_ICACHE_MISS
+   { "DCache Access", 0x04 },  // CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_ACCESS
+   { "DCache Miss", 0x03 }  // CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_MISS
+};
+
+static PMU_Config gPmuConfig = {
+   .bCycleCounter = true,
+   .numEventCounters = PMU_MAX_EVENT_COUNTERS,
+   .eventCounters = gPmuEventCfg
+};
+
+/*-----------------------------------------------------------
+ * PMU Initialization
+ *-----------------------------------------------------------*/
+int tm_setup_pmu(void)
+{
+    printk("Initializing PMU...\n");
+
+    // 1) Disable PMU
+    uint32_t pmcr = pmu_read_pmcr();
+    pmcr &= ~0x1;
+    pmu_write_pmcr(pmcr);
+
+    // 2) Clear all counters
+    pmu_write_cntenclr(0xFFFFFFFF);
+
+    // 3) Reset cycle and event counters, configure no divider
+    pmcr = (1 << 2) | (1 << 1);  // Reset Cycle & Event Counter
+    pmu_write_pmcr(pmcr);
+
+    // 4) Reset cycle counter
+    pmu_write_pmccntr(0);
+
+    // 5) Configure event counters
+    for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
+        pmu_select_event_counter(i);
+        pmu_write_evtyper(gPmuConfig.eventCounters[i].type);
+        pmu_write_evcounter(0);
+    }
+
+    // 6) Enable cycle counter & event counters
+    pmu_write_cntenset((1 << 31) | ((1 << gPmuConfig.numEventCounters) - 1));
+
+    // 7) Enable PMU
+    pmcr = pmu_read_pmcr();
+    pmcr |= 0x1;
+    pmu_write_pmcr(pmcr);
+
+    printk("PMU Initialized.\n");
+    return 1;
+}
+
+SYS_INIT(tm_setup_pmu, PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
+
+/*-----------------------------------------------------------
+ * Start Profiling
+ *-----------------------------------------------------------*/
+void tm_pmu_profile_start(const char* name)
+{
+    printk("PMU Profiling Start: %s \n", name);
+    pmu_write_pmccntr(0);  // Reset cycle counter
+    for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
+        pmu_select_event_counter(i);
+        pmu_write_evcounter(0);
+    }
+}
+
+/*-----------------------------------------------------------
+ * End Profiling
+ *-----------------------------------------------------------*/
+void tm_pmu_profile_end(const char* name)
+{
+    printk("PMU Profiling End: %s \n", name);
+}
+
+/*-----------------------------------------------------------
+ * Print Profiling Results
+ *-----------------------------------------------------------*/
+void tm_pmu_profile_print(const char* name)
+{
+    uint32_t cycles = pmu_read_pmccntr();
+    printk("Profiling Results for: %s \n", name);
+    printk("Cycle Count: %u \n", cycles);
+    
+    for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
+        pmu_select_event_counter(i);
+        uint32_t count = pmu_read_evcounter();
+        printk("Event [%s]: %u \n", gPmuConfig.eventCounters[i].name, count);
+    }
+}
+
 #endif /* USING_ZEPHYR */

@@ -502,9 +502,10 @@ PMU_Config gPmuConfig = {
  * This function initializes the PMU with the configured
  * event counters. It must be called before profiling begins.
  *-----------------------------------------------------------*/
-void tm_setup_pmu(void)
+int tm_setup_pmu(void)
 {
    PMU_init(&gPmuConfig);
+   return 1;
 }
 
 /*-----------------------------------------------------------

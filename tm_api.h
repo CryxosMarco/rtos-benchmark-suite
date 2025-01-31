@@ -196,7 +196,7 @@ extern "C"
    returned.  */
    unsigned long tm_time_get(void);
    /* Configures and initializes the PMU on R5F Core */
-   void tm_setup_pmu(void);
+   int tm_setup_pmu(void);
    /* Start PMU profiling */
    void tm_pmu_profile_start(const char* name);
    /* End PMU profiling */
