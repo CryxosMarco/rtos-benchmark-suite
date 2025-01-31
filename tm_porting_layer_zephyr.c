@@ -21,7 +21,7 @@
 /*  without notice.                                                       */
 /*                                                                        */
 /*  Express Logic, Inc.                     info@expresslogic.com         */
-/*  11423 West Bernardo Court               http:/*www.expresslogic.com   */
+/*  11423 West Bernardo Court               http://www.expresslogic.com   */
 /*  San Diego, CA  92127                                                  */
 /*                                                                        */
 /**************************************************************************/
@@ -389,6 +389,9 @@ int tm_setup_pmu(void)
     pmcr |= 0x1;
     pmu_write_pmcr(pmcr);
 
+    /* Enable User Mode access to PMU*/
+    pmu_enable_user_access();
+
     printk("PMU Initialized.\n");
     return 1;
 }
@@ -401,7 +404,7 @@ SYS_INIT(tm_setup_pmu, PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
 void tm_pmu_profile_start(const char* name)
 {
     printk("PMU Profiling Start: %s \n", name);
-    pmu_write_pmccntr(0);  /* Reset cycle counter
+    pmu_write_pmccntr(0);  /* Reset cycle counter */
     for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
         pmu_select_event_counter(i);
         pmu_write_evcounter(0);
