@@ -21,7 +21,7 @@
 /*  without notice.                                                       */
 /*                                                                        */
 /*  Express Logic, Inc.                     info@expresslogic.com         */
-/*  11423 West Bernardo Court               http://www.expresslogic.com   */
+/*  11423 West Bernardo Court               http:/*www.expresslogic.com   */
 /*  San Diego, CA  92127                                                  */
 /*                                                                        */
 /**************************************************************************/
@@ -311,7 +311,7 @@ int tm_memory_pool_deallocate(int pool_id, unsigned char* memory_ptr)
 /* This function returns the number of ticks to estimate a time*/
 unsigned long tm_time_get(void)
 {
-   return 5; // dummy value
+   return 5; /* dummy value */
 }
 
 
@@ -334,9 +334,9 @@ typedef struct {
  * Event Configuration
  *-----------------------------------------------------------*/
 static PMU_EventCfg gPmuEventCfg[PMU_MAX_EVENT_COUNTERS] = {
-   { "ICache Miss", 0x01 },  // CSL_ARM_R5_PMU_EVENT_TYPE_ICACHE_MISS
-   { "DCache Access", 0x04 },  // CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_ACCESS
-   { "DCache Miss", 0x03 }  // CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_MISS
+   { "ICache Miss", 0x01 },  /* CSL_ARM_R5_PMU_EVENT_TYPE_ICACHE_MISS */
+   { "DCache Access", 0x04 },  /* CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_ACCESS */
+   { "DCache Miss", 0x03 }  /* CSL_ARM_R5_PMU_EVENT_TYPE_DCACHE_MISS */
 };
 
 static PMU_Config gPmuConfig = {
@@ -352,32 +352,39 @@ int tm_setup_pmu(void)
 {
     printk("Initializing PMU...\n");
 
-    // 1) Disable PMU
+    /* 1) Disable PMU */
     uint32_t pmcr = pmu_read_pmcr();
     pmcr &= ~0x1;
     pmu_write_pmcr(pmcr);
 
-    // 2) Clear all counters
+    /* 2) Clear all counters */
     pmu_write_cntenclr(0xFFFFFFFF);
 
-    // 3) Reset cycle and event counters, configure no divider
-    pmcr = (1 << 2) | (1 << 1);  // Reset Cycle & Event Counter
+    /* 3) Reset cycle and event counters, configure no divider */
+    pmcr = (1 << 2) | (1 << 1);  /* Reset Cycle & Event Counter */
+    pmcr |= (1 << 3);            /* D = 1 => 64er Divider enabled */
     pmu_write_pmcr(pmcr);
 
-    // 4) Reset cycle counter
+    /* 4) Reset cycle counter */
     pmu_write_pmccntr(0);
 
-    // 5) Configure event counters
+    /* 5) Configure event counters */
     for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
         pmu_select_event_counter(i);
         pmu_write_evtyper(gPmuConfig.eventCounters[i].type);
         pmu_write_evcounter(0);
     }
 
-    // 6) Enable cycle counter & event counters
+    /* 6) Enable cycle counter & event counters */
     pmu_write_cntenset((1 << 31) | ((1 << gPmuConfig.numEventCounters) - 1));
 
-    // 7) Enable PMU
+    /* 
+      E=1 => „Enable all counters“
+      P=1 => „Reset all event counters“ 
+      C=1 => „Reset cycle counter“ 
+      D=0 => „Kein 64er Divider“ */
+
+    /* 7) Enable PMU */
     pmcr = pmu_read_pmcr();
     pmcr |= 0x1;
     pmu_write_pmcr(pmcr);
@@ -394,7 +401,7 @@ SYS_INIT(tm_setup_pmu, PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
 void tm_pmu_profile_start(const char* name)
 {
     printk("PMU Profiling Start: %s \n", name);
-    pmu_write_pmccntr(0);  // Reset cycle counter
+    pmu_write_pmccntr(0);  /* Reset cycle counter
     for (uint32_t i = 0; i < gPmuConfig.numEventCounters; i++) {
         pmu_select_event_counter(i);
         pmu_write_evcounter(0);
