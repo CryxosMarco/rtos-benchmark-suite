@@ -480,13 +480,6 @@ void tm_pmu_profile_start(const char* name)
    TM_PMUProfilePoint* p = &gProfileObject.point[idx];
    p->name = name;
 
-   /* Reset the counters to 0 */
-   pmu_write_pmccntr(0);
-   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
-   {
-      pmu_select_event_counter(i);
-      pmu_write_evcounter(0);
-   }
 
    for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
    {
@@ -509,7 +502,7 @@ void tm_pmu_profile_start(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_end(const char* name)
 {
-   // uint32_t idx = gProfileObject.logIndex;
+   uint32_t idx = gProfileObject.logIndex;
    // if (idx >= PMU_MAX_LOG_ENTRIES)
    // {
    //    return;
@@ -551,6 +544,14 @@ void tm_pmu_profile_end(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_print(const char* name)
 {
+   /* Reset the counters to 0 */
+   pmu_write_pmccntr(0);
+   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
+   {
+      pmu_select_event_counter(i);
+      pmu_write_evcounter(0);
+   }
+
    for (uint32_t i = 0; i < gProfileObject.logIndex; i++)
    {
       TM_PMUProfilePoint* p = &gProfileObject.point[i];
@@ -576,6 +577,14 @@ void tm_pmu_profile_print(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_print_all(void)
 {
+   /* Reset the counters to 0 */
+   pmu_write_pmccntr(0);
+   for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
+   {
+      pmu_select_event_counter(i);
+      pmu_write_evcounter(0);
+   }
+   
    for (uint32_t i = 0; i < gProfileObject.logIndex; i++)
    {
       TM_PMUProfilePoint* p = &gProfileObject.point[i];
