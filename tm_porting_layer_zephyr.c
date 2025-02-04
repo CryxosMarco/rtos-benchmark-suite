@@ -399,14 +399,14 @@ int tm_setup_pmu(void)
    pmcr |= 0x1;
    pmu_write_pmcr(pmcr);
 
-   /* Allow user mode access to PMU (optional) */
+   /* Allow user mode access to PMU */
    pmu_enable_user_access();
    pmu_init_profile();
    printk("PMU Initialized.\n");
    return 0; /* success */
 }
 
-/* Register this init function to run at PRE_KERNEL_1 (or adjust as needed) */
+/* Register this init function to run at PRE_KERNEL_1 */
 SYS_INIT(tm_setup_pmu, PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
 
 /* --------------------------------------------------------------------------
@@ -488,8 +488,6 @@ void tm_pmu_profile_start(const char* name)
       pmu_write_evcounter(0);
    }
 
-   /* Immediately read them as "start" values */
-   p->cycleCountStart = pmu_read_pmccntr();
    for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
    {
       pmu_select_event_counter(i);
@@ -499,6 +497,8 @@ void tm_pmu_profile_start(const char* name)
       p->events[i].name = gPmuEventCfg[i].name;
       p->events[i].type = gPmuEventCfg[i].type;
    }
+   /* Immediately read them as "start" values */
+   p->cycleCountStart = pmu_read_pmccntr();
 }
 
 /* --------------------------------------------------------------------------
@@ -509,20 +509,20 @@ void tm_pmu_profile_start(const char* name)
  * -------------------------------------------------------------------------- */
 void tm_pmu_profile_end(const char* name)
 {
-   uint32_t idx = gProfileObject.logIndex;
-   if (idx >= PMU_MAX_LOG_ENTRIES)
-   {
-      return;
-   }
+   // uint32_t idx = gProfileObject.logIndex;
+   // if (idx >= PMU_MAX_LOG_ENTRIES)
+   // {
+   //    return;
+   // }
 
    TM_PMUProfilePoint* p = &gProfileObject.point[idx];
 
    /* Optional: check name matches the start */
-   if (p->name == NULL || strcmp(p->name, name) != 0)
-   {
-      /* mismatch => error or skip */
-      return;
-   }
+   // if (p->name == NULL || strcmp(p->name, name) != 0)
+   // {
+   //    /* mismatch => error or skip */
+   //    return;
+   // }
 
    /* Read end counters */
    p->cycleCountEnd = pmu_read_pmccntr();

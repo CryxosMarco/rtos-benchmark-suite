@@ -29,9 +29,6 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 
 #include "tm_api.h"
 
-
-
-
 /********************************************************************************
  * MAIN ENTRY POINT
  ********************************************************************************/
@@ -45,8 +42,6 @@ int main_pmu(void)
    tm_pmu_profile_end("PMU_Test");
    tm_pmu_profile_print("PMU_Test");
 
-   /* In many RTOSes, tm_initialize() might not return. If it does here,
-    * we just print a message. */
    printf("[Main] Finished Test.\n");
 
    return 0;
