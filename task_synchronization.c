@@ -32,35 +32,27 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 #include <string.h>
 
 /* We define a unique mutex ID for the UART resource. */
-#define UART_MUTEX_ID 1
+#define MUTEX_ID 1
 #define SEM_A 1
 #define SEM_B 2
+
+unsigned long global_thread_counter = 0;
 
 /********************************************************************************
  * OPEN/CLOSE/PUTCH: Abstract "UART" usage
  ********************************************************************************/
 
 /* Acquire the UART mutex so only one task prints at a time. */
-static int OpenUART(void)
+static int lock_critical(void)
 {
    /* Ensure the mutex is available.  */
-   return tm_mutex_get(UART_MUTEX_ID) == TM_SUCCESS ? TM_SUCCESS : TM_ERROR;
-}
-
-/* Write one character (simulated) to the UART by printing. */
-static void putch(char c)
-{
-#ifndef USING_ZEPHYR /* when using ThreadX or FreeRTOS via CCS */
-   printf("%c", c);
-#else
-   printk("%c", c); /* using Zephyr api for UART */
-#endif
+   return tm_mutex_get(MUTEX_ID) == TM_SUCCESS ? TM_SUCCESS : TM_ERROR;
 }
 
 /* Release the UART mutex after finishing the print. */
-static void CloseUART(void)
+static void unlock_critical(void)
 {
-   tm_mutex_put(UART_MUTEX_ID);
+   tm_mutex_put(MUTEX_ID);
 }
 
 /********************************************************************************
@@ -69,81 +61,93 @@ static void CloseUART(void)
  * TODO: YIELD or SLEEP to allow other tasks to run. TEST both
  ********************************************************************************/
 
-/* First writer task: prints "Hello from WriterTask1" a few times. */
-static void WriterTask1(void* arg1, void* arg2, void* arg3)
+/* First writer task: prints "Hello from writer_task1" a few times. */
+static void writer_task1(void* arg1, void* arg2, void* arg3)
 {
-   static int callCount = 0;
+   (void) arg1;
+   (void) arg2;
+   (void) arg3;
+   
    while (1)
    {
       /* wait on SEM_A to put from Task2 */
       tm_semaphore_wait(SEM_A);
+      tm_pmu_profile_end("SEM_A_perf");
 
-      if (callCount < 3)
+      if (lock_critical() == TM_SUCCESS)
       {
-         if (OpenUART() == TM_SUCCESS)
-         {
-            printf("[WriterTask1] Printing...\n");
-            const char* msg = "Hello from WriterTask1!\r\n";
-            for (const char* p = msg; *p; p++)
-            {
-               putch(*p);
-            }
-            CloseUART();
-            callCount++;
-         }
-         /* Release the second semaphore */
-         tm_semaphore_put(SEM_B);
+         global_thread_counter++;
+         unlock_critical();
       }
-      else
-      {
-         printf("[WriterTask1] Done. Suspending.\n");
-         tm_semaphore_put(SEM_B);
-         tm_thread_suspend(1); /* Suspends itself (thread ID 1). */
-      }
+      /* Release the second semaphore */
+      tm_semaphore_put(SEM_B);
+      
    }
 }
 
 /* Second writer task: prints a different message. */
-static void WriterTask2(void* arg1, void* arg2, void* arg3)
+static void writer_task2(void* arg1, void* arg2, void* arg3)
 {
    (void) arg1;
    (void) arg2;
    (void) arg3;
 
-   static int callCount = 0;
-
    while (1)
    {
       /* wait on SEM_B put form Task1 */
+      tm_pmu_profile_start("SEM_A_perf");
       tm_semaphore_wait(SEM_B);
-      if (callCount < 3)
+   
+      if (lock_critical() == TM_SUCCESS)
       {
-         if (OpenUART() == TM_SUCCESS)
-         {
-            printf("[WriterTask2] printing...\n");
-            tm_pmu_profile_start("Zuweisung");
-            const char* msg = "WriterTask2 says hi!\r\n";
-            tm_pmu_profile_end("Zuweisung");
-            tm_pmu_profile_print("Zuweisung");
-
-            for (const char* p = msg; *p; p++)
-            {
-               putch(*p);
-            }
-            CloseUART();
-            callCount++;
-         }
-         /* Release the first semaphore */
-         tm_semaphore_put(SEM_A);
+         global_thread_counter++;
+         unlock_critical();
       }
-      else
-      {
-         printf("[WriterTask2] Done. Suspending.\n");
-         tm_semaphore_put(SEM_A);
-         /* Print profiling data for a specific entry */
+      /* Release the first semaphore */
+      tm_semaphore_put(SEM_A);
+      // tm_pmu_profile_end("SEM_A_perf");
+   }
+}
 
-         tm_thread_suspend(2);
-      }
+static void reporting_thread(void* arg1, void* arg2, void* arg3)
+{
+   unsigned long total;
+   unsigned long relative_time;
+   unsigned long last_total;
+
+   /* Initialize the last total.  */
+   last_total = 0;
+
+   /* Initialize the relative time.  */
+   relative_time = 0;
+
+   while (1)
+   {
+
+      /* Sleep to allow the test to run.  */
+      tm_thread_sleep(3);
+      
+      /* Increment the relative time.  */
+      relative_time = relative_time + 3;
+
+      /* Print results to the stdio window.  */
+      printf("**** Task Synchronistation Test **** Relative Time: %lu\n", relative_time);
+
+      /* Calculate the total of all the counters.  */
+      total = global_thread_counter;
+
+      /* WCC - integrity check */
+      printf("global_thread_counter: %lu\n", global_thread_counter);
+
+      
+      /* Show the time period total.  */
+      printf("Time Period Total:  %lu\n\n", total - last_total);
+
+      /* Print the PMU Report */
+      tm_pmu_profile_print("SEM_A_perf");
+
+      /* Save the last total.  */
+      last_total = total;
    }
 }
 
@@ -157,7 +161,7 @@ static void task_synchronisation_initialize(void)
    /* initialze PMU */
    tm_setup_pmu();
    /* Create the UART mutex. */
-   tm_mutex_create(UART_MUTEX_ID);
+   tm_mutex_create(MUTEX_ID);
    /* Create the semaphore to snychronize tasks.
       The implementation calls a semaphore_get()
       to make it available from the start */
@@ -169,12 +173,14 @@ static void task_synchronisation_initialize(void)
    /* Create two tasks, each with a unique ID. Priority is arbitrary.
       Without synchronisation Task1 would start operating before task2.
       we use synchronisation to ensure that task2 can finish printing first*/
-   tm_thread_create(1, 5, WriterTask1);
-   tm_thread_create(2, 5, WriterTask2);
+   tm_thread_create(1, 5, writer_task1);
+   tm_thread_create(2, 5, writer_task2);
+   tm_thread_create(3, 1, reporting_thread);
 
    /* Start (resume) both tasks. */
    tm_thread_resume(1);
    tm_thread_resume(2);
+   tm_thread_resume(3);
 }
 
 /********************************************************************************
