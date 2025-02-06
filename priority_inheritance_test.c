@@ -8,9 +8,6 @@
  * Medium, Low) share a mutex-protected resource to trigger and observe
  * priority inheritance on an RTOS that implements it (e.g., FreeRTOS).
  *
- * Optional: The code also includes a rudimentary placeholder for measuring
- * performance or timing differences across different RTOSes, if desired.
- *
  * You can compile and run this test via one of the supported RTOS platforms
  * that implement the TM API (tm_api.h) for tasks, mutexes, etc.
  *
@@ -150,7 +147,7 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
    {
       printf("[MedPrioTask] Running (count=%d). Yielding.\n", ++count);
 
-      /* Tested RTOSes only yield to tasks with same or higher priority, 
+      /* Tested RTOSes only yield to tasks with same or higher priority,
          therefore we need to block the task */
       tm_thread_sleep(1);
 

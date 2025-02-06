@@ -131,7 +131,7 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       /* Print results to the stdio window.  */
       printf("**** Task Synchronistation Test **** Relative Time: %lu\n", relative_time);
 
-      /* Calculate the total of all the counters.  */
+      /* Calculate the total of all the counters. */
       total = global_thread_counter;
 
       /* Show the time period total.  */
