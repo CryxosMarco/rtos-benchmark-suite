@@ -67,7 +67,7 @@ static void writer_task1(void* arg1, void* arg2, void* arg3)
    (void) arg1;
    (void) arg2;
    (void) arg3;
-   
+
    while (1)
    {
       /* wait on SEM_A to put from Task2 */
@@ -81,7 +81,6 @@ static void writer_task1(void* arg1, void* arg2, void* arg3)
       }
       /* Release the second semaphore */
       tm_semaphore_put(SEM_B);
-      
    }
 }
 
@@ -97,7 +96,7 @@ static void writer_task2(void* arg1, void* arg2, void* arg3)
       /* wait on SEM_B put form Task1 */
       tm_pmu_profile_start("SEM_A_perf");
       tm_semaphore_wait(SEM_B);
-   
+
       if (lock_critical() == TM_SUCCESS)
       {
          global_thread_counter++;
@@ -105,7 +104,6 @@ static void writer_task2(void* arg1, void* arg2, void* arg3)
       }
       /* Release the first semaphore */
       tm_semaphore_put(SEM_A);
-      // tm_pmu_profile_end("SEM_A_perf");
    }
 }
 
@@ -126,7 +124,7 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
 
       /* Sleep to allow the test to run.  */
       tm_thread_sleep(3);
-      
+
       /* Increment the relative time.  */
       relative_time = relative_time + 3;
 
@@ -136,10 +134,6 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       /* Calculate the total of all the counters.  */
       total = global_thread_counter;
 
-      /* WCC - integrity check */
-      printf("global_thread_counter: %lu\n", global_thread_counter);
-
-      
       /* Show the time period total.  */
       printf("Time Period Total:  %lu\n\n", total - last_total);
 
