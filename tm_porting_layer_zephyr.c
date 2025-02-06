@@ -132,6 +132,11 @@ void tm_thread_relinquish(void)
  */
 void tm_thread_sleep(int seconds)
 {
+   if (seconds == 0)
+   {
+      /* Sleep for 1 Tick */
+      k_sleep(K_SECONDS(10));
+   }
    k_sleep(K_SECONDS(seconds));
 }
 
@@ -479,7 +484,6 @@ void tm_pmu_profile_start(const char* name)
 
    TM_PMUProfilePoint* p = &gProfileObject.point[idx];
    p->name = name;
-
 
    for (uint32_t i = 0; i < gProfileObject.numEvents; i++)
    {

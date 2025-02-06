@@ -131,6 +131,11 @@ void tm_thread_exit(void)
    Otherwise, TM_ERROR should be returned.  */
 void tm_thread_sleep(int seconds)
 {
+   if (seconds == 0)
+   {
+      /* sleep for 1 Tick */
+      vTaskDelay(10);
+   }
    vTaskDelay((seconds * 1000U) / portTICK_RATE_MS);
 }
 

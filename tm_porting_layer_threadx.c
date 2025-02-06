@@ -185,7 +185,11 @@ void tm_thread_relinquish(void)
    Otherwise, TM_ERROR should be returned.  */
 void tm_thread_sleep(int seconds)
 {
-
+   if (seconds == 0)
+   {
+      /* Sleep for 1 Tick */
+      tx_thread_sleep((UINT) 2);
+   }
    /* Attempt to sleep.  */
    tx_thread_sleep(((UINT) seconds) * TM_THREADX_TICKS_PER_SECOND);
 }
