@@ -209,7 +209,7 @@ extern "C"
    void tm_interrupt_raise();
    void tm_interrupt_processing_handler();
    void tm_interrupt_preemption_handler();
-// void tm_interrupt_synchronization_handler();
+   void tm_isr_message_handler(void);
 
 /* Determine if a C++ compiler is being used.  If so, complete the standard
    C conditional started above.  */
