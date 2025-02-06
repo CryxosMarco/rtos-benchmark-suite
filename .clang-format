@@ -1,0 +1,38 @@
+BasedOnStyle: LLVM                     # Use LLVM style as the base
+IndentWidth: 3                         # Use 3 spaces for indentation
+UseTab: Never                          # Always use spaces instead of tabs
+
+BraceWrapping:
+  AfterFunction: true                 # Keep function opening braces inline
+  AfterClass: true                    # Keep class opening braces inline
+  AfterNamespace: true                # Namespace opening braces inline
+  SplitEmptyFunction: true            # Inline braces for empty functions
+
+AlignAfterOpenBracket: true            # Align multi-line arguments to the opening parenthesis
+IndentCaseLabels: false                # Do not indent case labels
+IndentWrappedFunctionNames: true       # Indent wrapped function declarations
+ContinuationIndentWidth: 3             # Indentation for continued lines
+
+SpaceBeforeParens: ControlStatements   # Add space before parentheses in control statements (e.g., if, while)
+SpaceInEmptyParentheses: false         # No space inside empty parentheses
+SpacesInParentheses: false             # No spaces inside parentheses
+SpaceBeforeCpp11BracedList: false      # No space before initializer list
+SpaceAfterCStyleCast: true             # Add space after C-style casts
+SpaceBeforeSquareBrackets: false       # No space before square brackets
+SpacesInSquareBrackets: false          # No spaces inside square brackets
+
+PointerAlignment: Left                 # Align pointers and references to the left (e.g., `int* ptr`)
+
+IndentAccessModifiers: false           # Do not indent access specifiers (e.g., public, private)
+IndentPPDirectives: None               # Keep preprocessor directives in the leftmost column
+
+AllowShortFunctionsOnASingleLine: None # Do not allow short functions to stay on one line
+AlwaysBreakAfterReturnType: None       # No line break after return type
+BreakBeforeBraces: Allman              # Attach braces to their control statement (e.g., `if (...) {`)
+BreakConstructorInitializersBeforeComma: false # No break for initializer lists in constructors
+AllowShortIfStatementsOnASingleLine: false     # Force if statements to break into multiple lines
+AllowShortBlocksOnASingleLine: false           # Prevent short blocks from being on a single line
+
+ColumnLimit: 120                       # Maximum line length 
+ReflowComments: true
+
