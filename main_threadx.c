@@ -96,7 +96,7 @@ void setup_interrupt(void)
 
 void threadx_main(ULONG arg)
 {
-   main_sync(); /* Startet den Benchmark-Test */
+   main_isr_to_task(); /* Startet den Benchmark-Test */
 }
 
 int rtos_main_threadx(void)
@@ -105,7 +105,7 @@ int rtos_main_threadx(void)
    System_init();
    Board_init();
    /* enable this when interrupts are needed. */
-   test_interrupt_handler = tm_interrupt_processing_handler;
+   test_interrupt_handler = tm_isr_message_handler;
    setup_interrupt();
 
    /* Enter the ThreadX kernel.  */
