@@ -36,7 +36,8 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 #define SEM_A 1
 #define SEM_B 2
 
-unsigned long global_thread_counter = 0;
+unsigned long task1_counter = 0;
+unsigned long task2_counter = 0;
 
 /********************************************************************************
  * OPEN/CLOSE/PUTCH: Abstract "UART" usage
@@ -76,7 +77,7 @@ static void writer_task1(void* arg1, void* arg2, void* arg3)
 
       if (lock_critical() == TM_SUCCESS)
       {
-         global_thread_counter++;
+         task1_counter++;
          unlock_critical();
       }
       /* Release the second semaphore */
@@ -99,7 +100,7 @@ static void writer_task2(void* arg1, void* arg2, void* arg3)
 
       if (lock_critical() == TM_SUCCESS)
       {
-         global_thread_counter++;
+         task2_counter++;
          unlock_critical();
       }
       /* Release the first semaphore */
@@ -123,16 +124,16 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
    {
 
       /* Sleep to allow the test to run.  */
-      tm_thread_sleep(3);
+      tm_thread_sleep(TM_TEST_DURATION);
 
       /* Increment the relative time.  */
-      relative_time = relative_time + 3;
+      relative_time = relative_time + TM_TEST_DURATION;
 
       /* Print results to the stdio window.  */
       printf("**** Task Synchronistation Test **** Relative Time: %lu\n", relative_time);
 
       /* Calculate the total of all the counters. */
-      total = global_thread_counter;
+      total = task1_counter + task2_counter;
 
       /* Show the time period total.  */
       printf("Time Period Total:  %lu\n\n", total - last_total);
