@@ -38,7 +38,7 @@ int main_pmu(void)
    tm_setup_pmu();
 
    tm_pmu_profile_start("PMU_Test");
-   tm_thread_sleep(1);
+   // tm_thread_sleep(1);
    tm_pmu_profile_end("PMU_Test");
    tm_pmu_profile_print("PMU_Test");
 

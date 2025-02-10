@@ -39,22 +39,6 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 unsigned long task1_counter = 0;
 unsigned long task2_counter = 0;
 
-/********************************************************************************
- * OPEN/CLOSE/PUTCH: Abstract "UART" usage
- ********************************************************************************/
-
-/* Acquire the UART mutex so only one task prints at a time. */
-static int lock_critical(void)
-{
-   /* Ensure the mutex is available.  */
-   return tm_mutex_get(MUTEX_ID) == TM_SUCCESS ? TM_SUCCESS : TM_ERROR;
-}
-
-/* Release the UART mutex after finishing the print. */
-static void unlock_critical(void)
-{
-   tm_mutex_put(MUTEX_ID);
-}
 
 /********************************************************************************
  * TEST TASKS
