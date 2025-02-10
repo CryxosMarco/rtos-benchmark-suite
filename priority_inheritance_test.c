@@ -18,201 +18,169 @@
 #include "tm_api.h"
 #include <stdio.h>
 
-/* Define a unique mutex ID for our shared resource. */
+/* Define a unique mutex ID for our shared resource */
 #define SHARED_MUTEX_ID 1
 
-/* Define IDs and priorities for our three tasks. */
-#define HIGH_TASK_ID 0
-#define HIGH_TASK_PRIO 5 /* relatively high */
+/* Define Task IDs and their priorities */
+#define HIGH_TASK_ID   0
+#define HIGH_TASK_PRIO 5    /* High priority */
 
-#define MED_TASK_ID 1
-#define MED_TASK_PRIO 10 /* medium */
+#define MED_TASK_ID    1
+#define MED_TASK_PRIO  10   /* Medium priority */
 
-#define LOW_TASK_ID 2
-#define LOW_TASK_PRIO 20 /* relatively low */
+#define LOW_TASK_ID    2
+#define LOW_TASK_PRIO  20   /* Low priority */
 
-/* Globals for measurement */
-static unsigned long start_time = 0;
-static unsigned long end_time = 0;
+/* For real measurments you want to disable prints in critical loops 
+   But for ensuring the correct execution we can add these define 
+   to have debugging prints */
+// #define DEBUG_PRIO_INHERITANCE_ON 
 
 /*******************************************************************************
- * TEST TASKS
- * Three tasks that share a mutex to demonstrate priority inheritance.
- * LowPrioTask holds the mutex, HighPrioTask tries to lock it,
- * MediumPrioTask runs to show preemption, etc.
+ * Low Priority Task
+ *
+ * This task acquires the mutex first and then simulates a long critical section.
+ * Its busy loop will delay releasing the mutex, forcing the high‑priority task to block.
  ******************************************************************************/
-
-static void print_measurement(void);
-
-/*----------------------------------------------------------------------------*/
-/* Low Priority Task: acquires the mutex first, simulates "long" work while
-   holding it, to force the High Priority Task to block → triggers inheritance. */
-/*----------------------------------------------------------------------------*/
 static void LowPrioTask(void* p1, void* p2, void* p3)
 {
-   (void) p1;
-   (void) p2;
-   (void) p3;
+    (void)p1;
+    (void)p2;
+    (void)p3;
 
-   printf("[LowPrioTask] Attempting to get mutex...\n");
-   if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
-   {
-      printf("[LowPrioTask] Mutex acquired. Doing work...\n");
-
-      /* Optional: record start time for performance measure. */
-      start_time = tm_time_get();
-
-      /* Simulate some "long" operation while holding the mutex. */
-      volatile int computation_result = 0; // Prevent compiler optimization
-
-      for (volatile int i = 0; i < 10000000; i++)
-      {
-         /* Some arithmetic that the compiler cannot optimize out easily */
-         computation_result += (i % 10) * (i % 3);
-
-         /* Ensure the compiler does not assume computation_result is unused */
-         __asm__ volatile("" : "+r"(computation_result));
-
-         /* Meanwhile, if HighPrioTask tries to get the mutex,
-            the RTOS should boost this task's priority. */
-      }
-
-      /* Optional: record end time. */
-      end_time = tm_time_get();
-
-      printf("[LowPrioTask] Done working. Releasing mutex now.\n");
-      tm_mutex_put(SHARED_MUTEX_ID);
-   }
-   else
-   {
-      printf("[LowPrioTask] Failed to get mutex?\n");
-   }
-
-   /* After finishing, suspend itself */
-   printf("[LowPrioTask] Finished. Suspending.\n");
-   tm_thread_suspend(LOW_TASK_ID);
-}
-
-/*----------------------------------------------------------------------------*/
-/* High Priority Task: tries to acquire the mutex. If LowPrioTask is holding it,
-   this task will block—and the RTOS should raise the LowPrioTask's priority
-   to avoid priority inversion. */
-/*----------------------------------------------------------------------------*/
-static void HighPrioTask(void* p1, void* p2, void* p3)
-{
-   (void) p1;
-   (void) p2;
-   (void) p3;
-
-   /* Delay/sleep slightly so LowPrioTask can lock the mutex first. */
-   printf("[HighPrioTask] Sleeping a bit so Low can get mutex...\n");
-   tm_thread_sleep(1);
-
-   printf("[HighPrioTask] Trying to get mutex.\n");
-   if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
-   {
-      printf("[HighPrioTask] Successfully got mutex. Priority Inheritance test.\n");
-      /* We hold it briefly... */
-      tm_thread_sleep(1);
-
-      /* Release it. */
-      printf("[HighPrioTask] Releasing mutex.\n");
-      tm_mutex_put(SHARED_MUTEX_ID);
-   }
-   else
-   {
-      printf("[HighPrioTask] Failed to get mutex?\n");
-   }
-
-   /* Optionally measure or just suspend. */
-   printf("[HighPrioTask] Finished. Suspending.\n");
-   tm_thread_suspend(HIGH_TASK_ID);
-}
-
-/*----------------------------------------------------------------------------*/
-/* Medium Priority Task: runs in between Low and High. If Low wasn't boosted,
-   Medium might preempt Low, causing potential priority inversion. But with
-   priority inheritance, Low should be boosted above Medium while holding mutex. */
-/*----------------------------------------------------------------------------*/
-static void MedPrioTask(void* p1, void* p2, void* p3)
-{
-   (void) p1;
-   (void) p2;
-   (void) p3;
-
-   /* This task just increments a counter or prints to show it's alive. */
-   int count = 0;
-
-   while (1)
-   {
-      printf("[MedPrioTask] Running (count=%d). Yielding.\n", ++count);
-
-      /* Tested RTOSes only yield to tasks with same or higher priority,
-         therefore we need to block the task */
-      tm_thread_sleep(1);
-
-      if (count > 4)
-      {
-         printf("[MedPrioTask] Enough demonstration, suspending.\n");
-         print_measurement();
-         tm_thread_suspend(MED_TASK_ID);
-      }
-   }
+    if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
+    {
+#ifdef DEBUG_PRIO_INHERITANCE_ON
+        printf("[LowPrioTask] Mutex acquired. Performing long work...\n");
+#endif
+        /* Simulate a long critical section with a busy loop.
+         * This loop is intentionally "heavy" to force a delay.
+         */
+        volatile unsigned long dummy = 0;
+        for (volatile unsigned long i = 0; i < 10000000UL; i++)
+        {
+            dummy += (i % 3);
+            __asm__ volatile("" ::: "memory");  // Prevent optimization.
+        }
+#ifdef DEBUG_PRIO_INHERITANCE_ON
+        printf("[LowPrioTask] Work done. Releasing mutex.\n");
+#endif
+        tm_mutex_put(SHARED_MUTEX_ID);
+    }
+    else
+    {
+        printf("[LowPrioTask] Failed to acquire mutex.\n");
+    }
+    
+    tm_thread_suspend(LOW_TASK_ID);
 }
 
 /*******************************************************************************
- * REPORTING & INITIALIZATION
+ * High Priority Task
+ *
+ * This task waits briefly so that the low‑priority task acquires the mutex.
+ * Then it starts the PMU profile just before trying to get the mutex.
+ * Once the mutex is finally acquired (i.e. after any inheritance boosting),
+ * it stops the PMU profile. The difference (reported by the PMU) is the block time.
  ******************************************************************************/
-
-/* (Optional) Print measurement results. Could be used to compare RTOS performance. */
-static void print_measurement(void)
+static void HighPrioTask(void* p1, void* p2, void* p3)
 {
-   if (end_time >= start_time)
-   {
-      unsigned long duration = end_time - start_time;
-      printf("[Measurement] LowPrioTask 'work' with priority inheritance took: %lu time units.\n", duration);
-   }
-   else
-   {
-      printf("[Measurement] Time measurement is invalid.\n");
-   }
+    (void)p1;
+    (void)p2;
+    (void)p3;
+
+    /* Sleep briefly to let LowPrioTask acquire the mutex first */
+    tm_thread_sleep(1);
+
+    printf("[HighPrioTask] Attempting to acquire mutex. Starting PMU measurement.\n");
+#ifndef DEBUG_PRIO_INHERITANCE_ON /* Debug prints are off */
+    printf("Measuring Mode enabled: Prints inside critical loop are deactivated.\n");
+#endif
+
+    /* Start PMU profiling before attempting to acquire the mutex */
+    tm_pmu_profile_start("HP_block");
+
+    if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
+    {
+        /* Once acquired, stop the PMU measurement */
+        tm_pmu_profile_end("HP_block");
+
+        /* Print the profiling result.
+           A lower printed value means the block duration was shorter. */
+        tm_pmu_profile_print("HP_block");
+
+        /* Optionally hold the mutex briefly and then release it */
+      //   tm_thread_sleep(1);
+        tm_mutex_put(SHARED_MUTEX_ID);
+    }
+    else
+    {
+        printf("[HighPrioTask] Failed to acquire mutex.\n");
+    }
+
+    tm_thread_suspend(HIGH_TASK_ID);
 }
 
-/*----------------------------------------------------------------------------
- * Priority Inheritance Test Initialization:
- * Creates the mutex, spawns the tasks with different priorities, and resumes them.
- * Called by tm_initialize() from tm_main_priority_inheritance_test().
-----------------------------------------------------------------------------*/
+/*******************************************************************************
+ * Medium Priority Task
+ *
+ * This task runs concurrently to simulate interference.
+ * Without effective priority inheritance, its execution might delay the low‑priority task,
+ * resulting in a longer block time for the high‑priority task.
+ ******************************************************************************/
+static void MedPrioTask(void* p1, void* p2, void* p3)
+{
+    (void)p1;
+    (void)p2;
+    (void)p3;
+
+    int count = 0;
+    while (1)
+    {
+        printf("[MedPrioTask] Running... (count=%d)\n", ++count);
+        tm_thread_sleep(1);
+
+        if (count > 4)
+        {
+            printf("[MedPrioTask] Finished. Suspending.\n");
+            tm_thread_suspend(MED_TASK_ID);
+        }
+    }
+}
+
+/*******************************************************************************
+ * Priority Inheritance Test Initialization
+ *
+ * This function sets up the PMU, creates the mutex and tasks, and then resumes them.
+ ******************************************************************************/
 static void tm_priority_inheritance_initialize(void)
 {
-   /* Create the shared mutex. */
-   tm_mutex_create(SHARED_MUTEX_ID);
+    /* Initialize and configure the PMU */
+    tm_setup_pmu();
 
-   /* Starting the Timer */
-   tm_time_init();
-   /* Create and resume the tasks.
-      Priority 5 = high, 10 = medium, 20 = low, as an example. */
+    /* Create the shared mutex */
+    tm_mutex_create(SHARED_MUTEX_ID);
 
-   tm_thread_create(LOW_TASK_ID, LOW_TASK_PRIO, LowPrioTask);
-   tm_thread_create(MED_TASK_ID, MED_TASK_PRIO, MedPrioTask);
-   tm_thread_create(HIGH_TASK_ID, HIGH_TASK_PRIO, HighPrioTask);
+    /* Create the tasks */
+    tm_thread_create(LOW_TASK_ID, LOW_TASK_PRIO, LowPrioTask);
+    tm_thread_create(MED_TASK_ID, MED_TASK_PRIO, MedPrioTask);
+    tm_thread_create(HIGH_TASK_ID, HIGH_TASK_PRIO, HighPrioTask);
 
-   tm_thread_resume(LOW_TASK_ID);
-   tm_thread_resume(MED_TASK_ID);
-   tm_thread_resume(HIGH_TASK_ID);
+    /* Resume the tasks */
+    tm_thread_resume(LOW_TASK_ID);
+    tm_thread_resume(MED_TASK_ID);
+    tm_thread_resume(HIGH_TASK_ID);
 
-   printf("[Init] Priority Inheritance test started.\n");
+    printf("[Init] Priority Inheritance test started.\n");
 }
 
-/*----------------------------------------------------------------------------
- * Main entry point for the Priority Inheritance Test.
- * This function is typically called from user code or an existing test suite.
- * It calls tm_initialize with our init function, launching tasks, etc.
-----------------------------------------------------------------------------*/
+/*******************************************************************************
+ * Main Entry Point
+ *
+ * Initializes the RTOS and starts the test.
+ ******************************************************************************/
 int main_inheritance(void)
 {
-   /* Initialize the RTOS & start the test. */
-   tm_initialize(tm_priority_inheritance_initialize);
-
-   return 0;
+    tm_initialize(tm_priority_inheritance_initialize);
+    return 0;
 }
