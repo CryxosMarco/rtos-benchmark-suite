@@ -75,11 +75,8 @@ static void writer_task1(void* arg1, void* arg2, void* arg3)
       tm_semaphore_wait(SEM_A);
       tm_pmu_profile_end("SEM_A_perf");
 
-      if (lock_critical() == TM_SUCCESS)
-      {
-         task1_counter++;
-         unlock_critical();
-      }
+      task1_counter++;
+
       /* Release the second semaphore */
       tm_semaphore_put(SEM_B);
    }
@@ -98,11 +95,8 @@ static void writer_task2(void* arg1, void* arg2, void* arg3)
       tm_pmu_profile_start("SEM_A_perf");
       tm_semaphore_wait(SEM_B);
 
-      if (lock_critical() == TM_SUCCESS)
-      {
-         task2_counter++;
-         unlock_critical();
-      }
+      task2_counter++;
+
       /* Release the first semaphore */
       tm_semaphore_put(SEM_A);
    }
