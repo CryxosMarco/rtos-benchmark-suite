@@ -350,9 +350,9 @@ int tm_memory_pool_deallocate(int pool_id, unsigned char* memory_ptr)
 void tm_time_init(void)
 {
    /* Start the timer */
-   TimerP_start(gTimerBaseAddr[CONFIG_TIMER0]);
+   // TimerP_start(gTimerBaseAddr[CONFIG_TIMER0]);
 
-   DebugP_log("tm_time_init: Timer started.\r\n");
+   // DebugP_log("tm_time_init: Timer started.\r\n");
 }
 
 /*******************************************************************************
@@ -367,8 +367,8 @@ void tm_time_init(void)
  ******************************************************************************/
 void tm_timer_isr(void* args)
 {
-   (void) args;
-   g_timeCounter++;
+   // (void) args;
+   // g_timeCounter++;
 }
 
 /*******************************************************************************
@@ -386,7 +386,7 @@ void tm_timer_isr(void* args)
 unsigned long tm_time_get(void)
 {
    /* Return the lower 32 bits */
-   return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
+   // return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
 }
 
 /*-----------------------------------------------------------
