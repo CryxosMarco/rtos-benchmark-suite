@@ -34,7 +34,7 @@
 #include <task.h>
 
 /* Global time counter incremented by the timer ISR */
-static volatile uint64_t g_timeCounter = 0ULL;
+// static volatile uint64_t g_timeCounter = 0ULL;
 
 /* Define FreeRTOS mapping constants. */
 #define TM_FREERTOS_MAX_THREADS 10
