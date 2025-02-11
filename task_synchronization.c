@@ -39,7 +39,6 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 unsigned long task1_counter = 0;
 unsigned long task2_counter = 0;
 
-
 /********************************************************************************
  * TEST TASKS
  * Two tasks that get synchrinized by a semaphore and access the UART as shared resource
