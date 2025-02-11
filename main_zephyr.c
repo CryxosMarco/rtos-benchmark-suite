@@ -87,7 +87,7 @@ void setup_interrupt(void)
 void main_task(void* pvParameters)
 {
    /* Start Thread-Metric tests */
-   printk("Starting Thread-Metric tests...");
+   printk("Starting Thread-Metric tests...\n");
 
    /* Initialize custom interrupts*/
    test_interrupt_handler = tm_isr_message_handler;
