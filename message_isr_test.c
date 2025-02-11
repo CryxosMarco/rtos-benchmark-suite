@@ -86,9 +86,9 @@ void tm_message_isr_to_task_initialize(void)
 ---------------------------------------------------------------*/
 void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
 {
-   (void)p1;
-   (void)p2;
-   (void)p3;
+   (void) p1;
+   (void) p2;
+   (void) p3;
 
    while (1)
    {
@@ -96,37 +96,35 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
       /* Block until a message is available from queue 0 */
       tm_queue_receive(0, message_received_arr);
 
-         /* Stop the PMU measurement started in the ISR */
-         tm_pmu_profile_end("msg_latency");
+      /* Stop the PMU measurement started in the ISR */
+      tm_pmu_profile_end("msg_latency");
 
-         /* Increment the processed message count */
-         tm_isr_to_task_counter++;
+      /* Increment the processed message count */
+      tm_isr_to_task_counter++;
 
-         /* Check if the received message matches the expected pattern */
-         int match = 1;
-         for (int i = 0; i < 4; i++)
+      /* Check if the received message matches the expected pattern */
+      int match = 1;
+      for (int i = 0; i < 4; i++)
+      {
+         if (message_received_arr[i] != message_sent_arr[i])
          {
-            if (message_received_arr[i] != message_sent_arr[i])
-            {
-               match = 0;
-               break;
-            }
-         }
-         if (match)
-         {
-
-            /* Report the final benchmark results */
-            printf("==== OneShot Benchmark Complete ====\n");
-            printf("Total messages processed: %lu\n", tm_isr_to_task_counter);
-            printf("Total interrupts processed: %lu\n", tm_isr_counter);
-            tm_pmu_profile_print("msg_latency");
-            printf("\n");
-
-            
+            match = 0;
             break;
          }
       }
-   
+      if (match)
+      {
+
+         /* Report the final benchmark results */
+         printf("==== OneShot Benchmark Complete ====\n");
+         printf("Total messages processed: %lu\n", tm_isr_to_task_counter);
+         printf("Total interrupts processed: %lu\n", tm_isr_counter);
+         tm_pmu_profile_print("msg_latency");
+         printf("\n");
+
+         break;
+      }
+   }
 
    /* Suspend this thread after finishing the report */
    tm_thread_suspend(0);
@@ -139,9 +137,9 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
 ---------------------------------------------------------------*/
 void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3)
 {
-   (void)p1;
-   (void)p2;
-   (void)p3;
+   (void) p1;
+   (void) p2;
+   (void) p3;
 
    /* Raise a software interrupt. This will call tm_isr_message_handler() */
    tm_interrupt_raise();
@@ -163,11 +161,10 @@ void tm_isr_message_handler(void)
 
    tm_pmu_profile_start("msg_latency");
 
-   if (tm_queue_send(0, message_sent_arr) != 0) 
+   if (tm_queue_send(0, message_sent_arr) != 0)
    {
       printf("Message send gone wrong! \n");
    }
-
 }
 
 /*[EOF]************************************************************************/
