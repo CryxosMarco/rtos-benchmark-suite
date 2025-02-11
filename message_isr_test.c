@@ -18,11 +18,6 @@
 #include <stdio.h>
 
 /*---------------------------------------------------------------
-  Configuration Macros
----------------------------------------------------------------*/
-#define TM_TEST_DURATION 3 // Report interval in seconds
-
-/*---------------------------------------------------------------
   Global Counters and Message Buffers
 ---------------------------------------------------------------*/
 /* Global counter: number of messages successfully processed */
@@ -31,16 +26,15 @@ volatile unsigned long tm_isr_to_task_counter = 0;
 /* Global counter: number of interrupts (i.e. ISR invocations) */
 volatile unsigned long tm_isr_counter = 0;
 
-/* Message buffers (adjust size as needed – here we use 16 bytes, which may be 32 bytes on some systems) */
-unsigned long tm_message_sent[4];
-unsigned long tm_message_received[4];
+/* Message buffers */
+unsigned long message_sent_arr[4];
+unsigned long message_received_arr[4];
 
 /*---------------------------------------------------------------
   Thread and ISR Prototypes
 ---------------------------------------------------------------*/
 void tm_receiver_thread_entry(void* p1, void* p2, void* p3);
 void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3);
-void tm_report_thread_entry(void* p1, void* p2, void* p3);
 void tm_isr_message_handler(void);
 void tm_message_isr_to_task_initialize(void);
 
@@ -62,20 +56,22 @@ void tm_message_isr_to_task_initialize(void)
    /* Initialize the PMU for low-overhead cycle counting */
    tm_setup_pmu();
 
+   /* Initialize the message content with a known pattern */
+   message_sent_arr[0] = 0xDEADBEEF;
+   message_sent_arr[1] = 0xCAFEBABE;
+   message_sent_arr[2] = 0xBAADF00D;
+   message_sent_arr[3] = 0xFEEDFACE;
+
    /* Create a message queue with id 0 */
    tm_queue_create(0);
 
-   /* Create and resume the Receiver Thread (moderate priority) */
-   tm_thread_create(0, 10, tm_receiver_thread_entry);
-   tm_thread_resume(0);
-
-   /* Create and resume the Interrupt Simulator Thread (high priority) */
+   /* Create and resume the Receiver Thread (moderate priority, id 0) */
+   tm_thread_create(0, 5, tm_receiver_thread_entry);
+   /* Create and resume the Interrupt Simulator Thread (high priority, id 1) */
    tm_thread_create(1, 1, tm_interrupt_simulator_thread_entry);
-   tm_thread_resume(1);
 
-   /* Create and resume the Reporting Thread (intermediate priority) */
-   tm_thread_create(2, 5, tm_report_thread_entry);
-   tm_thread_resume(2);
+   tm_thread_resume(0);
+   tm_thread_resume(1);
 
    printf("[Init] ISR-to-Task Message Queue Benchmark started.\n");
 }
@@ -85,25 +81,55 @@ void tm_message_isr_to_task_initialize(void)
   - Blocks on the message queue.
   - Immediately after receiving a message, stops the PMU latency measurement.
   - Increments the message-processed counter.
+  - Compares the received message to the known send pattern.
+  - If they match, suspends the interrupt simulator thread and outputs the final report.
 ---------------------------------------------------------------*/
 void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
 {
-   (void) p1;
-   (void) p2;
-   (void) p3;
+   (void)p1;
+   (void)p2;
+   (void)p3;
 
    while (1)
    {
+
       /* Block until a message is available from queue 0 */
-      if (tm_queue_receive(0, tm_message_received))
-      {
-         /* Stop the PMU measurement that was started in the ISR */
+      tm_queue_receive(0, message_received_arr);
+
+         /* Stop the PMU measurement started in the ISR */
          tm_pmu_profile_end("msg_latency");
 
-         /* Increment the count of messages processed */
+         /* Increment the processed message count */
          tm_isr_to_task_counter++;
+
+         /* Check if the received message matches the expected pattern */
+         int match = 1;
+         for (int i = 0; i < 4; i++)
+         {
+            if (message_received_arr[i] != message_sent_arr[i])
+            {
+               match = 0;
+               break;
+            }
+         }
+         if (match)
+         {
+
+            /* Report the final benchmark results */
+            printf("==== OneShot Benchmark Complete ====\n");
+            printf("Total messages processed: %lu\n", tm_isr_to_task_counter);
+            printf("Total interrupts processed: %lu\n", tm_isr_counter);
+            tm_pmu_profile_print("msg_latency");
+            printf("\n");
+
+            
+            break;
+         }
       }
-   }
+   
+
+   /* Suspend this thread after finishing the report */
+   tm_thread_suspend(0);
 }
 
 /*---------------------------------------------------------------
@@ -113,24 +139,14 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
 ---------------------------------------------------------------*/
 void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3)
 {
-   (void) p1;
-   (void) p2;
-   (void) p3;
+   (void)p1;
+   (void)p2;
+   (void)p3;
 
-   /* Initialize the message content with a known pattern */
-   tm_message_sent[0] = 0xDEADBEEF;
-   tm_message_sent[1] = 0xCAFEBABE;
-   tm_message_sent[2] = 0xBAADF00D;
-   tm_message_sent[3] = 0xFEEDFACE;
-
-   while (1)
-   {
-      /* Sleep for a tick (or adjust as needed) to control the interrupt frequency */
-      tm_thread_sleep(1);
-
-      /* Raise a software interrupt. This will call tm_isr_message_handler() */
-      tm_interrupt_raise();
-   }
+   /* Raise a software interrupt. This will call tm_isr_message_handler() */
+   tm_interrupt_raise();
+   /* Suspend the Interrupt Simulator Thread (assumed thread id 1) */
+   tm_thread_suspend(1);
 }
 
 /*---------------------------------------------------------------
@@ -143,57 +159,15 @@ void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3)
 ---------------------------------------------------------------*/
 void tm_isr_message_handler(void)
 {
-   /* Increment the ISR invocation counter. Just a sanity check*/
    tm_isr_counter++;
 
-   /* Start PMU profiling for message latency.
-      The measurement will run from here until the receiver thread stops it. */
    tm_pmu_profile_start("msg_latency");
 
-   /* Send the message to the queue (non-blocking call) */
-   tm_queue_send(0, tm_message_sent);
-}
-
-/*---------------------------------------------------------------
-  Reporting Thread
-  - Wakes up every TM_TEST_DURATION seconds.
-  - Reports the number of messages and interrupts processed.
-  - Prints the PMU profile result for the message latency ("msg_latency").
----------------------------------------------------------------*/
-void tm_report_thread_entry(void* p1, void* p2, void* p3)
-{
-   (void) p1;
-   (void) p2;
-   (void) p3;
-
-   unsigned long last_message_count = 0;
-   unsigned long last_interrupt_count = 0;
-   unsigned long relative_time = 0;
-
-   while (1)
+   if (tm_queue_send(0, message_sent_arr) != 0) 
    {
-      /* Sleep for the defined test duration (in seconds) */
-      tm_thread_sleep(TM_TEST_DURATION);
-      relative_time += TM_TEST_DURATION;
-
-      /* Calculate the number of messages and interrupts in this period */
-      unsigned long messages = tm_isr_to_task_counter - last_message_count;
-      unsigned long interrupts = tm_isr_counter - last_interrupt_count;
-
-      /* Report the throughput and timing measurements */
-      printf("**** ISR-to-Task Message Benchmark **** Relative Time: %lu seconds\n", relative_time);
-      printf("Messages processed in period: %lu\n", messages);
-      printf("Interrupts processed in period: %lu\n", interrupts);
-
-      /* Print the PMU profiling result for the message latency.
-         (A lower value indicates lower latency.) */
-      tm_pmu_profile_print("msg_latency");
-      printf("\n");
-
-      /* Update counters for the next reporting period */
-      last_message_count = tm_isr_to_task_counter;
-      last_interrupt_count = tm_isr_counter;
+      printf("Message send gone wrong! \n");
    }
+
 }
 
 /*[EOF]************************************************************************/

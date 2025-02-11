@@ -90,11 +90,11 @@ void main_task(void* pvParameters)
    printk("Starting Thread-Metric tests...");
 
    /* Initialize custom interrupts*/
-   test_interrupt_handler = tm_interrupt_processing_handler;
+   test_interrupt_handler = tm_isr_message_handler;
    setup_interrupt();
 
    /* Call the main Thread-Metric function */
-   main_sync();
+   main_message_test();
 
    /* Delete thread after completion */
    k_thread_abort(k_current_get());
