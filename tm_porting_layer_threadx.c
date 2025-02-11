@@ -93,7 +93,7 @@ unsigned char tm_queue_memory_area[TM_THREADX_MAX_QUEUES * TM_THREADX_QUEUE_SIZE
 unsigned char tm_pool_memory_area[TM_THREADX_MAX_MEMORY_POOLS * TM_THREADX_MEMORY_POOL_SIZE];
 
 /* Global time counter incremented by the timer ISR */
-static volatile uint64_t g_timeCounter = 0ULL;
+// static volatile uint64_t g_timeCounter = 0ULL;
 
 /* Define array to remember the test entry function.  */
 
@@ -464,6 +464,7 @@ unsigned long tm_time_get(void)
 {
    /* Return the lower 32 bits */
    // return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
+    return 0;
 }
 
 /*-----------------------------------------------------------
