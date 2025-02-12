@@ -103,9 +103,9 @@ void main_task(void* pvParameters)
 
    /* Start Thread-Metric tests */
    printf("Starting Thread-Metric tests...\n");
-   main_message_test();
    test_interrupt_handler = tm_isr_message_handler;
    setup_interrupt();
+   main_message_test();
 
    /* Delete this task when finished */
    vTaskDelete(NULL);
