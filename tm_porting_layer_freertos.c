@@ -109,7 +109,7 @@ void tm_thread_relinquish(void)
 /* Terminates the current thread and removes it from the scheduler */
 void tm_thread_exit(int thread_id)
 {
-   void(thread_id);
+    (void) thread_id;
    // Ensure the function is called from a valid FreeRTOS task context
    if (xTaskGetCurrentTaskHandle() != NULL)
    {
