@@ -144,7 +144,7 @@ void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3)
    /* Raise a software interrupt. This will call tm_isr_message_handler() */
    tm_interrupt_raise();
    /* Suspend the Interrupt Simulator Thread (assumed thread id 1) */
-   tm_thread_suspend(1);
+   tm_thread_exit();
 }
 
 /*---------------------------------------------------------------
