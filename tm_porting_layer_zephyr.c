@@ -118,6 +118,15 @@ int tm_thread_suspend(int thread_id)
 }
 
 /*
+ * This function suspends the specified thread.  If successful, the function should
+ * return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
+ */
+void tm_thread_exit(int thread_id)
+{
+   k_thread_suspend(&test_thread[thread_id]);
+}
+
+/*
  * This function relinquishes to other ready threads at the same
  * priority.
  */

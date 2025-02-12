@@ -139,8 +139,8 @@ extern "C"
    /* This function relinquishes to other ready threads at the same
    priority.  */
    void tm_thread_relinquish(void);
-
-   void tm_thread_exit(void);
+   /* Only really needed in FreeRTOS as Threads are not allowed to return */
+   void tm_thread_exit(int thread_id);
    /* This function suspends the specified thread for the specified number
    of seconds.  If successful, the function should return TM_SUCCESS.
    Otherwise, TM_ERROR should be returned.  */

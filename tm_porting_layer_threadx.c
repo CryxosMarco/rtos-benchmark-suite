@@ -171,6 +171,14 @@ int tm_thread_suspend(int thread_id)
       return (TM_ERROR);
 }
 
+/* This function suspends the specified thread.  If successful, the function
+   should return TM_SUCCESS. Otherwise, TM_ERROR should be returned. */
+void tm_thread_exit(int thread_id)
+{
+   /* Attempt to suspend the thread.  */
+   tx_thread_suspend(&tm_thread_array[thread_id]);
+}
+
 /* This function relinquishes to other ready threads at the same
    priority.  */
 void tm_thread_relinquish(void)
@@ -464,7 +472,7 @@ unsigned long tm_time_get(void)
 {
    /* Return the lower 32 bits */
    // return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
-    return 0;
+   return 0;
 }
 
 /*-----------------------------------------------------------
