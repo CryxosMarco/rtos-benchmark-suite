@@ -137,7 +137,10 @@ void tm_thread_sleep(int seconds)
       /* sleep for 1 Tick */
       vTaskDelay(10);
    }
+   else
+   {
    vTaskDelay((seconds * 1000U) / portTICK_RATE_MS);
+   }
 }
 
 /* This function creates the specified queue.  If successful, the function should
@@ -388,6 +391,7 @@ unsigned long tm_time_get(void)
 {
    /* Return the lower 32 bits */
    // return (unsigned long) (g_timeCounter & 0xFFFFFFFFUL);
+   return 0;
 }
 
 /*-----------------------------------------------------------

@@ -198,8 +198,11 @@ void tm_thread_sleep(int seconds)
       /* Sleep for 1 Tick */
       tx_thread_sleep((UINT) 2);
    }
+   else
+   {
    /* Attempt to sleep.  */
    tx_thread_sleep(((UINT) seconds) * TM_THREADX_TICKS_PER_SECOND);
+   }
 }
 
 /* This function creates the specified queue.  If successful, the function

@@ -146,7 +146,10 @@ void tm_thread_sleep(int seconds)
       /* Sleep for 1 Tick */
       k_sleep(K_SECONDS(10));
    }
+   else
+   {
    k_sleep(K_SECONDS(seconds));
+   }
 }
 
 /*
