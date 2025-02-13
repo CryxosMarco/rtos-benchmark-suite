@@ -176,7 +176,7 @@ int tm_queue_receive(int queue_id, unsigned long* message_ptr)
 {
    BaseType_t status;
 
-   status = xQueueReceive(tm_queue_array[queue_id], (void* const) message_ptr, (TickType_t) 0);
+   status = xQueueReceive(tm_queue_array[queue_id], (void* const) message_ptr, portMAX_DELAY);
 
    if (status != pdTRUE)
    {

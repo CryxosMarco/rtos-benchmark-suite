@@ -247,7 +247,7 @@ int tm_queue_receive(int queue_id, unsigned long* message_ptr)
    UINT status;
 
    /* Receive a 16-byte message from the specified queue.  */
-   status = tx_queue_receive(&tm_queue_array[queue_id], message_ptr, TX_NO_WAIT);
+   status = tx_queue_receive(&tm_queue_array[queue_id], message_ptr, TX_WAIT_FOREVER);
 
    /* Determine if the queue receive was successful.  */
    if (status == TX_SUCCESS)
