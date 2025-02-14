@@ -5,10 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * This program tests the perofrmace of message queues used in a RTOS from a
- * ISR or IRQ.
- *
- * You can compile and run this test via one of the supported RTOS platforms
- * that implement the TM API (tm_api.h) for tasks, mutexes, etc.
+ * ISR to Thread.
  *
  ******************************************************************************/
 /*******************************************************************************
@@ -20,10 +17,11 @@
 /*---------------------------------------------------------------
   Global Counters and Message Buffers
 ---------------------------------------------------------------*/
-/* Global counter: number of messages successfully processed */
+
+/* Global observation counter: number of messages successfully processed to ensure correct execution */
 volatile unsigned long tm_isr_to_task_counter = 0;
 
-/* Global counter: number of interrupts (i.e. ISR invocations) */
+/* Global observation counter: number of interrupts (i.e. ISR invocations) to enure correct exeution */
 volatile unsigned long tm_isr_counter = 0;
 
 /* Message buffers */
@@ -65,9 +63,9 @@ void tm_message_isr_to_task_initialize(void)
    /* Create a message queue with id 0 */
    tm_queue_create(0);
 
-   /* Create and resume the Receiver Thread (moderate priority, id 0) */
+   /* Create and resume the Receiver Thread */
    tm_thread_create(0, 5, tm_receiver_thread_entry);
-   /* Create and resume the Interrupt Simulator Thread (high priority, id 1) */
+   /* Create and resume the Interrupt Simulator Thread */
    tm_thread_create(1, 1, tm_interrupt_simulator_thread_entry);
 
    tm_thread_resume(0);
@@ -132,8 +130,7 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
 
 /*---------------------------------------------------------------
   Interrupt Simulator Thread
-  - Initializes the message content.
-  - Periodically raises a software interrupt that triggers the ISR.
+  Periodically raises a software interrupt that triggers the ISR.
 ---------------------------------------------------------------*/
 void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3)
 {
