@@ -109,7 +109,7 @@ void tm_thread_relinquish(void)
 /* Terminates the current thread and removes it from the scheduler */
 void tm_thread_exit(int thread_id)
 {
-    (void) thread_id;
+   (void) thread_id;
    // Ensure the function is called from a valid FreeRTOS task context
    if (xTaskGetCurrentTaskHandle() != NULL)
    {
@@ -139,7 +139,7 @@ void tm_thread_sleep(int seconds)
    }
    else
    {
-   vTaskDelay((seconds * 1000U) / portTICK_RATE_MS);
+      vTaskDelay((seconds * 1000U) / portTICK_RATE_MS);
    }
 }
 
@@ -163,7 +163,7 @@ int tm_queue_send(int queue_id, unsigned long* message_ptr)
 {
    BaseType_t status;
 
-   status = xQueueSendToBack(tm_queue_array[queue_id], (const void*) message_ptr, (TickType_t) 0);
+   status = xQueueSendToBack(tm_queue_array[queue_id], (const void*) message_ptr, portMAX_DELAY);
 
    if (status != pdTRUE)
    {

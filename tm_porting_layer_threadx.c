@@ -200,8 +200,8 @@ void tm_thread_sleep(int seconds)
    }
    else
    {
-   /* Attempt to sleep.  */
-   tx_thread_sleep(((UINT) seconds) * TM_THREADX_TICKS_PER_SECOND);
+      /* Attempt to sleep.  */
+      tx_thread_sleep(((UINT) seconds) * TM_THREADX_TICKS_PER_SECOND);
    }
 }
 
@@ -232,7 +232,7 @@ int tm_queue_send(int queue_id, unsigned long* message_ptr)
    UINT status;
 
    /* Send the 16-byte message to the specified queue.  */
-   status = tx_queue_send(&tm_queue_array[queue_id], message_ptr, TX_NO_WAIT);
+   status = tx_queue_send(&tm_queue_array[queue_id], message_ptr, TX_WAIT_FOREVER);
 
    /* Determine if the queue send was successful.  */
    if (status == TX_SUCCESS)
