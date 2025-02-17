@@ -119,6 +119,7 @@ extern "C"
    int main_inheritance(void);
    int main_pmu(void);
    int main_message_test(void);
+   int main_message_task_test(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be

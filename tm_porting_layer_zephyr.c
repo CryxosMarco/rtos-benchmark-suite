@@ -47,6 +47,13 @@
 #define TM_TEST_NUM_SEMAPHORES 4
 #define TM_TEST_NUM_MESSAGE_QUEUES 4
 #define TM_TEST_NUM_SLABS 4
+/* Define the number of messages per queue */
+#define MSGQ_NUM_MESSAGES 8
+/* Calculate the size of each message in bytes */
+#define MSGQ_MESSAGE_SIZE (MESSAGE_SIZE * sizeof(int32_t))
+/* Calculate the total size of the message queue buffer */
+#define MSGQ_BUFFER_SIZE (MSGQ_NUM_MESSAGES * MSGQ_MESSAGE_SIZE)
+
 
 #if (CONFIG_MP_MAX_NUM_CPUS > 1)
 #error "*** Tests are only designed for single processor systems! ***"
@@ -54,11 +61,14 @@
 
 static struct k_thread test_thread[TM_TEST_NUM_THREADS];
 static K_THREAD_STACK_ARRAY_DEFINE(test_stack, TM_TEST_NUM_THREADS, TM_TEST_STACK_SIZE);
-
+   
 static struct k_sem test_sem[TM_TEST_NUM_SEMAPHORES];
 
 static struct k_msgq test_msgq[TM_TEST_NUM_MESSAGE_QUEUES];
-static char test_msgq_buffer[TM_TEST_NUM_MESSAGE_QUEUES][8][16];
+/* Allocate the message queue buffer dynamically using our macros */
+static char test_msgq_buffer[TM_TEST_NUM_MESSAGE_QUEUES][MSGQ_NUM_MESSAGES][MSGQ_MESSAGE_SIZE];
+
+
 
 static struct k_mem_slab test_slab[TM_TEST_NUM_SLABS];
 static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
@@ -160,7 +170,8 @@ void tm_thread_sleep(int seconds)
  */
 int tm_queue_create(int queue_id)
 {
-   k_msgq_init(&test_msgq[queue_id], test_msgq_buffer[queue_id], MESSAGE_SIZE * sizeof(int32_t), 8);
+   k_msgq_init(&test_msgq[queue_id], &test_msgq_buffer[queue_id][0][0],
+            MESSAGE_SIZE * sizeof(int32_t), 8);
 
    return TM_SUCCESS;
 }
