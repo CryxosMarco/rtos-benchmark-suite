@@ -17,12 +17,15 @@
 /*---------------------------------------------------------------
   Compile-Time Configuration Macros
 ---------------------------------------------------------------*/
-/* Duration of the test in seconds different form tm_api.h */
+/* Duration of the test in seconds different from tm_api.h */
 #define TEST_DURATION 10
 
 #ifndef MESSAGE_SIZE
 #define MESSAGE_SIZE 8
 #endif
+
+/* Uncomment the following line to enable observation of per-thread activity */
+// #define OBSERVE
 
 /* Number of producers and consumers */
 #define NUM_PRODUCERS 3
@@ -37,8 +40,14 @@ volatile unsigned long total_sent_counter = 0;
 volatile unsigned long total_received_counter = 0;
 volatile unsigned long integrity_errors_counter = 0;
 
+#ifdef OBSERVE
+/* Per-thread run counts for observation */
+volatile unsigned long producer_run_counts[NUM_PRODUCERS] = {0};
+volatile unsigned long consumer_run_counts[NUM_CONSUMERS] = {0};
+#endif
+
 /*---------------------------------------------------------------
-  Global Arrays to hold thread IDs (passed as first parameter)
+  Global Arrays to hold thread IDs (these will be passed via p1)
 ---------------------------------------------------------------*/
 int producer_ids[NUM_PRODUCERS];
 int consumer_ids[NUM_CONSUMERS];
@@ -83,9 +92,7 @@ void message_queue_test_initialize(void)
    for (i = 0; i < NUM_PRODUCERS; i++)
    {
       producer_ids[i] = i; // store the producer id
-      tm_thread_create(i, 5, producer_thread_entry_generic);
-      /* Pass the pointer to producer_ids[i] as the first parameter.
-         The other two parameters are unused. */
+      tm_thread_create_param(i, 5, producer_thread_entry_generic, &producer_ids[i]);
       tm_thread_resume(i);
    }
 
@@ -93,11 +100,11 @@ void message_queue_test_initialize(void)
    for (i = 0; i < NUM_CONSUMERS; i++)
    {
       consumer_ids[i] = i; // store the consumer id
-      tm_thread_create(NUM_PRODUCERS + i, 5, consumer_thread_entry_generic);
+      tm_thread_create_param(NUM_PRODUCERS + i, 5, consumer_thread_entry_generic, &consumer_ids[i]);
       tm_thread_resume(NUM_PRODUCERS + i);
    }
 
-   /* Create and resume the reporting thread with a higher priority */
+   /* Create and resume the reporting thread with a higher priority (no parameter needed) */
    tm_thread_create(REPORTING_THREAD_ID, 1, reporting_thread_entry);
    tm_thread_resume(REPORTING_THREAD_ID);
 
@@ -129,8 +136,8 @@ unsigned long compute_checksum(unsigned long* msg, int size)
 ---------------------------------------------------------------*/
 void producer_thread_entry_generic(void* p1, void* p2, void* p3)
 {
-   (void) p2;
-   (void) p3;
+   (void)p2;
+   (void)p3;
 
    int producer_id = *((int*) p1);
    unsigned long local_counter = 0;
@@ -157,6 +164,9 @@ void producer_thread_entry_generic(void* p1, void* p2, void* p3)
       else
       {
          total_sent_counter++;
+#ifdef OBSERVE
+         producer_run_counts[producer_id]++;
+#endif
       }
 
       local_counter++;
@@ -170,8 +180,8 @@ void producer_thread_entry_generic(void* p1, void* p2, void* p3)
 ---------------------------------------------------------------*/
 void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
 {
-   (void) p2;
-   (void) p3;
+   (void)p2;
+   (void)p3;
 
    int consumer_id = *((int*) p1);
 
@@ -186,23 +196,26 @@ void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
       unsigned long expected_checksum = compute_checksum(message, MESSAGE_SIZE - 1);
       if (expected_checksum != message[MESSAGE_SIZE - 1])
       {
-         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\n", consumer_id,
-                expected_checksum, message[MESSAGE_SIZE - 1]);
+         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\n",
+                consumer_id, expected_checksum, message[MESSAGE_SIZE - 1]);
          integrity_errors_counter++;
       }
       total_received_counter++;
+#ifdef OBSERVE
+      consumer_run_counts[consumer_id]++;
+#endif
    }
 }
 
 /*---------------------------------------------------------------
   Reporting Thread
-  Periodically prints throughput and integrity statistics.
+  Periodically prints throughput, integrity, and per-thread activity statistics.
 ---------------------------------------------------------------*/
 void reporting_thread_entry(void* p1, void* p2, void* p3)
 {
-   (void) p1;
-   (void) p2;
-   (void) p3;
+   (void)p1;
+   (void)p2;
+   (void)p3;
 
    unsigned long last_total_sent = 0;
    unsigned long last_total_received = 0;
@@ -221,7 +234,24 @@ void reporting_thread_entry(void* p1, void* p2, void* p3)
       printf("**** Multi Producer/Consumer Message Queue Test **** Time: %lu sec\n", relative_time);
       printf("Messages Sent in Period: %lu\n", period_sent);
       printf("Messages Received in Period: %lu\n", period_received);
-      printf("Integrity Errors: %lu\n\n", integrity_errors_counter);
+      printf("Integrity Errors: %lu\n", integrity_errors_counter);
+
+#ifdef OBSERVE
+      /* Print per-thread execution counts */
+      printf("\nPer-Producer Execution Counts:\n");
+      for (int i = 0; i < NUM_PRODUCERS; i++)
+      {
+         printf("  Producer %d: %lu\n", i, producer_run_counts[i]);
+      }
+      printf("\nPer-Consumer Execution Counts:\n");
+      for (int i = 0; i < NUM_CONSUMERS; i++)
+      {
+         printf("  Consumer %d: %lu\n", i, consumer_run_counts[i]);
+      }
+      printf("\n");
+#endif
+
+      printf("\n");
    }
 }
 

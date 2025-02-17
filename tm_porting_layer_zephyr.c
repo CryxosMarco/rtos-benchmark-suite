@@ -61,7 +61,7 @@
 
 static struct k_thread test_thread[TM_TEST_NUM_THREADS];
 static K_THREAD_STACK_ARRAY_DEFINE(test_stack, TM_TEST_NUM_THREADS, TM_TEST_STACK_SIZE);
-   
+
 static struct k_sem test_sem[TM_TEST_NUM_SEMAPHORES];
 
 static struct k_msgq test_msgq[TM_TEST_NUM_MESSAGE_QUEUES];
@@ -86,7 +86,7 @@ void tm_initialize(void (*test_initialization_function)(void))
 
 /*
  * This function takes a thread ID and priority and attempts to create the
- * file in the underlying RTOS.  Valid priorities range from 1 through 31,
+ * file in the underlying RTOS. Valid priorities range from 1 through 31,
  * where 1 is the highest priority and 31 is the lowest. If successful,
  * the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
  */
@@ -104,6 +104,29 @@ int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, 
 
    return (tid == &test_thread[thread_id]) ? TM_SUCCESS : TM_ERROR;
 }
+
+/* 
+ * This function takes a thread ID and priority and attempts to create the
+ * file in the underlying RTOS. Valid priorities range from 1 through 31,
+ * where 1 is the highest priority and 31 is the lowest. It also passes the parameter 
+ * as pointer to the underlying thread. If successful, the function should return TM_SUCCESS. 
+ * Otherwise, TM_ERROR should be returned. 
+ */
+int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(void*, void*, void*), void *param)
+{
+   k_tid_t tid = k_thread_create(&test_thread[thread_id],
+                                 test_stack[thread_id],
+                                 TM_TEST_STACK_SIZE,
+                                 entry_function,
+                                 param, NULL, NULL,  /* pass param as p1 */
+                                 priority, 0, K_FOREVER);
+
+   k_thread_suspend(&test_thread[thread_id]);
+   k_wakeup(&test_thread[thread_id]);
+
+   return (tid == &test_thread[thread_id]) ? TM_SUCCESS : TM_ERROR;
+}
+
 
 /*
  * This function resumes the specified thread.  If successful, the function should

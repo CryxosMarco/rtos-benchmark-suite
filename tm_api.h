@@ -103,7 +103,7 @@ extern "C"
 #endif
 /* Define the size used by the queue create function ensure that the maximum queue size macros can hold the size*/
 #ifndef MESSAGE_SIZE
-#define MESSAGE_SIZE 16
+#define MESSAGE_SIZE 4
 #endif
 
    /* Prototype of the test functions */
@@ -135,6 +135,7 @@ extern "C"
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
    */
    int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, void*, void*));
+   int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(void*, void*, void*), void *param);
    /* This function resumes the specified thread.  If successful, the function
    should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
    int tm_thread_resume(int thread_id);
