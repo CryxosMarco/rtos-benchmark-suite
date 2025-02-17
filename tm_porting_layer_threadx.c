@@ -97,10 +97,22 @@ unsigned char tm_pool_memory_area[TM_THREADX_MAX_MEMORY_POOLS * TM_THREADX_MEMOR
 /* Define array to remember the test entry function.  */
 
 void* tm_thread_entry_functions[TM_THREADX_MAX_THREADS];
+/* Define array for storing optional parameters per thread */
+void* tm_thread_entry_params[TM_THREADX_MAX_THREADS];
 
 /* Define our shell entry function to match ThreadX.  */
+VOID tm_thread_entry(ULONG thread_input)
+{
+   /* Retrieve the stored entry function */
+   void (*entry_function)(void*, void*, void*);
+   entry_function = (void (*)(void*, void*, void*)) tm_thread_entry_functions[thread_input];
 
-VOID tm_thread_entry(ULONG thread_input);
+   /* Retrieve the stored parameter (may be NULL if not used) */
+   void* param = tm_thread_entry_params[thread_input];
+
+   /* Call the entry function. If param is NULL, this behaves as before */
+   entry_function(param, NULL, NULL);
+}
 
 /* This function called from main performs basic RTOS initialization,
    calls the test initialization function, and then starts the RTOS function. */
@@ -134,6 +146,31 @@ int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, 
       return (TM_SUCCESS);
    else
       return (TM_ERROR);
+}
+
+/*
+ * This function takes a thread ID and priority and attempts to create the
+ * file in the underlying RTOS. Valid priorities range from 1 through 31,
+ * where 1 is the highest priority and 31 is the lowest. It also passes the parameter
+ * as pointer to the underlying thread. If successful, the function should return TM_SUCCESS.
+ * Otherwise, TM_ERROR should be returned.
+ */
+int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(void*, void*, void*), void* param)
+{
+   UINT status;
+
+   /* Store the entry function and the parameter */
+   tm_thread_entry_functions[thread_id] = (void*) entry_function;
+   tm_thread_entry_params[thread_id] = param;
+
+   /* Create the thread using the ThreadX API */
+   status =
+      tx_thread_create(&tm_thread_array[thread_id], "Thread-Metric test", tm_thread_entry, (ULONG) thread_id,
+                       &tm_thread_stack_area[thread_id * TM_THREADX_THREAD_STACK_SIZE], TM_THREADX_THREAD_STACK_SIZE,
+                       (UINT) priority, (UINT) priority, TX_NO_TIME_SLICE, TX_DONT_START);
+
+   /* Return the result */
+   return (status == TX_SUCCESS) ? TM_SUCCESS : TM_ERROR;
 }
 
 /* This function resumes the specified thread.  If successful, the function
@@ -413,20 +450,6 @@ int tm_memory_pool_deallocate(int pool_id, unsigned char* memory_ptr)
       return (TM_SUCCESS);
    else
       return (TM_ERROR);
-}
-
-/* This is the ThreadX thread entry.  It is going to call the Thread-Metric
-   entry function saved earlier.  */
-VOID tm_thread_entry(ULONG thread_input)
-{
-
-   void (*entry_function)(void);
-
-   /* Pickup the entry function from the saved array.  */
-   entry_function = (void (*)(void)) tm_thread_entry_functions[thread_input];
-
-   /* Call the entry function.   */
-   (entry_function)();
 }
 
 /*******************************************************************************
