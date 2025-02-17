@@ -143,11 +143,14 @@ void tm_thread_sleep(int seconds)
    }
 }
 
-/* This function creates the specified queue.  If successful, the function should
-   return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
+/* This function creates the specified queue.
+   It creates a queue with 10 messages, each of size:
+      MESSAGE_SIZE * sizeof(int32_t)
+   If successful, TM_SUCCESS is returned; otherwise, TM_ERROR.
+*/
 int tm_queue_create(int queue_id)
 {
-   tm_queue_array[queue_id] = xQueueCreate(10, 4 * sizeof(int32_t));
+   tm_queue_array[queue_id] = xQueueCreate(10, MESSAGE_SIZE * sizeof(int32_t));
 
    if (tm_queue_array[queue_id] == NULL)
    {

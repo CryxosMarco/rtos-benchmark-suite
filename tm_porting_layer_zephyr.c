@@ -148,17 +148,19 @@ void tm_thread_sleep(int seconds)
    }
    else
    {
-   k_sleep(K_SECONDS(seconds));
+      k_sleep(K_SECONDS(seconds));
    }
 }
 
 /*
- * This function creates the specified queue.  If successful, the function should
- * return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
+ * This function creates the specified queue.
+ * It initializes the Zephyr message queue to hold 8 messages,
+ * each of size: MESSAGE_SIZE * sizeof(int32_t).
+ * If successful, TM_SUCCESS is returned; otherwise, TM_ERROR.
  */
 int tm_queue_create(int queue_id)
 {
-   k_msgq_init(&test_msgq[queue_id], &test_msgq_buffer[queue_id][0][0], 16, 8);
+   k_msgq_init(&test_msgq[queue_id], test_msgq_buffer[queue_id], MESSAGE_SIZE * sizeof(int32_t), 8);
 
    return TM_SUCCESS;
 }

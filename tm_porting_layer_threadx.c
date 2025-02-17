@@ -66,19 +66,18 @@
 #define TM_THREADX_THREAD_STACK_SIZE 2096 // Increase to a higher value
 
 /* Define the default ThreadX queue size.  */
-
 #define TM_THREADX_QUEUE_SIZE 200
 
 /* Define the default ThreadX memory pool size.  */
-
 #define TM_THREADX_MEMORY_POOL_SIZE 2048
 
 /* Define the number of timer interrupt ticks per second.  */
-
 #define TM_THREADX_TICKS_PER_SECOND 1000
 
-/* Define ThreadX data structures.  */
+/* Define the ThreadX queue message size.  */
+// #define MESSAGE_SIZE 8
 
+/* Define ThreadX data structures.  */
 TX_THREAD tm_thread_array[TM_THREADX_MAX_THREADS];
 TX_QUEUE tm_queue_array[TM_THREADX_MAX_QUEUES];
 TX_SEMAPHORE tm_semaphore_array[TM_THREADX_MAX_SEMAPHORES];
@@ -209,18 +208,19 @@ void tm_thread_sleep(int seconds)
    should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
 int tm_queue_create(int queue_id)
 {
-
    UINT status;
 
-   /* Create the specified queue with 16-byte messages.  */
-   status = tx_queue_create(&tm_queue_array[queue_id], "Thread-Metric test", TX_4_ULONG,
+   /* Create the specified queue with messages of size MESSAGE_SIZE ULONGs.
+      Note: MESSAGE_SIZE is the number of unsigned long words per message.
+      TM_THREADX_QUEUE_SIZE must be large enough to hold the desired number
+      of messages. */
+   status = tx_queue_create(&tm_queue_array[queue_id], "Thread-Metric test", (UINT) MESSAGE_SIZE,
                             &tm_queue_memory_area[queue_id * TM_THREADX_QUEUE_SIZE], TM_THREADX_QUEUE_SIZE);
 
-   /* Determine if the queue create was successful.  */
    if (status == TX_SUCCESS)
-      return (TM_SUCCESS);
+      return TM_SUCCESS;
    else
-      return (TM_ERROR);
+      return TM_ERROR;
 }
 
 /* This function sends a 16-byte message to the specified queue.  If successful,

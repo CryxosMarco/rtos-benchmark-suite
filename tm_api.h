@@ -101,6 +101,10 @@ extern "C"
 #ifndef TM_TEST_DURATION
 #define TM_TEST_DURATION 30
 #endif
+/* Define the size used by the queue create function ensure that the maximum queue size macros can hold the size*/
+#ifndef MESSAGE_SIZE
+#define MESSAGE_SIZE 16
+#endif
 
    /* Prototype of the test functions */
    int tm_main(void);
