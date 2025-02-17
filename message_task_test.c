@@ -4,8 +4,8 @@
  * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
- * This program tests the perofrmace of message queues used in a RTOS from a
- * Task to another Task.
+ * This program tests the performance of message queues used in a RTOS from one
+ * task to another.
  *
  ******************************************************************************/
 /*******************************************************************************
@@ -13,157 +13,215 @@
  ******************************************************************************/
 #include "tm_api.h"
 #include <stdio.h>
-#define TM_TEST_DURATION 3
 
 /*---------------------------------------------------------------
-  Global Counters and Message Buffers
+  Compile-Time Configuration Macros
 ---------------------------------------------------------------*/
-/* Global counter: number of messages successfully processed */
-volatile unsigned long tm_receiver_counter = 0;
+/* Duration of the test in seconds different form tm_api.h */
+#define TEST_DURATION 10
 
-/* Global counter: number of interrupts (i.e. ISR invocations) */
-volatile unsigned long tm_sender_counter = 0;
+#ifndef MESSAGE_SIZE
+#define MESSAGE_SIZE 8
+#endif
 
-/* Message buffers */
-unsigned long message_sent_arr[4];
-unsigned long message_received_arr[4];
+/* Number of producers and consumers */
+#define NUM_PRODUCERS 3
+#define NUM_CONSUMERS 3
+/* Reporting thread ID (should be unique) */
+#define REPORTING_THREAD_ID (NUM_PRODUCERS + NUM_CONSUMERS)
 
 /*---------------------------------------------------------------
-  Thread and ISR Prototypes
+  Global Counters
 ---------------------------------------------------------------*/
-void tm_task_receiver_thread_entry(void* p1, void* p2, void* p3);
-void tm_task_sender_thread_entry(void* p1, void* p2, void* p3);
-void tm_reporting_thread_entry(void* p1, void* p2, void* p3);
-void tm_isr_message_handler(void);
-void tm_message_task_to_task_initialize(void);
+volatile unsigned long total_sent_counter = 0;
+volatile unsigned long total_received_counter = 0;
+volatile unsigned long integrity_errors_counter = 0;
+
+/*---------------------------------------------------------------
+  Global Arrays to hold thread IDs (passed as first parameter)
+---------------------------------------------------------------*/
+int producer_ids[NUM_PRODUCERS];
+int consumer_ids[NUM_CONSUMERS];
+
+/*---------------------------------------------------------------
+  Function Prototypes
+---------------------------------------------------------------*/
+void message_queue_test_initialize(void);
+int main_message_task_test(void);
+unsigned long compute_checksum(unsigned long* msg, int size);
+
+/* Generic Producer and Consumer thread entry functions */
+void producer_thread_entry_generic(void* p1, void* p2, void* p3);
+void consumer_thread_entry_generic(void* p1, void* p2, void* p3);
+void reporting_thread_entry(void* p1, void* p2, void* p3);
 
 /*---------------------------------------------------------------
   Main Entry Point
 ---------------------------------------------------------------*/
 int main_message_task_test(void)
 {
-   /* Initialize the RTOS and start the ISR-to-Task test */
-   tm_initialize(tm_message_task_to_task_initialize);
+   tm_initialize(message_queue_test_initialize);
    return 0;
 }
 
 /*---------------------------------------------------------------
   Initialization Function
 ---------------------------------------------------------------*/
-void tm_message_task_to_task_initialize(void)
+void message_queue_test_initialize(void)
 {
-   /* Initialize the PMU for low-overhead cycle counting */
+   int i;
+
+   /* Initialize the PMU if needed */
    tm_setup_pmu();
 
-   /* Initialize the message content with a known pattern */
-   message_sent_arr[0] = 0xDEADBEEF;
-   message_sent_arr[1] = 0xCAFEBABE;
-   message_sent_arr[2] = 0xBAADF00D;
-   message_sent_arr[3] = 0xFEEDFACE;
-
-   /* Create a message queue with id 0 */
+   /* Create a message queue with id 0.
+      The queue is configured for messages of size:
+      MESSAGE_SIZE * sizeof(unsigned long) */
    tm_queue_create(0);
 
-   /* Create and resume the Receiver Thread */
-   tm_thread_create(0, 2, tm_task_receiver_thread_entry);
-   /* Create and resume the Sender Thread */
-   tm_thread_create(1, 5, tm_task_sender_thread_entry);
-   /* Create reporting thread with highest priority*/
-   tm_thread_create(2, 1, tm_reporting_thread_entry);
-
-   tm_thread_resume(0);
-   tm_thread_resume(1);
-   tm_thread_resume(2);
-
-   printf("[Init] Task-to-Task Message Queue Benchmark started.\n");
-}
-
-/*---------------------------------------------------------------
-  Receiver Thread
-  - Blocks on the message queue.
-  - Immediately after receiving a message, stops the PMU latency measurement.
-  - Increments the message-processed counter.
-  - Compares the received message to the known send pattern.
-  - If they match, suspends the interrupt simulator thread and outputs the final report.
----------------------------------------------------------------*/
-void tm_task_receiver_thread_entry(void* p1, void* p2, void* p3)
-{
-   (void) p1;
-   (void) p2;
-   (void) p3;
-
-   while (1)
+   /* Create and resume producer threads using the generic function */
+   for (i = 0; i < NUM_PRODUCERS; i++)
    {
-      /* Block until a message is available from queue 0 */
-      tm_queue_receive(0, message_received_arr);
-
-      /* Stop the PMU measurement started in the ISR */
-      // tm_pmu_profile_end("msg_latency");
-
-      /* Increment the processed message count */
-      tm_receiver_counter++;
+      producer_ids[i] = i; // store the producer id
+      tm_thread_create(i, 5, producer_thread_entry_generic);
+      /* Pass the pointer to producer_ids[i] as the first parameter.
+         The other two parameters are unused. */
+      tm_thread_resume(i);
    }
 
-   /* Suspend this thread after finishing the report */
-   tm_thread_suspend(0);
+   /* Create and resume consumer threads using the generic function */
+   for (i = 0; i < NUM_CONSUMERS; i++)
+   {
+      consumer_ids[i] = i; // store the consumer id
+      tm_thread_create(NUM_PRODUCERS + i, 5, consumer_thread_entry_generic);
+      tm_thread_resume(NUM_PRODUCERS + i);
+   }
+
+   /* Create and resume the reporting thread with a higher priority */
+   tm_thread_create(REPORTING_THREAD_ID, 1, reporting_thread_entry);
+   tm_thread_resume(REPORTING_THREAD_ID);
+
+   printf("[Init] Multi Producer/Consumer Message Queue Benchmark started.\n");
 }
 
 /*---------------------------------------------------------------
-  Message sending thread
+  Utility: Compute a Simple Checksum
+  Computes an additive checksum over 'size' elements of msg.
 ---------------------------------------------------------------*/
-void tm_task_sender_thread_entry(void* p1, void* p2, void* p3)
+unsigned long compute_checksum(unsigned long* msg, int size)
 {
-   (void) p1;
+   unsigned long checksum = 0;
+   for (int i = 0; i < size; i++)
+   {
+      checksum += msg[i];
+   }
+   return checksum;
+}
+
+/*---------------------------------------------------------------
+  Producer Thread Generic Function
+  Receives its ID via the first parameter, builds and sends messages.
+  Message layout:
+       [0] : Producer ID
+       [1] : Local message counter
+       [2..MESSAGE_SIZE-2] : A predictable pattern
+       [MESSAGE_SIZE-1] : Checksum over the first (MESSAGE_SIZE-1) words.
+---------------------------------------------------------------*/
+void producer_thread_entry_generic(void* p1, void* p2, void* p3)
+{
    (void) p2;
    (void) p3;
 
+   int producer_id = *((int*) p1);
+   unsigned long local_counter = 0;
+
    while (1)
    {
-      // tm_pmu_profile_start("msg_latency");
-      if (tm_queue_send(0, message_sent_arr) != 0)
+      unsigned long message[MESSAGE_SIZE];
+
+      /* Build the message */
+      message[0] = producer_id;
+      message[1] = local_counter;
+      for (int i = 2; i < MESSAGE_SIZE - 1; i++)
       {
-         printf("Message send gone wrong! \n");
+         message[i] = producer_id * 1000 + i;
       }
-      tm_sender_counter++;
+      /* Compute and store the checksum */
+      message[MESSAGE_SIZE - 1] = compute_checksum(message, MESSAGE_SIZE - 1);
+
+      /* Send the message; print an error if sending fails */
+      if (tm_queue_send(0, message) != 0)
+      {
+         printf("Producer %d: Message send failed!\n", producer_id);
+      }
+      else
+      {
+         total_sent_counter++;
+      }
+
+      local_counter++;
    }
 }
 
-void tm_reporting_thread_entry(void* p1, void* p2, void* p3)
+/*---------------------------------------------------------------
+  Consumer Thread Generic Function
+  Receives its ID via the first parameter, then continuously receives messages
+  and verifies the checksum.
+---------------------------------------------------------------*/
+void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
+{
+   (void) p2;
+   (void) p3;
+
+   int consumer_id = *((int*) p1);
+
+   while (1)
+   {
+      unsigned long message[MESSAGE_SIZE];
+
+      /* Block until a message is available on queue 0 */
+      tm_queue_receive(0, message);
+
+      /* Recompute the checksum and verify */
+      unsigned long expected_checksum = compute_checksum(message, MESSAGE_SIZE - 1);
+      if (expected_checksum != message[MESSAGE_SIZE - 1])
+      {
+         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\n", consumer_id,
+                expected_checksum, message[MESSAGE_SIZE - 1]);
+         integrity_errors_counter++;
+      }
+      total_received_counter++;
+   }
+}
+
+/*---------------------------------------------------------------
+  Reporting Thread
+  Periodically prints throughput and integrity statistics.
+---------------------------------------------------------------*/
+void reporting_thread_entry(void* p1, void* p2, void* p3)
 {
    (void) p1;
    (void) p2;
    (void) p3;
 
-   unsigned long total;
-   unsigned long relative_time;
-   unsigned long last_total;
-
-   /* Initialize the last total.  */
-   last_total = 0;
-
-   /* Initialize the relative time.  */
-   relative_time = 0;
+   unsigned long last_total_sent = 0;
+   unsigned long last_total_received = 0;
+   unsigned long relative_time = 0;
 
    while (1)
    {
+      tm_thread_sleep(TEST_DURATION);
+      relative_time += TEST_DURATION;
 
-      /* Sleep to allow the test to run.  */
-      tm_thread_sleep(TM_TEST_DURATION);
+      unsigned long period_sent = total_sent_counter - last_total_sent;
+      unsigned long period_received = total_received_counter - last_total_received;
+      last_total_sent = total_sent_counter;
+      last_total_received = total_received_counter;
 
-      /* Increment the relative time.  */
-      relative_time = relative_time + TM_TEST_DURATION;
-
-      /* Print results to the stdio window.  */
-      printf("**** Task-To-Task Message Queue Test **** Relative Time: %lu\n", relative_time);
-
-      /* Calculate the total of all the counters. */
-      total = tm_sender_counter + tm_receiver_counter;
-
-      /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", total - last_total);
-
-      /* Save the last total.  */
-      last_total = total;
+      printf("**** Multi Producer/Consumer Message Queue Test **** Time: %lu sec\n", relative_time);
+      printf("Messages Sent in Period: %lu\n", period_sent);
+      printf("Messages Received in Period: %lu\n", period_received);
+      printf("Integrity Errors: %lu\n\n", integrity_errors_counter);
    }
 }
 
