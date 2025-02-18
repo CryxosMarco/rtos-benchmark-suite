@@ -81,6 +81,25 @@ int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, 
    return TM_SUCCESS;
 }
 
+/* Extended version that accepts a parameter */
+int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(void*, void*, void*), void* param)
+{
+   int new_priority = configMAX_PRIORITIES - priority + 1;
+   BaseType_t status;
+
+   configASSERT(new_priority <= (configMAX_PRIORITIES - 1));
+   status =
+      xTaskCreate(entry_function, "Thread-Metric test", configMINIMAL_STACK_SIZE, param, /* Pass the parameter here */
+                  new_priority, &tm_thread_array[thread_id]);
+
+   if (status != pdPASS)
+   {
+      return TM_ERROR;
+   }
+   /* Note: Tasks in FreeRTOS start active by default */
+   return TM_SUCCESS;
+}
+
 /* This function resumes the specified thread.  If successful, the function should
    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
 int tm_thread_resume(int thread_id)
