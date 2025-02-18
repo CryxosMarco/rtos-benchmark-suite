@@ -20,10 +20,6 @@
 /* Duration of the test in seconds different from tm_api.h */
 #define TEST_DURATION 10
 
-#ifndef MESSAGE_SIZE
-#define MESSAGE_SIZE 8
-#endif
-
 /* Uncomment the following line to enable observation of per-thread activity */
 // #define OBSERVE
 
@@ -136,8 +132,8 @@ unsigned long compute_checksum(unsigned long* msg, int size)
 ---------------------------------------------------------------*/
 void producer_thread_entry_generic(void* p1, void* p2, void* p3)
 {
-   (void)p2;
-   (void)p3;
+   (void) p2;
+   (void) p3;
 
    int producer_id = *((int*) p1);
    unsigned long local_counter = 0;
@@ -180,8 +176,8 @@ void producer_thread_entry_generic(void* p1, void* p2, void* p3)
 ---------------------------------------------------------------*/
 void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
 {
-   (void)p2;
-   (void)p3;
+   (void) p2;
+   (void) p3;
 
    int consumer_id = *((int*) p1);
 
@@ -196,8 +192,8 @@ void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
       unsigned long expected_checksum = compute_checksum(message, MESSAGE_SIZE - 1);
       if (expected_checksum != message[MESSAGE_SIZE - 1])
       {
-         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\n",
-                consumer_id, expected_checksum, message[MESSAGE_SIZE - 1]);
+         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\n", consumer_id,
+                expected_checksum, message[MESSAGE_SIZE - 1]);
          integrity_errors_counter++;
       }
       total_received_counter++;
@@ -213,9 +209,9 @@ void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
 ---------------------------------------------------------------*/
 void reporting_thread_entry(void* p1, void* p2, void* p3)
 {
-   (void)p1;
-   (void)p2;
-   (void)p3;
+   (void) p1;
+   (void) p2;
+   (void) p3;
 
    unsigned long last_total_sent = 0;
    unsigned long last_total_received = 0;
