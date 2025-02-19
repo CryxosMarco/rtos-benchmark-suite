@@ -1,167 +1,193 @@
 /*[CR]******************************************************************************
- *   Message Queue ISR-to-Task Benchmark
+ * Message Queue ISR-to-Task Benchmark (Single Threaded Test)
+ *
+ * This test uses a minimal ISR that generates a message with a fixed layout:
+ *    [0] : Producer ID (fixed as 1)
+ *    [1] : Message counter (iteration number)
+ *    [2..MESSAGE_SIZE-2] : Pattern = 1000 + (iteration * 10) + index
+ *    [MESSAGE_SIZE-1] : Checksum over the first (MESSAGE_SIZE-1) words
+ *
+ * The ISR performs a PMU measurement for the queue send latency using precomputed
+ * PMU name strings. No prints or dynamic formatting occur in the ISR.
+ *
+ * A single thread drives the test: for each iteration it triggers the ISR via
+ * tm_interrupt_raise(), then blocks on the message queue to receive the message,
+ * measures the receive latency, validates the message, and continues.
+ *
+ * After all iterations, a summary report with the PMU results is printed.
  *
  * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
- * This program tests the perofrmace of message queues used in a RTOS from a
- * ISR to Thread.
- *
  ******************************************************************************/
-/*******************************************************************************
- * includes
- ******************************************************************************/
+
 #include "tm_api.h"
 #include <stdio.h>
+#include <string.h>
 
-/*---------------------------------------------------------------
-  Global Counters and Message Buffers
----------------------------------------------------------------*/
+#ifndef MESSAGE_SIZE
+#define MESSAGE_SIZE 6 /* N x 4 Byte  integers */
+#endif
 
-/* Global observation counter: number of messages successfully processed to ensure correct execution */
+#define ITERATION_COUNT 30
+
+/* Global counters */
 volatile unsigned long tm_isr_to_task_counter = 0;
-
-/* Global observation counter: number of interrupts (i.e. ISR invocations) to enure correct exeution */
 volatile unsigned long tm_isr_counter = 0;
+volatile unsigned long isr_message_counter = 0; // Used by ISR as message index
 
-/* Message buffers */
-unsigned long message_sent_arr[4];
-unsigned long message_received_arr[4];
+unsigned long message_received_arr[MESSAGE_SIZE];
 
-/*---------------------------------------------------------------
-  Thread and ISR Prototypes
----------------------------------------------------------------*/
+/* Precomputed PMU name arrays for send and receive iterations */
+char pmu_send_names[ITERATION_COUNT][16];
+char pmu_recv_names[ITERATION_COUNT][16];
+
+/* Function prototypes */
 void tm_receiver_thread_entry(void* p1, void* p2, void* p3);
-void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3);
 void tm_isr_message_handler(void);
 void tm_message_isr_to_task_initialize(void);
+unsigned long compute_checksum(unsigned long* msg, int size);
 
-/*---------------------------------------------------------------
-  Main Entry Point
----------------------------------------------------------------*/
+/* Main entry point */
 int main_message_test(void)
 {
-   /* Initialize the RTOS and start the ISR-to-Task test */
    tm_initialize(tm_message_isr_to_task_initialize);
    return 0;
 }
 
-/*---------------------------------------------------------------
-  Initialization Function
----------------------------------------------------------------*/
-void tm_message_isr_to_task_initialize(void)
+/* Compute additive checksum over 'size' elements */
+unsigned long compute_checksum(unsigned long* msg, int size)
 {
-   /* Initialize the PMU for low-overhead cycle counting */
-   tm_setup_pmu();
-
-   /* Initialize the message content with a known pattern */
-   message_sent_arr[0] = 0xDEADBEEF;
-   message_sent_arr[1] = 0xCAFEBABE;
-   message_sent_arr[2] = 0xBAADF00D;
-   message_sent_arr[3] = 0xFEEDFACE;
-
-   /* Create a message queue with id 0 */
-   tm_queue_create(0);
-
-   /* Create and resume the Receiver Thread */
-   tm_thread_create(0, 5, tm_receiver_thread_entry);
-   /* Create and resume the Interrupt Simulator Thread */
-   tm_thread_create(1, 1, tm_interrupt_simulator_thread_entry);
-
-   tm_thread_resume(0);
-   tm_thread_resume(1);
-
-   printf("[Init] ISR-to-Task Message Queue Benchmark started.\n");
+   unsigned long checksum = 0;
+   for (int i = 0; i < size; i++)
+   {
+      checksum += msg[i];
+   }
+   return checksum;
 }
 
-/*---------------------------------------------------------------
-  Receiver Thread
-  - Blocks on the message queue.
-  - Immediately after receiving a message, stops the PMU latency measurement.
-  - Increments the message-processed counter.
-  - Compares the received message to the known send pattern.
-  - If they match, suspends the interrupt simulator thread and outputs the final report.
----------------------------------------------------------------*/
+/* Initialization function */
+void tm_message_isr_to_task_initialize(void)
+{
+   int i;
+   tm_setup_pmu();
+   tm_queue_create(0);
+
+   /* Precompute PMU names for each iteration so the ISR can avoid runtime formatting */
+   for (i = 0; i < ITERATION_COUNT; i++)
+   {
+      snprintf(pmu_send_names[i], sizeof(pmu_send_names[i]), "S%02d", i);
+      snprintf(pmu_recv_names[i], sizeof(pmu_recv_names[i]), "R%02d", i);
+   }
+
+   /* Create the single receiver thread that drives the entire test */
+   tm_thread_create(0, 5, tm_receiver_thread_entry);
+   tm_thread_resume(0);
+}
+
+/* Minimal ISR: No prints, no dynamic formatting */
+void tm_isr_message_handler(void)
+{
+   int i;
+   tm_isr_counter++;
+   unsigned long message[MESSAGE_SIZE];
+
+   /* Generate message:
+      [0] : Producer ID (1)
+      [1] : Message counter (isr_message_counter)
+      [2..MESSAGE_SIZE-2] : Pattern = 1000 + (isr_message_counter * 10) + index
+      [MESSAGE_SIZE-1] : Checksum over first (MESSAGE_SIZE-1) words */
+   message[0] = 1;
+   message[1] = isr_message_counter;
+   for (i = 2; i < MESSAGE_SIZE - 1; i++)
+   {
+      message[i] = 1000 + (isr_message_counter * 10) + i;
+   }
+   message[MESSAGE_SIZE - 1] = compute_checksum(message, MESSAGE_SIZE - 1);
+
+   /* Measure send latency using a precomputed PMU name */
+   tm_pmu_profile_start(pmu_send_names[isr_message_counter]);
+   tm_queue_send(0, message);
+   tm_pmu_profile_end(pmu_send_names[isr_message_counter]);
+
+   isr_message_counter++; /* Prepare for next iteration */
+}
+
+/* Receiver thread:
+   Drives the test by triggering the ISR, measuring the receive latency,
+   validating the received message, and finally reporting the results. */
 void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
 {
    (void) p1;
    (void) p2;
    (void) p3;
+   int i, j;
+   char valid;
 
-   while (1)
+   for (i = 0; i < ITERATION_COUNT; i++)
    {
+      /* Trigger the ISR which will generate and send the message */
+      tm_interrupt_raise();
 
-      /* Block until a message is available from queue 0 */
+      /* Measure receive latency using a precomputed PMU name */
+      tm_pmu_profile_start(pmu_recv_names[i]);
       tm_queue_receive(0, message_received_arr);
+      tm_pmu_profile_end(pmu_recv_names[i]);
 
-      /* Stop the PMU measurement started in the ISR */
-      tm_pmu_profile_end("msg_latency");
-
-      /* Increment the processed message count */
       tm_isr_to_task_counter++;
 
-      /* Check if the received message matches the expected pattern */
-      int match = 1;
-      for (int i = 0; i < 4; i++)
+      /* Validate the received message.
+         Expected layout:
+            [0] : 1
+            [1] : iteration number (i)
+            [2..MESSAGE_SIZE-2] : 1000 + (i*10) + index
+            [MESSAGE_SIZE-1] : checksum over first (MESSAGE_SIZE-1) words
+      */
+      valid = 1;
+
+      /* Check fixed fields */
+      if (message_received_arr[0] != 1 || message_received_arr[1] != (unsigned long) i)
       {
-         if (message_received_arr[i] != message_sent_arr[i])
+         valid = 0;
+      }
+
+      /* Check the pattern fields */
+      for (j = 2; j < MESSAGE_SIZE - 1; j++)
+      {
+         if (message_received_arr[j] != 1000 + (i * 10) + j)
          {
-            match = 0;
+            valid = 0;
             break;
          }
       }
-      if (match)
+
+      /* Check the checksum */
+      if (compute_checksum(message_received_arr, MESSAGE_SIZE - 1) != message_received_arr[MESSAGE_SIZE - 1])
       {
+         valid = 0;
+         printf("Message integrity error in iteration %d: checksum mismatch\n", i);
+      }
 
-         /* Report the final benchmark results */
-         printf("==== OneShot Benchmark Complete ====\n");
-         printf("Total messages processed: %lu\n", tm_isr_to_task_counter);
-         printf("Total interrupts processed: %lu\n", tm_isr_counter);
-         tm_pmu_profile_print("msg_latency");
-         printf("\n");
-
-         break;
+      if (!valid)
+      {
+         /* Optionally record the error state */
+         // For example: error_counter++;
       }
    }
 
-   /* Suspend this thread after finishing the report */
+   /* After all iterations, report the results */
+   printf("==== ISR-to-Task Benchmark Complete ====\n");
+   printf("Total messages processed: %lu\n", tm_isr_to_task_counter);
+   printf("Total interrupts processed: %lu\n", tm_isr_counter);
+
+   /* Print PMU results for measurements */
+   for (i = 0; i < ITERATION_COUNT; i++)
+   {
+      printf("Receive Latency: ");
+      tm_pmu_profile_print(pmu_recv_names[i]);
+      printf("Send Latency: ");
+      tm_pmu_profile_print(pmu_send_names[i]);
+   }
+
    tm_thread_suspend(0);
 }
-
-/*---------------------------------------------------------------
-  Interrupt Simulator Thread
-  Periodically raises a software interrupt that triggers the ISR.
----------------------------------------------------------------*/
-void tm_interrupt_simulator_thread_entry(void* p1, void* p2, void* p3)
-{
-   (void) p1;
-   (void) p2;
-   (void) p3;
-   tm_thread_sleep(1);
-   /* Raise a software interrupt. This will call tm_isr_message_handler() */
-   tm_interrupt_raise();
-   /* Suspend the Interrupt Simulator Thread (assumed thread id 1) */
-   tm_thread_exit(1);
-}
-
-/*---------------------------------------------------------------
-  ISR Message Handler
-  - Called in interrupt context.
-  - Increments the interrupt counter.
-  - Starts the PMU latency measurement.
-  - Sends the pre-defined message to the message queue.
-  Note: Only ISR-safe RTOS functions should be used here.
----------------------------------------------------------------*/
-void tm_isr_message_handler(void)
-{
-   tm_isr_counter++;
-
-   tm_pmu_profile_start("msg_latency");
-
-   if (tm_queue_send(0, message_sent_arr) != 0)
-   {
-      printf("Message send gone wrong! \n");
-   }
-}
-
-/*[EOF]************************************************************************/
