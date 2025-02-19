@@ -58,7 +58,6 @@ int main_pmu(void)
    {
       printf("[Main] PMU Test: %s\n", pmu_calib_names[i]);
    }
-   tm_pmu_profile_print(pmu_recv_names[i]);
    printf("[Main] Finished Calibration Test.\n");
 
    return 0;
