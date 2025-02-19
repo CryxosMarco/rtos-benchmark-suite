@@ -66,7 +66,8 @@
 #define TM_THREADX_THREAD_STACK_SIZE 2096 // Increase to a higher value
 
 /* Define the default ThreadX queue size.  */
-#define TM_THREADX_QUEUE_SIZE 200
+#define NUM_QUEUE_MESSAGES 1
+#define TM_THREADX_QUEUE_SIZE (NUM_QUEUE_MESSAGES * MESSAGE_SIZE * sizeof(unsigned long))
 
 /* Define the default ThreadX memory pool size.  */
 #define TM_THREADX_MEMORY_POOL_SIZE 2048

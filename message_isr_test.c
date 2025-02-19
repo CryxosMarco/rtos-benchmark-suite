@@ -25,10 +25,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef MESSAGE_SIZE
-#define MESSAGE_SIZE 6 /* N x 4 Byte  integers */
-#endif
-
 #define ITERATION_COUNT 30
 
 /* Global counters */
@@ -37,6 +33,8 @@ volatile unsigned long tm_isr_counter = 0;
 volatile unsigned long isr_message_counter = 0; // Used by ISR as message index
 
 unsigned long message_received_arr[MESSAGE_SIZE];
+/* Use a static buffer for the isr to avoid stack corruption/overflow */
+static unsigned long isr_message_buffer[MESSAGE_SIZE];
 
 /* Precomputed PMU name arrays for send and receive iterations */
 char pmu_send_names[ITERATION_COUNT][16];
@@ -90,7 +88,8 @@ void tm_isr_message_handler(void)
 {
    int i;
    tm_isr_counter++;
-   unsigned long message[MESSAGE_SIZE];
+
+   unsigned long* message = isr_message_buffer;
 
    /* Generate message:
       [0] : Producer ID (1)
