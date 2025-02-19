@@ -53,7 +53,7 @@ int consumer_ids[NUM_CONSUMERS];
 ---------------------------------------------------------------*/
 void message_queue_test_initialize(void);
 int main_message_task_test(void);
-unsigned long compute_checksum(unsigned long* msg, int size);
+static unsigned long compute_checksum(unsigned long* msg, int size);
 
 /* Generic Producer and Consumer thread entry functions */
 void producer_thread_entry_generic(void* p1, void* p2, void* p3);
@@ -111,7 +111,7 @@ void message_queue_test_initialize(void)
   Utility: Compute a Simple Checksum
   Computes an additive checksum over 'size' elements of msg.
 ---------------------------------------------------------------*/
-unsigned long compute_checksum(unsigned long* msg, int size)
+static unsigned long compute_checksum(unsigned long* msg, int size)
 {
    unsigned long checksum = 0;
    for (int i = 0; i < size; i++)
