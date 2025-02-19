@@ -41,7 +41,7 @@ int main_pmu(void)
    /* Precompute PMU names for each iteration so the ISR can avoid runtime formatting */
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
-      snprintf(pmu_calib_names[i], sizeof(pmu_calib_names[i]), "S%02d", i);
+      snprintf(pmu_calib_names[i], sizeof(pmu_calib_names[i]), "Run %02d", i);
    }
 
    printf("[Main] Starting PMU calibration Test.\n");
@@ -56,7 +56,8 @@ int main_pmu(void)
    }
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
-      printf("[Main] PMU Test: %s\n", pmu_calib_names[i]);
+      printf("[Main] PMU Test: ");
+      tm_pmu_profile_print(pmu_calib_names[i]);
    }
    printf("[Main] Finished Calibration Test.\n");
 
