@@ -39,7 +39,7 @@ char pmu_calib_names[ITERATION_COUNT][16];
 int main_pmu(void)
 {
    /* Precompute PMU names for each iteration so the ISR can avoid runtime formatting */
-   for (i = 0; i < ITERATION_COUNT; i++)
+   for (int i = 0; i < ITERATION_COUNT; i++)
    {
       snprintf(pmu_calib_names[i], sizeof(pmu_calib_names[i]), "S%02d", i);
    }
@@ -47,14 +47,14 @@ int main_pmu(void)
    printf("[Main] Starting PMU calibration Test.\n");
    tm_setup_pmu();
 
-   for (i = 0; i < ITERATION_COUNT; i++)
+   for (int i = 0; i < ITERATION_COUNT; i++)
    {
       /* Measure send latency using a precomputed PMU name */
       tm_pmu_profile_start(pmu_calib_names[i]);
       // tm_thread_sleep(1); /* comment out for measuring overhead of pmu */
       tm_pmu_profile_end(pmu_calib_names[i]);
    }
-   for (i = 0; i < ITERATION_COUNT; i++)
+   for (int i = 0; i < ITERATION_COUNT; i++)
    {
       printf("[Main] PMU Test: %s\n", pmu_calib_names[i]);
    }
