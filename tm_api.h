@@ -151,6 +151,7 @@ extern "C"
    of seconds.  If successful, the function should return TM_SUCCESS.
    Otherwise, TM_ERROR should be returned.  */
    void tm_thread_sleep(int seconds);
+   void tm_thread_sleep_ticks(int ticks);
    /* This function creates the specified queue.  If successful, the function
    should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
    int tm_queue_create(int queue_id);

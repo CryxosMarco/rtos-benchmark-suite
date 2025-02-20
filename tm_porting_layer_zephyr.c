@@ -54,7 +54,6 @@
 /* Calculate the total size of the message queue buffer */
 #define MSGQ_BUFFER_SIZE (MSGQ_NUM_MESSAGES * MSGQ_MESSAGE_SIZE)
 
-
 #if (CONFIG_MP_MAX_NUM_CPUS > 1)
 #error "*** Tests are only designed for single processor systems! ***"
 #endif
@@ -67,8 +66,6 @@ static struct k_sem test_sem[TM_TEST_NUM_SEMAPHORES];
 static struct k_msgq test_msgq[TM_TEST_NUM_MESSAGE_QUEUES];
 /* Allocate the message queue buffer dynamically using our macros */
 static char test_msgq_buffer[TM_TEST_NUM_MESSAGE_QUEUES][MSGQ_NUM_MESSAGES][MSGQ_MESSAGE_SIZE];
-
-
 
 static struct k_mem_slab test_slab[TM_TEST_NUM_SLABS];
 static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
@@ -105,20 +102,17 @@ int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, 
    return (tid == &test_thread[thread_id]) ? TM_SUCCESS : TM_ERROR;
 }
 
-/* 
+/*
  * This function takes a thread ID and priority and attempts to create the
  * file in the underlying RTOS. Valid priorities range from 1 through 31,
- * where 1 is the highest priority and 31 is the lowest. It also passes the parameter 
- * as pointer to the underlying thread. If successful, the function should return TM_SUCCESS. 
- * Otherwise, TM_ERROR should be returned. 
+ * where 1 is the highest priority and 31 is the lowest. It also passes the parameter
+ * as pointer to the underlying thread. If successful, the function should return TM_SUCCESS.
+ * Otherwise, TM_ERROR should be returned.
  */
-int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(void*, void*, void*), void *param)
+int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(void*, void*, void*), void* param)
 {
-   k_tid_t tid = k_thread_create(&test_thread[thread_id],
-                                 test_stack[thread_id],
-                                 TM_TEST_STACK_SIZE,
-                                 entry_function,
-                                 param, NULL, NULL,  /* pass param as p1 */
+   k_tid_t tid = k_thread_create(&test_thread[thread_id], test_stack[thread_id], TM_TEST_STACK_SIZE, entry_function,
+                                 param, NULL, NULL, /* pass param as p1 */
                                  priority, 0, K_FOREVER);
 
    k_thread_suspend(&test_thread[thread_id]);
@@ -126,7 +120,6 @@ int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(v
 
    return (tid == &test_thread[thread_id]) ? TM_SUCCESS : TM_ERROR;
 }
-
 
 /*
  * This function resumes the specified thread.  If successful, the function should
@@ -174,15 +167,13 @@ void tm_thread_relinquish(void)
  */
 void tm_thread_sleep(int seconds)
 {
-   if (seconds == 0)
-   {
-      /* Sleep for 1 Tick */
-      k_sleep(K_SECONDS(10));
-   }
-   else
-   {
-      k_sleep(K_SECONDS(seconds));
-   }
+   k_sleep(K_SECONDS(seconds));
+}
+
+/* Version of above that only sleeps for defined period of ticks */
+void tm_thread_sleep_ticks(int ticks)
+{
+   k_sleep(K_TICKS(ticks));
 }
 
 /*
@@ -193,8 +184,7 @@ void tm_thread_sleep(int seconds)
  */
 int tm_queue_create(int queue_id)
 {
-   k_msgq_init(&test_msgq[queue_id], &test_msgq_buffer[queue_id][0][0],
-            MESSAGE_SIZE * sizeof(int32_t), 8);
+   k_msgq_init(&test_msgq[queue_id], &test_msgq_buffer[queue_id][0][0], MESSAGE_SIZE * sizeof(int32_t), 8);
 
    return TM_SUCCESS;
 }

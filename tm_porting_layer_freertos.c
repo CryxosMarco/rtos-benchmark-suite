@@ -151,15 +151,13 @@ void tm_thread_exit(int thread_id)
    Otherwise, TM_ERROR should be returned.  */
 void tm_thread_sleep(int seconds)
 {
-   if (seconds == 0)
-   {
-      /* sleep for 1 Tick */
-      vTaskDelay(10);
-   }
-   else
-   {
-      vTaskDelay((seconds * 1000U) / portTICK_RATE_MS);
-   }
+   vTaskDelay((seconds * 1000U) / portTICK_RATE_MS);
+}
+
+/* Version of above that only sleeps for defined period of ticks */
+void tm_thread_sleep_ticks(int ticks)
+{
+   vTaskDelay(ticks);
 }
 
 /* This function creates the specified queue.

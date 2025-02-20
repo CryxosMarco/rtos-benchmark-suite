@@ -230,16 +230,14 @@ void tm_thread_relinquish(void)
    Otherwise, TM_ERROR should be returned.  */
 void tm_thread_sleep(int seconds)
 {
-   if (seconds == 0)
-   {
-      /* Sleep for 1 Tick */
-      tx_thread_sleep((UINT) 2);
-   }
-   else
-   {
-      /* Attempt to sleep.  */
-      tx_thread_sleep(((UINT) seconds) * TM_THREADX_TICKS_PER_SECOND);
-   }
+   /* Attempt to sleep.  */
+   tx_thread_sleep(((UINT) seconds) * TM_THREADX_TICKS_PER_SECOND);
+}
+
+/* Version of above that only sleeps for defined period of ticks */
+void tm_thread_sleep_ticks(int ticks)
+{
+   tx_thread_sleep(ticks);
 }
 
 /* This function creates the specified queue.  If successful, the function
