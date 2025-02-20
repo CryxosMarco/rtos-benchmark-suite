@@ -608,7 +608,7 @@ void tm_pmu_profile_print(const char* name)
 
          for (uint32_t j = 0; j < gProfileObject.numEvents; j++)
          {
-            printk("[%s]: %u\n", p->events[j].name, p->events[j].value);
+            printk("%s Count: %u\n", p->events[j].name, p->events[j].value);
          }
          printk("\n");
          return;
@@ -631,7 +631,7 @@ void tm_pmu_profile_print_all(void)
 
       for (uint32_t j = 0; j < gProfileObject.numEvents; j++)
       {
-         printk("Event [%s]: %u\n", p->events[j].name, p->events[j].value);
+         printk("Event %s Count: %u\n", p->events[j].name, p->events[j].value);
       }
       printk("\n");
    }
