@@ -511,17 +511,9 @@ unsigned long tm_time_get(void)
  */
 int tm_task_priority_get(int thread_id)
 {
-   /* For ThreadX, use _tx_thread_info_get() to obtain the priority.
-   We retrieve only the user-specified priority. */
-   UINT priority;
-   _tx_thread_info_get(&tm_thread_array[thread_id], NULL, /* name */
-                       NULL,                              /* state */
-                       NULL,                              /* run count */
-                       &priority, NULL,                   /* preemption threshold */
-                       NULL,                              /* time slice */
-                       NULL,                              /* next thread */
-                       NULL);                             /* next suspended thread */
-   return (int) priority;
+   /* Return the effective priority from the thread control block.
+   This field reflects any priority inheritance changes. */
+   return (int) tm_thread_array[thread_id].tx_thread_priority;
 }
 
 /*-----------------------------------------------------------

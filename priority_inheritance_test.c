@@ -24,7 +24,7 @@
 #include <string.h>
 
 /* Number of inversion cycles (measurements) */
-#define ITERATION_COUNT 30
+#define ITERATION_COUNT 32
 
 #define PMU_KEY_LEN 8
 /* Global arrays for precomputed PMU keys and measured cycle counts */
