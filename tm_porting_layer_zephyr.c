@@ -357,6 +357,21 @@ unsigned long tm_time_get(void)
    return 5; /* dummy value */
 }
 
+/**
+ * tm_task_priority_get - Returns the effective priority of the task given its id.
+ * @thread_id: The index of the task in the OS-specific thread array.
+ *
+ * This function returns the current (effective) priority for the task corresponding
+ * to the provided thread_id. The prototype is the same across all supported RTOSes.
+ *
+ * Return: The effective priority as an integer, or -1 if not supported.
+ */
+int tm_task_priority_get(int thread_id)
+{
+   /* Get the priority from the thread structure. */
+   return (int) k_thread_priority_get(&test_thread[thread_id]);
+}
+
 /* ----------------------------------------------------------*/
 /*                        Driver Code                        */
 /* ----------------------------------------------------------*/

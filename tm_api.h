@@ -212,6 +212,8 @@ extern "C"
    void tm_pmu_profile_end(const char* name);
    /* Print PMU profiling results */
    void tm_pmu_profile_print(const char* name);
+   /* Get the priority of the current thread */
+   int tm_task_priority_get(int thread_id);
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

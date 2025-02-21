@@ -500,6 +500,30 @@ unsigned long tm_time_get(void)
    return 0;
 }
 
+/**
+ * tm_task_priority_get - Returns the effective priority of the task given its id.
+ * @thread_id: The index of the task in the OS-specific thread array.
+ *
+ * This function returns the current (effective) priority for the task corresponding
+ * to the provided thread_id. The prototype is the same across all supported RTOSes.
+ *
+ * Return: The effective priority as an integer, or -1 if not supported.
+ */
+int tm_task_priority_get(int thread_id)
+{
+   /* For ThreadX, use _tx_thread_info_get() to obtain the priority.
+   We retrieve only the user-specified priority. */
+   UINT priority;
+   _tx_thread_info_get(&tm_thread_array[thread_id], NULL, /* name */
+                       NULL,                              /* state */
+                       NULL,                              /* run count */
+                       &priority, NULL,                   /* preemption threshold */
+                       NULL,                              /* time slice */
+                       NULL,                              /* next thread */
+                       NULL);                             /* next suspended thread */
+   return (int) priority;
+}
+
 /*-----------------------------------------------------------
  * Performance Monitoring Unit (PMU) Configuration
  *-----------------------------------------------------------

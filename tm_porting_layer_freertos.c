@@ -414,6 +414,21 @@ unsigned long tm_time_get(void)
    return 0;
 }
 
+/**
+ * tm_task_priority_get - Returns the effective priority of the task given its id.
+ * @thread_id: The index of the task in the OS-specific thread array.
+ *
+ * This function returns the current (effective) priority for the task corresponding
+ * to the provided thread_id. The prototype is the same across all supported RTOSes.
+ *
+ * Return: The effective priority as an integer, or -1 if not supported.
+ */
+int tm_task_priority_get(int thread_id)
+{
+   UBaseType_t freertos_priority = uxTaskPriorityGet(tm_thread_array[thread_id]);
+   /* Recalculate to have higher numbers mean higher priority. */
+   return (int) (configMAX_PRIORITIES - freertos_priority + 1);
+}
 /*-----------------------------------------------------------
  * Performance Monitoring Unit (PMU) Configuration
  *-----------------------------------------------------------
