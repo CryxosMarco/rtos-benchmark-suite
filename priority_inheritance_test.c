@@ -1,20 +1,18 @@
 /*[CR]******************************************************************************
- *   Priority Inheritance Benchmark Test Program (Baseline vs Inheritance)
+ *   Priority Inheritance Detection Test Program (Iteration Based, No Stop Task)
  *
  * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
- * This program demonstrates how three tasks of different priorities (High,
- * Medium, Low) share a mutex-protected resource to trigger and observe priority
- * inheritance. Two modes are supported:
+ * This program measures the delay due to priority inheritance over a fixed
+ * number of inversion cycles (ITERATION_COUNT). PMU measurement keys are precomputed,
+ * and the low‑priority task busy-waits—calling tm_task_priority_get()—until its effective
+ * priority changes from its nominal value (LOW_TASK_PRIO). At that point it stops the PMU,
+ * records the cycle count, and releases the mutex.
  *
- *   - Baseline: The low‑priority task releases the mutex immediately.
- *   - Inheritance: The low‑priority task holds the mutex for a fixed delay (using sleep)
- *     to simulate a critical section.
- *
- * The high‑priority task measures the blocking delay via the PMU. With proper
- * priority inheritance, the delay in inheritance mode should be approximately
- * equal to the fixed hold delay, even with interference.
+ * The high‑priority task triggers the inversion and increments a counter each cycle.
+ * The medium‑priority (interference) task continuously runs until all cycles are complete,
+ * at which point it prints the PMU measurements and total inversion count.
  ******************************************************************************/
 
 /*******************************************************************************
@@ -23,14 +21,35 @@
 #include "tm_api.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-/* Number of iterations for the test */
-#define ITERATION_COUNT 5
+/* Number of inversion cycles (measurements) */
+#define ITERATION_COUNT 30
 
-/* Fixed delay for low-priority task in inheritance mode (in ticks) */
-#define CRITICAL_SECTION_DELAY_TICKS 1
+#define PMU_KEY_LEN 8
+/* Global arrays for precomputed PMU keys and measured cycle counts */
+char pmu_names[ITERATION_COUNT][PMU_KEY_LEN];
 
-/* Uncomment the following line to enable debug prints */
+/* Global counter for inversion cycles (should equal ITERATION_COUNT at test end) */
+volatile unsigned long inversion_count = 0;
+
+/*******************************************************************************
+ * Task Priority and IDs
+ ******************************************************************************/
+#define SHARED_MUTEX_ID 1
+
+#define HIGH_TASK_ID 0
+#define HIGH_TASK_PRIO 5 /* Highest priority */
+
+#define MED_TASK_ID 1
+#define MED_TASK_PRIO 10 /* Medium priority */
+
+#define LOW_TASK_ID 2
+#define LOW_TASK_PRIO 20 /* Nominal low priority */
+
+/*******************************************************************************
+ * Debug Macro
+ ******************************************************************************/
 // #define DEBUG_PRIO_INHERITANCE_ON
 #ifdef DEBUG_PRIO_INHERITANCE_ON
 #define DBG_PRINT(fmt, ...) printf(fmt, ##__VA_ARGS__)
@@ -42,84 +61,62 @@
 #endif
 
 /*******************************************************************************
- * Test Mode Selection
- *
- * MODE_BASELINE: Low-priority task releases the mutex immediately.
- * MODE_INHERITANCE: Low-priority task holds the mutex for a fixed delay.
- ******************************************************************************/
-typedef enum
-{
-   MODE_BASELINE,
-   MODE_INHERITANCE
-} test_mode_t;
-
-/* Select the mode for the test */
-volatile test_mode_t current_test_mode = MODE_INHERITANCE;
-
-/*******************************************************************************
- * PMU Profile Names (one per iteration)
- ******************************************************************************/
-char pmu_names[ITERATION_COUNT][16];
-
-/*******************************************************************************
- * Mutex and Task Definitions
- ******************************************************************************/
-#define SHARED_MUTEX_ID 1
-
-#define HIGH_TASK_ID 0
-#define HIGH_TASK_PRIO 5 /* High priority */
-
-#define MED_TASK_ID 1
-#define MED_TASK_PRIO 10 /* Medium priority */
-
-#define LOW_TASK_ID 2
-#define LOW_TASK_PRIO 20 /* Low priority */
-
-/*******************************************************************************
  * Low Priority Task
  *
- * In MODE_INHERITANCE, this task holds the mutex for a fixed time.
- * In MODE_BASELINE, it releases immediately.
+ * For each cycle:
+ *  1. Acquire the shared mutex.
+ *  2. Start the PMU measurement using the precomputed key.
+ *  3. Enter a busy loop calling tm_task_priority_get(LOW_TASK_ID) until its effective
+ *     priority is no longer LOW_TASK_PRIO.
+ *  4. Stop the PMU measurement, record the cycle count, and release the mutex.
+ *  5. Sleep briefly before the next cycle.
  ******************************************************************************/
 static void LowPrioTask(void* p1, void* p2, void* p3)
 {
    (void) p1;
    (void) p2;
    (void) p3;
+
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
-      DBG_PRINT("[LowPrioTask] Iteration %d: Attempting to acquire mutex.\n", i);
+      DBG_PRINT("[LowPrioTask] Cycle %d: Attempting to acquire mutex.\n", i);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
-         DBG_PRINT("[LowPrioTask] Iteration %d: Mutex acquired.\n", i);
-         if (current_test_mode == MODE_INHERITANCE)
+         DBG_PRINT("[LowPrioTask] Cycle %d: Mutex acquired.\n", i);
+
+         /* Busy loop until effective priority changes from the nominal value. */
+         while (tm_task_priority_get(LOW_TASK_ID) == LOW_TASK_PRIO)
          {
-            DBG_PRINT("[LowPrioTask] Iteration %d: Holding mutex for %d ticks.\n", i, CRITICAL_SECTION_DELAY_TICKS);
-            tm_thread_sleep_ticks(CRITICAL_SECTION_DELAY_TICKS);
+            tm_pmu_profile_start(pmu_names[i]);
+            // __asm__ volatile("nop");
          }
-         else
-         {
-            DBG_PRINT("[LowPrioTask] Iteration %d: Releasing mutex immediately (baseline).\n", i);
-         }
-         DBG_PRINT("[LowPrioTask] Iteration %d: Mutex released.\n", i);
+
+         tm_pmu_profile_end(pmu_names[i]);
+
+         DBG_PRINT("[LowPrioTask] Cycle %d: Inheritance detected. Releasing mutex.\n", i);
          tm_mutex_put(SHARED_MUTEX_ID);
+
+         inversion_count++; /* Completed inversion cycle */
       }
       else
       {
-         DBG_PRINT("[LowPrioTask] Iteration %d: Failed to acquire mutex.\n", i);
+         DBG_PRINT("[LowPrioTask] Cycle %d: Failed to acquire mutex.\n", i);
       }
-      tm_thread_sleep_ticks(100);
+      tm_thread_sleep_ticks(1);
    }
-   DBG_PRINT("[LowPrioTask] All iterations complete. Suspending task.\n");
+   DBG_PRINT("[LowPrioTask] All cycles complete. Suspending task.\n");
    tm_thread_suspend(LOW_TASK_ID);
 }
 
 /*******************************************************************************
  * High Priority Task
  *
- * This task measures how long it is blocked waiting for the mutex.
- * It starts a PMU measurement, attempts to acquire the mutex, stops the
- * measurement once the mutex is obtained, prints the result, and then releases the mutex.
+ * For each cycle:
+ *  1. Sleep briefly to allow LowPrioTask to acquire the mutex and start its busy loop.
+ *  2. Attempt to acquire the mutex (which blocks until LowPrioTask releases it).
+ *  3. Release the mutex and sleep briefly before the next cycle.
+ *
+ * (The inversion cycle is measured by LowPrioTask.)
  ******************************************************************************/
 static void HighPrioTask(void* p1, void* p2, void* p3)
 {
@@ -128,66 +125,74 @@ static void HighPrioTask(void* p1, void* p2, void* p3)
    (void) p3;
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
-      DBG_PRINT("[HighPrioTask] Iteration %d: Starting iteration. Sleeping briefly...\n", i);
-      tm_thread_sleep_ticks(5); // Allow LowPrioTask to run and acquire the mutex
-
-      DBG_PRINT("[HighPrioTask] Iteration %d: Initiating PMU measurement and attempting to acquire mutex.\n", i);
-      tm_pmu_profile_start(pmu_names[i]);
-
+      DBG_PRINT("[HighPrioTask] Cycle %d: Sleeping briefly before attempting mutex.\n", i);
+      tm_thread_sleep_ticks(4);
+      DBG_PRINT("[HighPrioTask] Cycle %d: Attempting to acquire mutex.\n", i);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
-         tm_pmu_profile_end(pmu_names[i]);
-         DBG_PRINT("[HighPrioTask] Iteration %d: Mutex acquired. Reporting PMU result.\n", i);
-         tm_pmu_profile_print(pmu_names[i]);
+         DBG_PRINT("[HighPrioTask] Cycle %d: Mutex acquired. Releasing mutex again.\n", i);
          tm_mutex_put(SHARED_MUTEX_ID);
       }
       else
       {
-         DBG_PRINT("[HighPrioTask] Iteration %d: Failed to acquire mutex.\n", i);
+         DBG_PRINT("[HighPrioTask] Cycle %d: Failed to acquire mutex.\n", i);
       }
-      tm_thread_sleep_ticks(100);
+      tm_thread_sleep_ticks(1);
    }
-   DBG_PRINT("[HighPrioTask] All iterations complete. Test finished.\n");
+   DBG_PRINT("[HighPrioTask] All cycles complete. Suspending task.\n");
    tm_thread_suspend(HIGH_TASK_ID);
 }
 
 /*******************************************************************************
- * Medium Priority Task
+ * Medium Priority Task (Interference & Final Results)
  *
- * This task continuously runs to simulate interference. Its work should not
- * delay the low-priority task if inheritance is working properly.
+ * This task continuously runs interference. Once all inversion cycles are complete,
+ * it prints the PMU measurement results and the total inversion count.
  ******************************************************************************/
 static void MedPrioTask(void* p1, void* p2, void* p3)
 {
    (void) p1;
    (void) p2;
    (void) p3;
-   for (int i = 0; i < ITERATION_COUNT * 20; i++)
+   while (1)
    {
-      DBG_PRINT("[MedPrioTask] Iteration %d: Running interference.\n", i);
+      DBG_PRINT("[MedPrioTask] Interference active.\n");
       tm_thread_sleep_ticks(5);
+
+      /* Check if all cycles have been completed */
+      if (inversion_count >= ITERATION_COUNT)
+      {
+         /* Allow a short delay for the other tasks to finish */
+         tm_thread_sleep_ticks(10);
+         printf("\n*** Test Complete ***\n");
+         printf("Total inversion cycles completed: %lu\n", inversion_count);
+         for (int i = 0; i < ITERATION_COUNT; i++)
+         {
+            tm_pmu_profile_print(pmu_names[i]);
+         }
+         break;
+      }
    }
-   DBG_PRINT("[MedPrioTask] Interference complete. Suspending task.\n");
+   DBG_PRINT("[MedPrioTask] Test ended. Suspending task.\n");
    tm_thread_suspend(MED_TASK_ID);
 }
 
 /*******************************************************************************
  * Test Initialization
  *
- * Precomputes PMU names, creates the mutex and tasks, and resumes them.
+ * Precomputes PMU keys, creates the mutex and tasks, and starts the test.
  ******************************************************************************/
 static void tm_priority_inheritance_initialize(void)
 {
    int i;
    tm_setup_pmu();
+   tm_mutex_create(SHARED_MUTEX_ID);
 
-   /* Precompute PMU names for each iteration (using same name for start, end, and print) */
+   /* Precompute PMU keys (e.g. "INV00", "INV01", ... "INV29") */
    for (i = 0; i < ITERATION_COUNT; i++)
    {
-      snprintf(pmu_names[i], sizeof(pmu_names[i]), "S%02d", i);
+      snprintf(pmu_names[i], PMU_KEY_LEN, "INV%02d", i);
    }
-
-   tm_mutex_create(SHARED_MUTEX_ID);
 
    tm_thread_create(LOW_TASK_ID, LOW_TASK_PRIO, LowPrioTask);
    tm_thread_create(MED_TASK_ID, MED_TASK_PRIO, MedPrioTask);
@@ -197,8 +202,7 @@ static void tm_priority_inheritance_initialize(void)
    tm_thread_resume(MED_TASK_ID);
    tm_thread_resume(HIGH_TASK_ID);
 
-   DBG_PRINT("[Init] Priority Inheritance test started for %d iterations in %s mode.\n", ITERATION_COUNT,
-             current_test_mode == MODE_INHERITANCE ? "Inheritance" : "Baseline");
+   printf("[Init] Priority Inheritance detection test started for %d cycles.\n", ITERATION_COUNT);
 }
 
 /*******************************************************************************
