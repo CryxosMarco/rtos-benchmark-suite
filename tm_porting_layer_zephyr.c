@@ -71,8 +71,9 @@ static struct k_mem_slab test_slab[TM_TEST_NUM_SLABS];
 static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
 /* Define an array of mutexes for Zephyr. */
 struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
-/* Create a global poll signal object. */
+/* Global poll signal object, initialized using Zephyr's macro. */
 static struct k_poll_signal tm_sync_poll_signal = K_POLL_SIGNAL_INITIALIZER(tm_sync_poll_signal);
+
 
 /*
  * This function called from main performs basic RTOS initialization,
@@ -397,12 +398,12 @@ int rtos_sync_wait(void)
 /*
  * rtos_sync_signal
  *
- * This function signals a waiting thread by raising the poll signal.
+ * Raises the poll signal to wake any waiting thread.
  */
 int rtos_sync_signal(void)
 {
-   /* Signal the poll event. The '1' is an arbitrary value. */
-   k_poll_signal(&tm_sync_poll_signal, 1);
+   /* Raise the signal with an arbitrary result value (e.g., 1) */
+   k_poll_signal_raise(&tm_sync_poll_signal, 1);
    return TM_SUCCESS;
 }
 

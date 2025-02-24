@@ -14,10 +14,10 @@
  ******************************************************************************/
 #include "tm_api.h"
 
-#define TM_TEST_DURATION 3
+#define TM_TEST_DURATION 30
 
 /* Define the counters used in the demo application...  */
-unsigned long tm_synchronization_processing_counter;
+unsigned long synchronozation_counter;
 
 /* Define the test thread prototypes.  */
 void sync_waiting_task(void* p1, void* p2, void* p3);
@@ -39,7 +39,7 @@ void sync_waiting_task(void* p1, void* p2, void* p3)
       rtos_sync_wait();
 
       /* Increment the number of semaphore get/puts.  */
-      tm_synchronization_processing_counter++;
+      synchronozation_counter++;
    }
 }
 
@@ -82,7 +82,7 @@ void preempting_report_thread(void)
              relative_time);
 
       /* See if there are any errors.  */
-      if (tm_synchronization_processing_counter == last_counter)
+      if (synchronozation_counter == last_counter)
       {
 
          printf("ERROR: Invalid counter value(s). Error getting/putting "
@@ -90,10 +90,10 @@ void preempting_report_thread(void)
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", tm_synchronization_processing_counter - last_counter);
+      printf("Time Period Total:  %lu\n\n", synchronozation_counter - last_counter);
 
       /* Save the last counter.  */
-      last_counter = tm_synchronization_processing_counter;
+      last_counter = synchronozation_counter;
    }
 }
 
