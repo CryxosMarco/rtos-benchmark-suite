@@ -92,6 +92,11 @@ unsigned char tm_thread_stack_area[TM_THREADX_MAX_THREADS * TM_THREADX_THREAD_ST
 unsigned char tm_queue_memory_area[TM_THREADX_MAX_QUEUES * TM_THREADX_QUEUE_SIZE];
 unsigned char tm_pool_memory_area[TM_THREADX_MAX_MEMORY_POOLS * TM_THREADX_MEMORY_POOL_SIZE];
 
+/* Global event flags group for synchronization. */
+static TX_EVENT_FLAGS_GROUP tm_sync_event_flags;
+/* Flag to indicate if the event flags group has been created. */
+static int tm_sync_event_flags_created = 0;
+
 /* Global time counter incremented by the timer ISR */
 // static volatile uint64_t g_timeCounter = 0ULL;
 
@@ -514,6 +519,47 @@ int tm_task_priority_get(int thread_id)
    /* Return the effective priority from the thread control block.
    This field reflects any priority inheritance changes. */
    return (int) tm_thread_array[thread_id].tx_thread_priority;
+}
+
+void init_rtos_sync(void)
+{
+   UINT status = tx_event_flags_create(&tm_sync_event_flags, "tm_sync_event_flags");
+   if (status == TX_SUCCESS)
+   {
+      tm_sync_event_flags_created = 1;
+      /* Optionally, set an initial flag (for example, if you want to allow immediate progress)
+         Here we set bit 0x1 so that a waiting call doesn't block immediately.
+         If you want the opposite behavior (i.e. wait for an external signal),
+         you can omit this step. */
+      tx_event_flags_set(&tm_sync_event_flags, 0x1, TX_OR);
+   }
+}
+
+/*
+ * rtos_sync_wait
+ *
+ * This function waits indefinitely for the event flag (bit 0x1) to be set.
+ * It uses TX_OR_CLEAR so that when the flag is received, it is automatically cleared.
+ */
+int rtos_sync_wait(void)
+{
+   UINT status;
+   ULONG actual_flags;
+
+   status = tx_event_flags_get(&tm_sync_event_flags, 0x1, TX_OR_CLEAR, &actual_flags, TX_WAIT_FOREVER);
+   return (status == TX_SUCCESS) ? TM_SUCCESS : TM_ERROR;
+}
+
+/*
+ * rtos_sync_signal
+ *
+ * This function sets the event flag (bit 0x1) to wake any thread waiting on it.
+ */
+int rtos_sync_signal(void)
+{
+   UINT status;
+   status = tx_event_flags_set(&tm_sync_event_flags, 0x1, TX_OR);
+   return (status == TX_SUCCESS) ? TM_SUCCESS : TM_ERROR;
 }
 
 /*-----------------------------------------------------------

@@ -15,6 +15,8 @@
 #include "tm_api.h"
 
 #define TM_TEST_DURATION 30
+/* Enable this to make the same test using standard binary semaphore to sync */
+// #define USE_REFERENCE
 
 /* Define the counters used in the demo application...  */
 unsigned long synchronozation_counter;
@@ -35,9 +37,13 @@ void sync_waiting_task(void* p1, void* p2, void* p3)
 
    while (1)
    {
-      /* Wait for the signal from Task B using RTOS-specific API  */
+/* Wait for the signal from Task B using RTOS-specific API  */
+#ifdef USE_REFERENCE
+      tm_semaphore_wait(0);
+#else
       rtos_sync_wait();
-
+#endif
+      // printf("Task A: Got the signal from Task B\n");
       /* Increment the number of semaphore get/puts.  */
       synchronozation_counter++;
    }
@@ -49,8 +55,13 @@ void sync_signaling_task(void* p1, void* p2, void* p3)
 
    while (1)
    {
-      /* Signal Task A using RTOS-specific API  */
+#ifdef USE_REFERENCE
+      /* Signal Task A by giving semaphore 0 */
+      tm_semaphore_put(0);
+#else
       rtos_sync_signal();
+#endif
+      // printf("Task B: signal\n");
    }
 }
 
@@ -109,7 +120,18 @@ int main_optimized_sync(void)
 /* Define the synchronization processing test initialization.  */
 void optimized_synchronization_initialize(void)
 {
-
+#ifdef USE_REFERENCE
+   /* Create two semaphores:
+   - Semaphore 0 (for Task A) starts available.
+   - Semaphore 1 (for Task B) starts unavailable.
+   */
+   tm_semaphore_create(0);
+   tm_semaphore_create(1);
+   /* Immediately take semaphore 1 so it is empty */
+   tm_semaphore_get(1);
+#endif
+   /* Initialize the optimizzed rtos synchronization mechanism  */
+   init_rtos_sync();
    /* Create thread 0 at priority 5.  */
    tm_thread_create(0, 5, sync_waiting_task);
    /* Create thread 1 at priority 10.  */
