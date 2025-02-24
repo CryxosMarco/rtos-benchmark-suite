@@ -21,7 +21,6 @@
 #ifdef USING_FREERTOS
 
 /* Include necessary files.  */
-
 #include "ti_drivers_config.h"
 #include "tm_api.h"
 #include <drivers/pmu.h>
@@ -46,6 +45,14 @@ TaskHandle_t tm_thread_array[TM_FREERTOS_MAX_THREADS];
 QueueHandle_t tm_queue_array[TM_FREERTOS_MAX_QUEUES];
 SemaphoreHandle_t tm_semaphore_array[TM_FREERTOS_MAX_SEMAPHORES];
 SemaphoreHandle_t tm_mutex_array[TM_FREERTOS_MAX_SEMAPHORES];
+/* Global variable to store the waiting task's handle for task notifications.
+   We use this global only for the benchmarking scenario.
+   In a real application you might pass handles via function parameters. */
+static TaskHandle_t tm_sync_task_handle = NULL;
+
+/* We use index 1 for the notification, following the provided example.
+   (The index can be chosen arbitrarily if only one notification channel is used.) */
+const UBaseType_t xSyncNotifyIndex = 1;
 
 /* This function called from main performs basic RTOS initialization,
    calls the test initialization function, and then starts the RTOS function.  */
@@ -67,17 +74,14 @@ int tm_thread_create(int thread_id, int priority, void (*entry_function)(void*, 
    BaseType_t status;
 
    configASSERT(new_priority <= (configMAX_PRIORITIES - 1));
-   status = xTaskCreate(entry_function, "Thread-Metric test", configMINIMAL_STACK_SIZE, NULL,
+   status = xTaskCreate((TaskFunction_t) entry_function, "Thread-Metric test", configMINIMAL_STACK_SIZE, NULL,
                         /*priority*/ new_priority, &tm_thread_array[thread_id]);
 
    if (status != pdPASS)
    {
       return TM_ERROR;
    }
-   // vTaskSuspend(tm_thread_array[thread_id]);
-   /* threads start active */
 
-   // printf("Creating thread ID: %d, Priority: %d\n", thread_id, priority);
    return TM_SUCCESS;
 }
 
@@ -88,9 +92,9 @@ int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(v
    BaseType_t status;
 
    configASSERT(new_priority <= (configMAX_PRIORITIES - 1));
-   status =
-      xTaskCreate(entry_function, "Thread-Metric test", configMINIMAL_STACK_SIZE, param, /* Pass the parameter here */
-                  new_priority, &tm_thread_array[thread_id]);
+   status = xTaskCreate((TaskFunction_t) entry_function, "Thread-Metric test", configMINIMAL_STACK_SIZE,
+                        param, /* Pass the parameter here */
+                        new_priority, &tm_thread_array[thread_id]);
 
    if (status != pdPASS)
    {
@@ -429,6 +433,57 @@ int tm_task_priority_get(int thread_id)
    /* Recalculate to have higher numbers mean higher priority. */
    return (int) (configMAX_PRIORITIES - freertos_priority + 1);
 }
+
+/*
+ * rtos_sync_wait()
+ *
+ * This function is intended to be called from the waiting task. It stores the
+ * current task's handle, then blocks until a notification is received.
+ */
+int rtos_sync_wait()
+{
+   /* Set the waiting task handle to the current task */
+   tm_sync_task_handle = xTaskGetCurrentTaskHandle();
+
+   /*
+    * Block until a notification is received.
+    * ulTaskNotifyTakeIndexed() clears the notification value (pdTRUE) and
+    * waits indefinitely (portMAX_DELAY).
+    */
+   uint32_t ulNotificationValue = ulTaskNotifyTakeIndexed(xSyncNotifyIndex, pdTRUE, portMAX_DELAY);
+
+   /* Return TM_SUCCESS if a notification was received, otherwise TM_ERROR */
+   return (ulNotificationValue > 0) ? TM_SUCCESS : TM_ERROR;
+}
+
+/*
+ * rtos_sync_signal()
+ *
+ * This function is intended to be called from the signaling task. It sends a
+ * notification to the task that is waiting in rtos_sync_wait().
+ */
+int rtos_sync_signal()
+{
+   /* Check that a waiting task is set */
+   if (tm_sync_task_handle != NULL)
+   {
+      /*
+       * Notify the waiting task using the same notification index.
+       * Note: vTaskNotifyGiveIndexed() does not return a status.
+       */
+      xTaskNotifyGiveIndexed(tm_sync_task_handle, xSyncNotifyIndex);
+
+      /* Optionally, if the synchronization is one-shot, clear the handle:
+         tm_sync_task_handle = NULL; */
+      return TM_SUCCESS;
+   }
+   else
+   {
+      /* If no task is waiting, return an error */
+      return TM_ERROR;
+   }
+}
+
 /*-----------------------------------------------------------
  * Performance Monitoring Unit (PMU) Configuration
  *-----------------------------------------------------------

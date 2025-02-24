@@ -120,6 +120,7 @@ extern "C"
    int main_pmu(void);
    int main_message_test(void);
    int main_message_task_test(void);
+   int main_optimized_sync(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
@@ -214,6 +215,10 @@ extern "C"
    void tm_pmu_profile_print(const char* name);
    /* Get the priority of the current thread */
    int tm_task_priority_get(int thread_id);
+   /* Set the handle and block the current thread */
+   int rtos_sync_wait();
+   /* Take the handle and unblock the waiting thread */
+   int rtos_sync_signal();
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();
