@@ -73,6 +73,8 @@ static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
 struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
 /* Global poll signal object, initialized using Zephyr's macro. */
 static struct k_poll_signal tm_sync_poll_signal = K_POLL_SIGNAL_INITIALIZER(tm_sync_poll_signal);
+/* Prepare a poll event that will be signaled. */
+static struct k_poll_event event;
 
 
 /*
@@ -374,7 +376,13 @@ int tm_task_priority_get(int thread_id)
    /* Get the priority from the thread structure. */
    return (int) k_thread_priority_get(&test_thread[thread_id]);
 }
+int init_rtos_sync ()
+{
+   /* Reset the signal so previous events don't interfere. */
+   k_poll_signal_reset(&tm_sync_poll_signal);
 
+   k_poll_event_init(&event, K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &tm_sync_poll_signal);
+}
 /*
  * rtos_sync_wait
  *
@@ -383,13 +391,6 @@ int tm_task_priority_get(int thread_id)
  */
 int rtos_sync_wait(void)
 {
-   /* Reset the signal so previous events don't interfere. */
-   k_poll_signal_reset(&tm_sync_poll_signal);
-
-   /* Prepare a poll event that will be signaled. */
-   struct k_poll_event event;
-   k_poll_event_init(&event, K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &tm_sync_poll_signal);
-
    /* Wait indefinitely until the signal is raised. */
    int ret = k_poll(&event, 1, K_FOREVER);
    return (ret == 0) ? TM_SUCCESS : TM_ERROR;
