@@ -71,6 +71,8 @@ static struct k_mem_slab test_slab[TM_TEST_NUM_SLABS];
 static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
 /* Define an array of mutexes for Zephyr. */
 struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
+/* Create a global poll signal object. */
+static struct k_poll_signal tm_sync_poll_signal = K_POLL_SIGNAL_INITIALIZER(tm_sync_poll_signal);
 
 /*
  * This function called from main performs basic RTOS initialization,
@@ -370,6 +372,38 @@ int tm_task_priority_get(int thread_id)
 {
    /* Get the priority from the thread structure. */
    return (int) k_thread_priority_get(&test_thread[thread_id]);
+}
+
+/*
+ * rtos_sync_wait
+ *
+ * This function waits for a signal using Zephyr's k_poll_signal API.
+ * It resets the poll signal, then waits indefinitely for the signal.
+ */
+int rtos_sync_wait(void)
+{
+   /* Reset the signal so previous events don't interfere. */
+   k_poll_signal_reset(&tm_sync_poll_signal);
+
+   /* Prepare a poll event that will be signaled. */
+   struct k_poll_event event;
+   k_poll_event_init(&event, K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &tm_sync_poll_signal);
+
+   /* Wait indefinitely until the signal is raised. */
+   int ret = k_poll(&event, 1, K_FOREVER);
+   return (ret == 0) ? TM_SUCCESS : TM_ERROR;
+}
+
+/*
+ * rtos_sync_signal
+ *
+ * This function signals a waiting thread by raising the poll signal.
+ */
+int rtos_sync_signal(void)
+{
+   /* Signal the poll event. The '1' is an arbitrary value. */
+   k_poll_signal(&tm_sync_poll_signal, 1);
+   return TM_SUCCESS;
 }
 
 /* ----------------------------------------------------------*/
