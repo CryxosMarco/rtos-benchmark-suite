@@ -121,6 +121,7 @@ extern "C"
    int main_message_test(void);
    int main_message_task_test(void);
    int main_optimized_sync(void);
+   int main_critical_section_test(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
@@ -221,6 +222,10 @@ extern "C"
    int rtos_sync_signal();
    /* Initialize the RTOS specificmechanism for synchronization */
    int init_rtos_sync();
+   /* Enter the criticial Section (disable tick Interrupts) */
+   void tm_enter_critical_section();
+   /* Exit the criticial Section (enable tick Interrupts) */
+   void tm_exit_critical_section();
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

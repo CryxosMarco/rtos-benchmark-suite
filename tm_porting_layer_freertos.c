@@ -441,9 +441,10 @@ int init_rtos_sync()
 }
 /*
  * rtos_sync_wait()
- *
- * This function is intended to be called from the waiting task. It stores the
- * current task's handle, then blocks until a notification is received.
+ *-----------------------------------------------------------
+ * This function is intended to be called from the waiting
+ * task. It stores the current task's handle, then blocks
+ * until a notification is received.
  */
 int rtos_sync_wait()
 {
@@ -463,9 +464,10 @@ int rtos_sync_wait()
 
 /*
  * rtos_sync_signal()
- *
- * This function is intended to be called from the signaling task. It sends a
- * notification to the task that is waiting in rtos_sync_wait().
+ *-----------------------------------------------------------
+ * This function is intended to be called from the signaling
+ * task. It sends a notification to the task that is waiting
+ * in rtos_sync_wait().
  */
 int rtos_sync_signal()
 {
@@ -487,6 +489,18 @@ int rtos_sync_signal()
       /* If no task is waiting, return an error */
       return TM_ERROR;
    }
+}
+
+/* This function enters a critical section. */
+void tm_enter_critical_section()
+{
+   taskENTER_CRITICAL();
+}
+
+/* This function exits a critical section. */
+void tm_exit_critical_section()
+{
+   taskEXIT_CRITICAL();
 }
 
 /*-----------------------------------------------------------

@@ -377,16 +377,16 @@ int tm_task_priority_get(int thread_id)
 
 int init_rtos_sync(void)
 {
-    /* Initialize the poll signal */
-    k_poll_signal_init(&tm_sync_poll_signal);
-    
-    /* Manually initialize the poll event for the signal */
-    tm_sync_poll_event[0].type = K_POLL_TYPE_SIGNAL;
-    tm_sync_poll_event[0].mode = K_POLL_MODE_NOTIFY_ONLY;
-    tm_sync_poll_event[0].obj = &tm_sync_poll_signal;
-    tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
-    
-    return 0;
+   /* Initialize the poll signal */
+   k_poll_signal_init(&tm_sync_poll_signal);
+
+   /* Manually initialize the poll event for the signal */
+   tm_sync_poll_event[0].type = K_POLL_TYPE_SIGNAL;
+   tm_sync_poll_event[0].mode = K_POLL_MODE_NOTIFY_ONLY;
+   tm_sync_poll_event[0].obj = &tm_sync_poll_signal;
+   tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
+
+   return 0;
 }
 
 /*
@@ -397,16 +397,17 @@ int init_rtos_sync(void)
  */
 int rtos_sync_wait(void)
 {
-    int ret = k_poll(tm_sync_poll_event, 1, K_FOREVER);
-    
-    if (ret == 0 && tm_sync_poll_event[0].state == K_POLL_STATE_SIGNALED) {
-        /* Reset the signal state so the next poll will block */
-        tm_sync_poll_event[0].signal->signaled = 0;
-        tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
-        return TM_SUCCESS;
-    }
-    
-    return TM_ERROR;
+   int ret = k_poll(tm_sync_poll_event, 1, K_FOREVER);
+
+   if (ret == 0 && tm_sync_poll_event[0].state == K_POLL_STATE_SIGNALED)
+   {
+      /* Reset the signal state so the next poll will block */
+      tm_sync_poll_event[0].signal->signaled = 0;
+      tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
+      return TM_SUCCESS;
+   }
+
+   return TM_ERROR;
 }
 
 /*
@@ -416,10 +417,21 @@ int rtos_sync_wait(void)
  */
 int rtos_sync_signal(void)
 {
-    k_poll_signal_raise(&tm_sync_poll_signal, 1);
-    return TM_SUCCESS;
+   k_poll_signal_raise(&tm_sync_poll_signal, 1);
+   return TM_SUCCESS;
 }
 
+/* This function enters a critical section. */
+void tm_enter_critical_section()
+{
+   k_sched_lock();
+}
+
+/* This function exits a critical section. */
+void tm_exit_critical_section()
+{
+   k_sched_unlock();
+}
 
 /* ----------------------------------------------------------*/
 /*                        Driver Code                        */

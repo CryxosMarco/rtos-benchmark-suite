@@ -562,6 +562,18 @@ int rtos_sync_signal(void)
    return (status == TX_SUCCESS) ? TM_SUCCESS : TM_ERROR;
 }
 
+/* This function enters a critical section. */
+void tm_enter_critical_section()
+{
+   tx_thread_interrupt_control(TX_INT_DISABLE);
+}
+
+/* This function exits a critical section. */
+void tm_exit_critical_section()
+{
+   tx_thread_interrupt_control(TX_INT_ENABLE);
+}
+
 /*-----------------------------------------------------------
  * Performance Monitoring Unit (PMU) Configuration
  *-----------------------------------------------------------
