@@ -434,6 +434,11 @@ int tm_task_priority_get(int thread_id)
    return (int) (configMAX_PRIORITIES - freertos_priority + 1);
 }
 
+/* Not used in FreeRTOS */
+int init_rtos_sync()
+{
+   return 1;
+}
 /*
  * rtos_sync_wait()
  *

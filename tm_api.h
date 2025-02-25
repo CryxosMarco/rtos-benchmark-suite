@@ -219,6 +219,8 @@ extern "C"
    int rtos_sync_wait();
    /* Take the handle and unblock the waiting thread */
    int rtos_sync_signal();
+   /* Initialize the RTOS specificmechanism for synchronization */
+   int init_rtos_sync();
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();
