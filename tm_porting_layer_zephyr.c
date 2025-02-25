@@ -375,7 +375,7 @@ int tm_task_priority_get(int thread_id)
    return (int) k_thread_priority_get(&test_thread[thread_id]);
 }
 
-int init_rtos_sync(void)
+void init_rtos_sync(void)
 {
    /* Initialize the poll signal */
    k_poll_signal_init(&tm_sync_poll_signal);
@@ -385,8 +385,6 @@ int init_rtos_sync(void)
    tm_sync_poll_event[0].mode = K_POLL_MODE_NOTIFY_ONLY;
    tm_sync_poll_event[0].obj = &tm_sync_poll_signal;
    tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
-
-   return 0;
 }
 
 /*
