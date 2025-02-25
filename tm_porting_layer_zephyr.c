@@ -71,11 +71,9 @@ static struct k_mem_slab test_slab[TM_TEST_NUM_SLABS];
 static char __aligned(4) test_slab_buffer[TM_TEST_NUM_SLABS][8 * 128];
 /* Define an array of mutexes for Zephyr. */
 struct k_mutex tm_mutex_array[TM_TEST_NUM_SEMAPHORES];
-/* Global poll signal object, initialized using Zephyr's macro. */
-static struct k_poll_signal tm_sync_poll_signal = K_POLL_SIGNAL_INITIALIZER(tm_sync_poll_signal);
-/* Prepare a poll event that will be signaled. */
-static struct k_poll_event event;
-
+/* Global poll signal and poll event array */
+static struct k_poll_event tm_sync_poll_event[1];
+static struct k_poll_signal tm_sync_poll_signal;
 
 /*
  * This function called from main performs basic RTOS initialization,
@@ -376,37 +374,52 @@ int tm_task_priority_get(int thread_id)
    /* Get the priority from the thread structure. */
    return (int) k_thread_priority_get(&test_thread[thread_id]);
 }
-int init_rtos_sync ()
-{
-   /* Reset the signal so previous events don't interfere. */
-   k_poll_signal_reset(&tm_sync_poll_signal);
 
-   k_poll_event_init(&event, K_POLL_TYPE_SIGNAL, K_POLL_MODE_NOTIFY_ONLY, &tm_sync_poll_signal);
+int init_rtos_sync(void)
+{
+    /* Initialize the poll signal */
+    k_poll_signal_init(&tm_sync_poll_signal);
+    
+    /* Manually initialize the poll event for the signal */
+    tm_sync_poll_event[0].type = K_POLL_TYPE_SIGNAL;
+    tm_sync_poll_event[0].mode = K_POLL_MODE_NOTIFY_ONLY;
+    tm_sync_poll_event[0].obj = &tm_sync_poll_signal;
+    tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
+    
+    return 0;
 }
+
 /*
- * rtos_sync_wait
+ * rtos_sync_wait()
  *
- * This function waits for a signal using Zephyr's k_poll_signal API.
- * It resets the poll signal, then waits indefinitely for the signal.
+ * Waits indefinitely until the poll signal is raised.
+ * After k_poll() returns (with state K_POLL_STATE_SIGNALED), it resets the poll event's state.
  */
 int rtos_sync_wait(void)
 {
-   /* Wait indefinitely until the signal is raised. */
-   int ret = k_poll(&event, 1, K_FOREVER);
-   return (ret == 0) ? TM_SUCCESS : TM_ERROR;
+    int ret = k_poll(tm_sync_poll_event, 1, K_FOREVER);
+    
+    if (ret == 0 && tm_sync_poll_event[0].state == K_POLL_STATE_SIGNALED) {
+        /* Reset the signal state so the next poll will block */
+        tm_sync_poll_event[0].signal->signaled = 0;
+        tm_sync_poll_event[0].state = K_POLL_STATE_NOT_READY;
+        return TM_SUCCESS;
+    }
+    
+    return TM_ERROR;
 }
 
 /*
- * rtos_sync_signal
+ * rtos_sync_signal()
  *
- * Raises the poll signal to wake any waiting thread.
+ * Signals the waiting thread by raising the poll signal.
  */
 int rtos_sync_signal(void)
 {
-   /* Raise the signal with an arbitrary result value (e.g., 1) */
-   k_poll_signal_raise(&tm_sync_poll_signal, 1);
-   return TM_SUCCESS;
+    k_poll_signal_raise(&tm_sync_poll_signal, 1);
+    return TM_SUCCESS;
 }
+
 
 /* ----------------------------------------------------------*/
 /*                        Driver Code                        */
