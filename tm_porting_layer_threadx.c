@@ -282,6 +282,22 @@ int tm_queue_send(int queue_id, unsigned long* message_ptr)
       return (TM_ERROR);
 }
 
+/* This function sends a message to the specified queue from an ISR.  If successful,
+   the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
+int tm_queue_send_from_isr(int queue_id, unsigned long* message_ptr)
+{
+   UINT status;
+
+   /* Send the 16-byte message to the specified queue.  */
+   status = tx_queue_send(&tm_queue_array[queue_id], message_ptr, TX_WAIT_FOREVER);
+
+   /* Determine if the queue send was successful.  */
+   if (status == TX_SUCCESS)
+      return (TM_SUCCESS);
+   else
+      return (TM_ERROR);
+}
+
 /* This function receives a 16-byte message from the specified queue.  If
    successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR should
    be returned.  */

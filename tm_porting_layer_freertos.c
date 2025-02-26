@@ -197,6 +197,25 @@ int tm_queue_send(int queue_id, unsigned long* message_ptr)
    return TM_SUCCESS;
 }
 
+/* This function sends a message to the specified queue from an ISR.  If successful,
+   the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
+int tm_queue_send_from_isr(int queue_id, unsigned long* message_ptr)
+{
+   BaseType_t xHigherPriorityTaskWoken;
+   BaseType_t status;
+
+   status = xQueueSendToBackFromISR(tm_queue_array[queue_id], (const void*) message_ptr, &xHigherPriorityTaskWoken);
+
+   if (status != pdTRUE)
+   {
+      return TM_ERROR;
+   }
+
+   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+   return TM_SUCCESS;
+}
+
 /* This function receives a 16-byte message from the specified queue.  If successful,
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
 int tm_queue_receive(int queue_id, unsigned long* message_ptr)

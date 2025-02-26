@@ -201,6 +201,12 @@ int tm_queue_send(int queue_id, unsigned long* message_ptr)
    return k_msgq_put(&test_msgq[queue_id], message_ptr, K_FOREVER);
 }
 
+/* This function sends a message to the specified queue from an ISR.  If successful,
+   the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
+int tm_queue_send_from_isr(int queue_id, unsigned long* message_ptr)
+{
+   return k_msgq_put(&test_msgq[queue_id], message_ptr, K_FOREVER);
+}
 /*
  * This function receives a 16-byte message from the specified queue.  If successful,
  * the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
