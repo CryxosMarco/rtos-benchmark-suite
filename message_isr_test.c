@@ -47,7 +47,7 @@ void tm_message_isr_to_task_initialize(void);
 unsigned long compute_checksum(unsigned long* msg, int size);
 
 /* Main entry point */
-int main_message_test(void)
+int main_message_isr_test(void)
 {
    tm_initialize(tm_message_isr_to_task_initialize);
    return 0;
@@ -106,7 +106,7 @@ void tm_isr_message_handler(void)
 
    /* Measure send latency using a precomputed PMU name */
    tm_pmu_profile_start(pmu_send_names[isr_message_counter]);
-   tm_queue_send(0, message);
+   tm_queue_send_from_isr(0, message);
    tm_pmu_profile_end(pmu_send_names[isr_message_counter]);
 
    isr_message_counter++; /* Prepare for next iteration */

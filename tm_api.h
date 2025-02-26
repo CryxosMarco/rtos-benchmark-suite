@@ -118,7 +118,7 @@ extern "C"
    int main_sync(void);
    int main_inheritance(void);
    int main_pmu(void);
-   int main_message_test(void);
+   int main_message_isr_test(void);
    int main_message_task_test(void);
    int main_optimized_sync(void);
    int main_critical_section_test(void);
@@ -161,6 +161,10 @@ extern "C"
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
    */
    int tm_queue_send(int queue_id, unsigned long* message_ptr);
+   /* This function sends a 16-byte message to the specified queue.  If successful,
+   the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.
+   */
+   int tm_queue_send_from_isr(int queue_id, unsigned long* message_ptr);
    /* This function receives a 16-byte message from the specified queue.  If
    successful, the function should return TM_SUCCESS. Otherwise, TM_ERROR should be
    returned.  */
