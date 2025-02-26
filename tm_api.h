@@ -230,6 +230,10 @@ extern "C"
    void tm_enter_critical_section();
    /* Exit the criticial Section (enable tick Interrupts) */
    void tm_exit_critical_section();
+   /* Suspending the scheduler and locking to current thread */
+   void tm_suspend_scheduler();
+   /* Resuming the scheduler */
+   void tm_resume_scheduler();
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

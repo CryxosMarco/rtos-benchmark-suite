@@ -522,6 +522,22 @@ void tm_exit_critical_section()
 }
 
 /*-----------------------------------------------------------
+ * Suspend the FreeRTOS scheduler
+ *-----------------------------------------------------------*/
+void tm_suspend_scheduler()
+{
+   vTaskSuspendAll();
+}
+
+/*-----------------------------------------------------------
+ * Resume the FreeRTOS scheduler
+ *-----------------------------------------------------------*/
+void tm_resume_scheduler()
+{
+   xTaskResumeAll();
+}
+
+/*-----------------------------------------------------------
  * Performance Monitoring Unit (PMU) Configuration
  *-----------------------------------------------------------
  * This configuration defines events to be monitored using the

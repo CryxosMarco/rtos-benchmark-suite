@@ -591,6 +591,22 @@ void tm_exit_critical_section()
 }
 
 /*-----------------------------------------------------------
+ * Suspend the ThreadX scheduler
+ *-----------------------------------------------------------*/
+tm_suspend_scheduler()
+{
+   tx_thread_preemption_disable();
+}
+
+/*-----------------------------------------------------------
+ * Resume the ThreadX scheduler
+ *-----------------------------------------------------------*/
+tm_resume_scheduler()
+{
+   tx_thread_preemption_enable();
+}
+
+/*-----------------------------------------------------------
  * Performance Monitoring Unit (PMU) Configuration
  *-----------------------------------------------------------
  * This configuration defines events to be monitored using the
