@@ -593,7 +593,7 @@ void tm_exit_critical_section()
 /*-----------------------------------------------------------
  * Suspend the ThreadX scheduler
  *-----------------------------------------------------------*/
-tm_suspend_scheduler()
+void tm_suspend_scheduler()
 {
    tx_thread_preemption_disable();
 }
@@ -601,7 +601,7 @@ tm_suspend_scheduler()
 /*-----------------------------------------------------------
  * Resume the ThreadX scheduler
  *-----------------------------------------------------------*/
-tm_resume_scheduler()
+void tm_resume_scheduler()
 {
    tx_thread_preemption_enable();
 }

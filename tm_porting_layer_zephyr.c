@@ -440,7 +440,7 @@ void tm_exit_critical_section()
 /*-----------------------------------------------------------
  * Suspend the Zephyr scheduler
  *-----------------------------------------------------------*/
-tm_suspend_scheduler()
+void tm_suspend_scheduler()
 {
    k_sched_lock();
 }
@@ -448,7 +448,7 @@ tm_suspend_scheduler()
 /*-----------------------------------------------------------
  * Resume the Zephyr scheduler
  *-----------------------------------------------------------*/
-tm_resume_scheduler()
+void tm_resume_scheduler()
 {
    k_sched_unlock();
 }
