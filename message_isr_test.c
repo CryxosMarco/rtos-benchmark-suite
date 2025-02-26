@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define ITERATION_COUNT 30
+#define ITERATION_COUNT 32
 
 /* Global counters */
 volatile unsigned long tm_isr_to_task_counter = 0;
