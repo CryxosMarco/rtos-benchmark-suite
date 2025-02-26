@@ -120,7 +120,7 @@ extern "C"
    int main_pmu(void);
    int main_message_isr_test(void);
    int main_message_task_test(void);
-   int main_optimized_sync(void);
+   int main_specific_sync(void);
    int main_critical_section_test(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the

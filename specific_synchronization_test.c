@@ -29,7 +29,7 @@ void sync_signaling_task(void* p1, void* p2, void* p3);
 void preempting_report_thread(void);
 
 /* Define the initialization prototype.  */
-void optimized_synchronization_initialize(void);
+void specific_synchronization_initialize(void);
 
 /* Define the synchronization processing thread A.  */
 void sync_waiting_task(void* p1, void* p2, void* p3)
@@ -109,16 +109,16 @@ void preempting_report_thread(void)
 }
 
 /* Define main entry point.  */
-int main_optimized_sync(void)
+int main_specific_sync(void)
 {
    /* Initialize the test.  */
-   tm_initialize(optimized_synchronization_initialize);
+   tm_initialize(specific_synchronization_initialize);
 
    return 0;
 }
 
 /* Define the synchronization processing test initialization.  */
-void optimized_synchronization_initialize(void)
+void specific_synchronization_initialize(void)
 {
 #ifdef USE_REFERENCE
    /* Create two semaphores:
