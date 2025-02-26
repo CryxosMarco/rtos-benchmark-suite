@@ -48,6 +48,7 @@
 
 #include "tm_api.h"
 #include "tx_api.h"
+#include "tx_thread.h"
 
 #include "ti_drivers_config.h"
 #include <drivers/pmu.h>
@@ -590,20 +591,61 @@ void tm_exit_critical_section()
    tx_interrupt_control(TX_INT_ENABLE);
 }
 
+/* Globale Variablen zum Speichern der alten Werte des aktuellen Threads */
+static UINT saved_preemption_threshold;
+static UINT saved_priority;
+
 /*-----------------------------------------------------------
  * Suspend the ThreadX scheduler
+ *
+ * This function obtains the current thread, saves its current
+ * preemption threshold and priority, then sets both to 0.
+ * This prevents other threads from preempting the current thread.
  *-----------------------------------------------------------*/
-void tm_suspend_scheduler()
+void tm_suspend_scheduler(void)
 {
-   tx_thread_preemption_disable();
+   /* Retrieve the current thread pointer */
+   TX_THREAD* current = _tx_thread_current_ptr;
+
+   /* Change the preemption threshold to 0 and save the old value */
+   if (tx_thread_preemption_change(current, 0, &saved_preemption_threshold) != TX_SUCCESS)
+   {
+      /* Error handling if needed */
+   }
+
+   /* Change the thread's priority to 0 (highest priority) and save the old value */
+   if (tx_thread_priority_change(current, 0, &saved_priority) != TX_SUCCESS)
+   {
+      /* Error handling if needed */
+   }
 }
 
 /*-----------------------------------------------------------
  * Resume the ThreadX scheduler
+ *
+ * This function restores the current thread's preemption threshold
+ * and priority to the value provided by 'thread_priority'. In this
+ * example, both the thread's priority and its preemption threshold
+ * are set to the same value.
  *-----------------------------------------------------------*/
-void tm_resume_scheduler()
+void tm_resume_scheduler(void)
 {
-   tx_thread_preemption_enable();
+   TX_THREAD* current;
+
+   /* Retrieve the current thread pointer */
+   TX_THREAD_GET_CURRENT(current);
+
+   /* Restore the preemption threshold to the desired value */
+   if (tx_thread_preemption_change(current, saved_preemption_threshold, NULL) != TX_SUCCESS)
+   {
+      /* Error handling if needed */
+   }
+
+   /* Restore the thread's priority to the desired value */
+   if (tx_thread_priority_change(current, saved_priority, NULL) != TX_SUCCESS)
+   {
+      /* Error handling if needed */
+   }
 }
 
 /*-----------------------------------------------------------

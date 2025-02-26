@@ -122,6 +122,7 @@ extern "C"
    int main_message_task_test(void);
    int main_specific_sync(void);
    int main_critical_section_test(void);
+   int main_thread_locking_test(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
@@ -231,9 +232,9 @@ extern "C"
    /* Exit the criticial Section (enable tick Interrupts) */
    void tm_exit_critical_section();
    /* Suspending the scheduler and locking to current thread */
-   void tm_suspend_scheduler();
+   void tm_suspend_scheduler(void);
    /* Resuming the scheduler */
-   void tm_resume_scheduler();
+   void tm_resume_scheduler(void);
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();
