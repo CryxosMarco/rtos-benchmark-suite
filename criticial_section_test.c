@@ -93,8 +93,6 @@ void tm_critical_section_reporting_thread(void* p1, void* p2, void* p3)
       printf("Time Period Total:  %lu\n\n", critical_section_counter - last_counter);
       if (last_counter == 0)
       {
-         printf("Iteration: %lu\n", critical_section_counter);
-
          for (int i = 0; i < ITERATION_COUNT; i++)
          {
             tm_pmu_profile_print(pmu_crit_numbers[i]);

@@ -581,13 +581,13 @@ int rtos_sync_signal(void)
 /* This function enters a critical section. */
 void tm_enter_critical_section()
 {
-   tx_thread_interrupt_control(TX_INT_DISABLE);
+   tx_interrupt_control(TX_INT_DISABLE);
 }
 
 /* This function exits a critical section. */
 void tm_exit_critical_section()
 {
-   tx_thread_interrupt_control(TX_INT_ENABLE);
+   tx_interrupt_control(TX_INT_ENABLE);
 }
 
 /*-----------------------------------------------------------

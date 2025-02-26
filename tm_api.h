@@ -221,7 +221,7 @@ extern "C"
    /* Take the handle and unblock the waiting thread */
    int rtos_sync_signal();
    /* Initialize the RTOS specificmechanism for synchronization */
-   int init_rtos_sync();
+   void init_rtos_sync();
    /* Enter the criticial Section (disable tick Interrupts) */
    void tm_enter_critical_section();
    /* Exit the criticial Section (enable tick Interrupts) */
