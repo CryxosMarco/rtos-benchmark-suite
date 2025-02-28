@@ -96,15 +96,15 @@ void tm_thread_locking_reporting_thread(void* p1, void* p2, void* p3)
    {
       tm_thread_sleep(TM_TEST_DURATION);
       relative_time += TM_TEST_DURATION;
-      printf("**** Thread Locking Benchmark **** Relative Time: %lu\n", relative_time);
+      printf("**** Thread Locking Benchmark **** Relative Time: %lu\r\n", relative_time);
 
       if (thread_locking_counter == last_counter)
       {
-         printf("ERROR: No progress in thread locking counter!\n");
+         printf("ERROR: No progress in thread locking counter!\r\n");
       }
       else
       {
-         printf("Locking Operations in Period: %lu\n\n", thread_locking_counter - last_counter);
+         printf("Locking Operations in Period: %lu\r\n\r\n", thread_locking_counter - last_counter);
       }
 
       /* Print PMU profile results on the first reporting interval */

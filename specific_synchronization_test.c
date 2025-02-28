@@ -43,7 +43,7 @@ void sync_waiting_task(void* p1, void* p2, void* p3)
 #else
       rtos_sync_wait();
 #endif
-      // printf("Task A: Got the signal from Task B\n");
+      // printf("Task A: Got the signal from Task B\r\n");
       /* Increment the number of semaphore get/puts.  */
       synchronozation_counter++;
    }
@@ -61,7 +61,7 @@ void sync_signaling_task(void* p1, void* p2, void* p3)
 #else
       rtos_sync_signal();
 #endif
-      // printf("Task B: signal\n");
+      // printf("Task B: signal\r\n");
    }
 }
 
@@ -89,7 +89,7 @@ void preempting_report_thread(void)
 
       /* Print results to the stdio window.  */
       printf("**** Thread-Metric Synchronization Processing Test **** Relative Time: "
-             "%lu\n",
+             "%lu\r\n",
              relative_time);
 
       /* See if there are any errors.  */
@@ -97,11 +97,11 @@ void preempting_report_thread(void)
       {
 
          printf("ERROR: Invalid counter value(s). Error getting/putting "
-                "semaphore!\n");
+                "semaphore!\r\n");
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", synchronozation_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n\r\n", synchronozation_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = synchronozation_counter;

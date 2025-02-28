@@ -188,7 +188,7 @@ void tm_interrupt_preemption_thread_report(void)
 
       /* Print results to the stdio window.  */
       printf("**** Thread-Metric Interrupt Preemption Processing Test **** Relative "
-             "Time: %lu\n",
+             "Time: %lu\r\n",
              relative_time);
 
       /* Calculate the total of all the counters.  */
@@ -208,11 +208,11 @@ void tm_interrupt_preemption_thread_report(void)
       {
 
          printf("ERROR: Invalid counter value(s). Interrupt processing test has "
-                "failed!\n");
+                "failed!\r\n");
       }
 
       /* Show the total interrupts for the time period.  */
-      printf("Time Period Total:  %lu\n\n", tm_interrupt_preemption_handler_counter - last_total);
+      printf("Time Period Total:  %lu\r\n\r\n", tm_interrupt_preemption_handler_counter - last_total);
 
       /* Save the last total number of interrupts.  */
       last_total = tm_interrupt_preemption_handler_counter;

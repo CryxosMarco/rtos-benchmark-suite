@@ -108,7 +108,7 @@ int tm_thread_create_param(int thread_id, int priority, void (*entry_function)(v
    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
 int tm_thread_resume(int thread_id)
 {
-   // printf("Resuming thread ID: %d\n", thread_id);
+   // printf("Resuming thread ID: %d\r\n", thread_id);
    vTaskResume(tm_thread_array[thread_id]);
    return TM_SUCCESS;
 }
@@ -142,7 +142,7 @@ void tm_thread_exit(int thread_id)
    else
    {
       // Print an error if this is called outside a task context
-      printf("Error: tm_thread_exit called outside of a task context\n");
+      printf("Error: tm_thread_exit called outside of a task context\r\n");
       // Optionally loop indefinitely or trigger a system error
       for (;;)
       {
@@ -318,7 +318,7 @@ int tm_mutex_create(int mutex_id)
 {
    if (mutex_id < 0 || mutex_id >= TM_FREERTOS_MAX_SEMAPHORES)
    {
-      printf("Invalid mutex ID: %d. Max allowed: %d\n", mutex_id, TM_FREERTOS_MAX_SEMAPHORES - 1);
+      printf("Invalid mutex ID: %d. Max allowed: %d\r\n", mutex_id, TM_FREERTOS_MAX_SEMAPHORES - 1);
       return TM_ERROR;
    }
 
@@ -326,7 +326,7 @@ int tm_mutex_create(int mutex_id)
 
    if (tm_mutex_array[mutex_id] == NULL)
    {
-      printf("Failed to create mutex for ID %d\n", mutex_id);
+      printf("Failed to create mutex for ID %d\r\n", mutex_id);
       return TM_ERROR;
    }
 
@@ -399,7 +399,7 @@ void tm_time_init(void)
    /* Start the timer */
    // TimerP_start(gTimerBaseAddr[CONFIG_TIMER0]);
 
-   // DebugP_log("tm_time_init: Timer started.\r\n");
+   // DebugP_log("tm_time_init: Timer started.\r\r\n");
 }
 
 /*******************************************************************************

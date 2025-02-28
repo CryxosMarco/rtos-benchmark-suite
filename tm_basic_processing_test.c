@@ -154,18 +154,18 @@ void tm_basic_processing_thread_report(void)
 
       /* Print results to the stdio window.  */
       printf("**** Thread-Metric Basic Single Thread Processing Test **** Relative Time: "
-             "%lu\n",
+             "%lu\r\n",
              relative_time);
 
       /* See if there are any errors.  */
       if (tm_basic_processing_counter == last_counter)
       {
 
-         printf("ERROR: Invalid counter value(s). Basic processing thread died!\n");
+         printf("ERROR: Invalid counter value(s). Basic processing thread died!\r\n");
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", tm_basic_processing_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n\r\n", tm_basic_processing_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = tm_basic_processing_counter;

@@ -501,7 +501,7 @@ void pmu_init_profile(void);
  * -------------------------------------------------------------------------- */
 int tm_setup_pmu(void)
 {
-   printk("Initializing PMU...\n");
+   printk("Initializing PMU...\r\n");
 
    /* Disable all counters (PMCR.E=0) */
    uint32_t pmcr = pmu_read_pmcr();
@@ -541,7 +541,7 @@ int tm_setup_pmu(void)
    /* Allow user mode access to PMU */
    pmu_enable_user_access();
    pmu_init_profile();
-   printk("PMU Initialized.\n");
+   printk("PMU Initialized.\r\n");
    return 0; /* success */
 }
 
@@ -689,18 +689,18 @@ void tm_pmu_profile_print(const char* name)
       TM_PMUProfilePoint* p = &gProfileObject.point[i];
       if (p->name != NULL && strcmp(p->name, name) == 0)
       {
-         printk("Profile Entry: %s\n", p->name);
-         printk("Cycle Count: %u\n", p->cycleCountValue);
+         printk("Profile Entry: %s\r\n", p->name);
+         printk("Cycle Count: %u\r\n", p->cycleCountValue);
 
          for (uint32_t j = 0; j < gProfileObject.numEvents; j++)
          {
-            printk("%s Count: %u\n", p->events[j].name, p->events[j].value);
+            printk("%s Count: %u\r\n", p->events[j].name, p->events[j].value);
          }
-         printk("\n");
+         printk("\r\n");
          return;
       }
    }
-   printk("No profile entry found for name: %s\n", name);
+   printk("No profile entry found for name: %s\r\n", name);
 }
 
 /* --------------------------------------------------------------------------
@@ -712,14 +712,14 @@ void tm_pmu_profile_print_all(void)
    for (uint32_t i = 0; i < gProfileObject.logIndex; i++)
    {
       TM_PMUProfilePoint* p = &gProfileObject.point[i];
-      printk("Profile Entry #%u: %s\n", i, p->name);
-      printk("Cycle Count: %u\n", p->cycleCountValue);
+      printk("Profile Entry #%u: %s\r\n", i, p->name);
+      printk("Cycle Count: %u\r\n", p->cycleCountValue);
 
       for (uint32_t j = 0; j < gProfileObject.numEvents; j++)
       {
-         printk("Event %s Count: %u\n", p->events[j].name, p->events[j].value);
+         printk("Event %s Count: %u\r\n", p->events[j].name, p->events[j].value);
       }
-      printk("\n");
+      printk("\r\n");
    }
 }
 

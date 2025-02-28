@@ -213,7 +213,7 @@ void tm_cooperative_thread_report(void)
       relative_time = relative_time + TM_TEST_DURATION;
 
       /* Print results to the stdio window.  */
-      printf("**** Thread-Metric Cooperative Scheduling Test **** Relative Time: %lu\n", relative_time);
+      printf("**** Thread-Metric Cooperative Scheduling Test **** Relative Time: %lu\r\n", relative_time);
 
       /* Calculate the total of all the counters.  */
       total = tm_cooperative_thread_0_counter + tm_cooperative_thread_1_counter + tm_cooperative_thread_2_counter +
@@ -223,11 +223,11 @@ void tm_cooperative_thread_report(void)
       average = total / 5;
 
       /* WCC - integrity check */
-      printf("tm_cooperative_thread_0_counter: %lu\n", tm_cooperative_thread_0_counter);
-      printf("tm_cooperative_thread_1_counter: %lu\n", tm_cooperative_thread_1_counter);
-      printf("tm_cooperative_thread_2_counter: %lu\n", tm_cooperative_thread_2_counter);
-      printf("tm_cooperative_thread_3_counter: %lu\n", tm_cooperative_thread_3_counter);
-      printf("tm_cooperative_thread_4_counter: %lu\n", tm_cooperative_thread_4_counter);
+      printf("tm_cooperative_thread_0_counter: %lu\r\n", tm_cooperative_thread_0_counter);
+      printf("tm_cooperative_thread_1_counter: %lu\r\n", tm_cooperative_thread_1_counter);
+      printf("tm_cooperative_thread_2_counter: %lu\r\n", tm_cooperative_thread_2_counter);
+      printf("tm_cooperative_thread_3_counter: %lu\r\n", tm_cooperative_thread_3_counter);
+      printf("tm_cooperative_thread_4_counter: %lu\r\n", tm_cooperative_thread_4_counter);
 
       /* See if there are any errors.  */
       if ((tm_cooperative_thread_0_counter < (average - 1)) || (tm_cooperative_thread_0_counter > (average + 1)) ||
@@ -238,11 +238,11 @@ void tm_cooperative_thread_report(void)
       {
 
          printf("ERROR: Invalid counter value(s). Cooperative counters should not "
-                "be more that 1 different than the average!\n");
+                "be more that 1 different than the average!\r\n");
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", total - last_total);
+      printf("Time Period Total:  %lu\r\n\r\n", total - last_total);
 
       /* Save the last total.  */
       last_total = total;

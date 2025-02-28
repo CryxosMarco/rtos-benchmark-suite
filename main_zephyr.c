@@ -87,7 +87,7 @@ void setup_interrupt(void)
 void main_task(void* pvParameters)
 {
    /* Start Thread-Metric tests */
-   printk("Starting Thread-Metric tests...\n");
+   printk("Starting Thread-Metric tests...\r\n");
 
    /* Initialize custom interrupts*/
    test_interrupt_handler = tm_isr_message_handler;
@@ -105,12 +105,12 @@ K_THREAD_DEFINE(main_thread, 512 /* STACKSIZE */, main_task, NULL, NULL, NULL, M
 
 int rtos_main_zephyr(void)
 {
-   printk("Initializing Zephyr system...\n");
+   printk("Initializing Zephyr system...\r\n");
 
    /* Create main task */
    k_thread_start(main_thread);
 
-   printk("Main task created and running...\n");
+   printk("Main task created and running...\r\n");
 
    return 0;
 }

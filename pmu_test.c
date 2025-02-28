@@ -44,7 +44,7 @@ int main_pmu(void)
       snprintf(pmu_calib_names[i], sizeof(pmu_calib_names[i]), "Run %02d", i);
    }
 
-   printf("[Main] Starting PMU calibration Test.\n");
+   printf("[Main] Starting PMU calibration Test.\r\n");
    tm_setup_pmu();
 
    for (int i = 0; i < ITERATION_COUNT; i++)
@@ -59,7 +59,7 @@ int main_pmu(void)
       printf("[Main] PMU Test: ");
       tm_pmu_profile_print(pmu_calib_names[i]);
    }
-   printf("[Main] Finished Calibration Test.\n");
+   printf("[Main] Finished Calibration Test.\r\n");
 
    return 0;
 }

@@ -104,7 +104,7 @@ void message_queue_test_initialize(void)
    tm_thread_create(REPORTING_THREAD_ID, 1, reporting_thread_entry);
    tm_thread_resume(REPORTING_THREAD_ID);
 
-   printf("[Init] Multi Producer/Consumer Message Queue Benchmark started.\n");
+   printf("[Init] Multi Producer/Consumer Message Queue Benchmark started.\r\n");
 }
 
 /*---------------------------------------------------------------
@@ -155,7 +155,7 @@ void producer_thread_entry_generic(void* p1, void* p2, void* p3)
       /* Send the message; print an error if sending fails */
       if (tm_queue_send(0, message) != 0)
       {
-         printf("Producer %d: Message send failed!\n", producer_id);
+         printf("Producer %d: Message send failed!\r\n", producer_id);
       }
       else
       {
@@ -192,7 +192,7 @@ void consumer_thread_entry_generic(void* p1, void* p2, void* p3)
       unsigned long expected_checksum = compute_checksum(message, MESSAGE_SIZE - 1);
       if (expected_checksum != message[MESSAGE_SIZE - 1])
       {
-         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\n", consumer_id,
+         printf("Consumer %d: Message integrity error. Expected checksum %lu, got %lu\r\n", consumer_id,
                 expected_checksum, message[MESSAGE_SIZE - 1]);
          integrity_errors_counter++;
       }
@@ -227,27 +227,27 @@ void reporting_thread_entry(void* p1, void* p2, void* p3)
       last_total_sent = total_sent_counter;
       last_total_received = total_received_counter;
 
-      printf("**** Multi Producer/Consumer Message Queue Test **** Time: %lu sec\n", relative_time);
-      printf("Messages Sent in Period: %lu\n", period_sent);
-      printf("Messages Received in Period: %lu\n", period_received);
-      printf("Integrity Errors: %lu\n", integrity_errors_counter);
+      printf("**** Multi Producer/Consumer Message Queue Test **** Time: %lu sec\r\n", relative_time);
+      printf("Messages Sent in Period: %lu\r\n", period_sent);
+      printf("Messages Received in Period: %lu\r\n", period_received);
+      printf("Integrity Errors: %lu\r\n", integrity_errors_counter);
 
 #ifdef OBSERVE
       /* Print per-thread execution counts */
-      printf("\nPer-Producer Execution Counts:\n");
+      printf("\nPer-Producer Execution Counts:\r\n");
       for (int i = 0; i < NUM_PRODUCERS; i++)
       {
-         printf("  Producer %d: %lu\n", i, producer_run_counts[i]);
+         printf("  Producer %d: %lu\r\n", i, producer_run_counts[i]);
       }
-      printf("\nPer-Consumer Execution Counts:\n");
+      printf("\nPer-Consumer Execution Counts:\r\n");
       for (int i = 0; i < NUM_CONSUMERS; i++)
       {
-         printf("  Consumer %d: %lu\n", i, consumer_run_counts[i]);
+         printf("  Consumer %d: %lu\r\n", i, consumer_run_counts[i]);
       }
-      printf("\n");
+      printf("\r\n");
 #endif
 
-      printf("\n");
+      printf("\r\n");
    }
 }
 

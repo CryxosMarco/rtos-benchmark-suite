@@ -79,10 +79,10 @@ static void LowPrioTask(void* p1, void* p2, void* p3)
 
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
-      DBG_PRINT("[LowPrioTask] Cycle %d: Attempting to acquire mutex.\n", i);
+      DBG_PRINT("[LowPrioTask] Cycle %d: Attempting to acquire mutex.\r\n", i);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
-         DBG_PRINT("[LowPrioTask] Cycle %d: Mutex acquired.\n", i);
+         DBG_PRINT("[LowPrioTask] Cycle %d: Mutex acquired.\r\n", i);
 
          /* Busy loop until effective priority changes from the nominal value. */
          while (tm_task_priority_get(LOW_TASK_ID) == LOW_TASK_PRIO)
@@ -93,18 +93,18 @@ static void LowPrioTask(void* p1, void* p2, void* p3)
 
          tm_pmu_profile_end(pmu_names[i]);
 
-         DBG_PRINT("[LowPrioTask] Cycle %d: Inheritance detected. Releasing mutex.\n", i);
+         DBG_PRINT("[LowPrioTask] Cycle %d: Inheritance detected. Releasing mutex.\r\n", i);
          tm_mutex_put(SHARED_MUTEX_ID);
 
          inversion_count++; /* Completed inversion cycle */
       }
       else
       {
-         DBG_PRINT("[LowPrioTask] Cycle %d: Failed to acquire mutex.\n", i);
+         DBG_PRINT("[LowPrioTask] Cycle %d: Failed to acquire mutex.\r\n", i);
       }
       tm_thread_sleep_ticks(1);
    }
-   DBG_PRINT("[LowPrioTask] All cycles complete. Suspending task.\n");
+   DBG_PRINT("[LowPrioTask] All cycles complete. Suspending task.\r\n");
    tm_thread_suspend(LOW_TASK_ID);
 }
 
@@ -125,21 +125,21 @@ static void HighPrioTask(void* p1, void* p2, void* p3)
    (void) p3;
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
-      DBG_PRINT("[HighPrioTask] Cycle %d: Sleeping briefly before attempting mutex.\n", i);
+      DBG_PRINT("[HighPrioTask] Cycle %d: Sleeping briefly before attempting mutex.\r\n", i);
       tm_thread_sleep_ticks(4);
-      DBG_PRINT("[HighPrioTask] Cycle %d: Attempting to acquire mutex.\n", i);
+      DBG_PRINT("[HighPrioTask] Cycle %d: Attempting to acquire mutex.\r\n", i);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
-         DBG_PRINT("[HighPrioTask] Cycle %d: Mutex acquired. Releasing mutex again.\n", i);
+         DBG_PRINT("[HighPrioTask] Cycle %d: Mutex acquired. Releasing mutex again.\r\n", i);
          tm_mutex_put(SHARED_MUTEX_ID);
       }
       else
       {
-         DBG_PRINT("[HighPrioTask] Cycle %d: Failed to acquire mutex.\n", i);
+         DBG_PRINT("[HighPrioTask] Cycle %d: Failed to acquire mutex.\r\n", i);
       }
       tm_thread_sleep_ticks(1);
    }
-   DBG_PRINT("[HighPrioTask] All cycles complete. Suspending task.\n");
+   DBG_PRINT("[HighPrioTask] All cycles complete. Suspending task.\r\n");
    tm_thread_suspend(HIGH_TASK_ID);
 }
 
@@ -156,7 +156,7 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
    (void) p3;
    while (1)
    {
-      DBG_PRINT("[MedPrioTask] Interference active.\n");
+      DBG_PRINT("[MedPrioTask] Interference active.\r\n");
       tm_thread_sleep_ticks(5);
 
       /* Check if all cycles have been completed */
@@ -164,8 +164,8 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
       {
          /* Allow a short delay for the other tasks to finish */
          tm_thread_sleep_ticks(10);
-         printf("\n*** Test Complete ***\n");
-         printf("Total inversion cycles completed: %lu\n", inversion_count);
+         printf("\r\n*** Test Complete ***\r\n");
+         printf("Total inversion cycles completed: %lu\r\n", inversion_count);
          for (int i = 0; i < ITERATION_COUNT; i++)
          {
             tm_pmu_profile_print(pmu_names[i]);
@@ -173,7 +173,7 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
          break;
       }
    }
-   DBG_PRINT("[MedPrioTask] Test ended. Suspending task.\n");
+   DBG_PRINT("[MedPrioTask] Test ended. Suspending task.\r\n");
    tm_thread_suspend(MED_TASK_ID);
 }
 
@@ -202,7 +202,7 @@ static void tm_priority_inheritance_initialize(void)
    tm_thread_resume(MED_TASK_ID);
    tm_thread_resume(HIGH_TASK_ID);
 
-   printf("[Init] Priority Inheritance detection test started for %d cycles.\n", ITERATION_COUNT);
+   printf("[Init] Priority Inheritance detection test started for %d cycles.\r\n", ITERATION_COUNT);
 }
 
 /*******************************************************************************

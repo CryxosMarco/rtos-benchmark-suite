@@ -145,18 +145,18 @@ void tm_message_processing_thread_report(void)
       relative_time = relative_time + TM_TEST_DURATION;
 
       /* Print results to the stdio window.  */
-      printf("**** Thread-Metric Message Processing Test **** Relative Time: %lu\n", relative_time);
+      printf("**** Thread-Metric Message Processing Test **** Relative Time: %lu\r\n", relative_time);
 
       /* See if there are any errors.  */
       if (tm_message_processing_counter == last_counter)
       {
 
          printf("ERROR: Invalid counter value(s). Error sending/receiving "
-                "messages!\n");
+                "messages!\r\n");
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", tm_message_processing_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n\r\n", tm_message_processing_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = tm_message_processing_counter;

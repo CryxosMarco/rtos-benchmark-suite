@@ -85,12 +85,12 @@ void tm_critical_section_reporting_thread(void* p1, void* p2, void* p3)
    {
       tm_thread_sleep(TM_TEST_DURATION);
       relative_time = relative_time + TM_TEST_DURATION;
-      printf("**** Critical Section Benchmark **** Relative Time: %lu\n", relative_time);
+      printf("**** Critical Section Benchmark **** Relative Time: %lu\r\n", relative_time);
       if (critical_section_counter == last_counter)
       {
-         printf("ERROR: Invalid counter value(s). Error getting/putting semaphore!\n");
+         printf("ERROR: Invalid counter value(s). Error getting/putting semaphore!\r\n");
       }
-      printf("Time Period Total:  %lu\n\n", critical_section_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n\r\n", critical_section_counter - last_counter);
       if (last_counter == 0)
       {
          for (int i = 0; i < ITERATION_COUNT; i++)

@@ -178,7 +178,7 @@ void tm_interrupt_thread_report(void)
       relative_time = relative_time + TM_TEST_DURATION;
 
       /* Print results to the stdio window.  */
-      printf("**** Thread-Metric Interrupt Processing Test **** Relative Time: %lu\n", relative_time);
+      printf("**** Thread-Metric Interrupt Processing Test **** Relative Time: %lu\r\n", relative_time);
 
       /* Calculate the total of all the counters.  */
       total = tm_interrupt_thread_0_counter + tm_interrupt_handler_counter;
@@ -192,11 +192,11 @@ void tm_interrupt_thread_report(void)
       {
 
          printf("ERROR: Invalid counter value(s). Interrupt processing test has "
-                "failed!\n");
+                "failed!\r\n");
       }
 
       /* Show the total interrupts for the time period.  */
-      printf("Time Period Total:  %lu\n\n", tm_interrupt_handler_counter - last_total);
+      printf("Time Period Total:  %lu\r\n\r\n", tm_interrupt_handler_counter - last_total);
 
       /* Save the last total number of interrupts.  */
       last_total = tm_interrupt_handler_counter;

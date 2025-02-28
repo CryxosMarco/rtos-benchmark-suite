@@ -59,15 +59,23 @@
 
 #endif /* USING_ZEPHYR */
 #ifdef USING_FREERTOS
+#include "ti_board_open_close.h"
+#include "ti_drivers_open_close.h"
+#include <drivers/uart.h>
 #include <kernel/dpl/DebugP.h>
 #endif /* USING_FREERTOS */
 #ifdef USING_THREADX
+#include "ti_board_open_close.h"
+#include "ti_drivers_open_close.h"
+#include "tx_api.h"
+#include <drivers/uart.h>
+#include <kernel/dpl/DebugP.h>
+
 #ifndef TX_DISABLE_ERROR_CHECKING
 #define TX_DISABLE_ERROR_CHECKING
 #endif
 #define TX_ENABLE_STACK_CHECKING
-#include "tx_api.h"
-#include <kernel/dpl/DebugP.h>
+
 #endif /* USING_THREADX */
 #include <stdbool.h>
 #include <stdio.h>
@@ -123,6 +131,7 @@ extern "C"
    int main_specific_sync(void);
    int main_critical_section_test(void);
    int main_thread_locking_test(void);
+   int main_uart(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
@@ -235,6 +244,8 @@ extern "C"
    void tm_suspend_scheduler(void);
    /* Resuming the scheduler */
    void tm_resume_scheduler(void);
+   /* Low latency print function */
+   void lowLatencyPrint(const char* format, ...);
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

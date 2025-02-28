@@ -135,7 +135,7 @@ void tm_synchronization_processing_thread_report(void)
 
       /* Print results to the stdio window.  */
       printf("**** Thread-Metric Synchronization Processing Test **** Relative Time: "
-             "%lu\n",
+             "%lu\r\n",
              relative_time);
 
       /* See if there are any errors.  */
@@ -143,11 +143,11 @@ void tm_synchronization_processing_thread_report(void)
       {
 
          printf("ERROR: Invalid counter value(s). Error getting/putting "
-                "semaphore!\n");
+                "semaphore!\r\n");
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", tm_synchronization_processing_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n\r\n", tm_synchronization_processing_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = tm_synchronization_processing_counter;

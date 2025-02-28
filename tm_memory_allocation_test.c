@@ -134,18 +134,18 @@ void tm_memory_allocation_thread_report(void)
       relative_time = relative_time + TM_TEST_DURATION;
 
       /* Print results to the stdio window.  */
-      printf("**** Thread-Metric Memory Allocation Test **** Relative Time: %lu\n", relative_time);
+      printf("**** Thread-Metric Memory Allocation Test **** Relative Time: %lu\r\n", relative_time);
 
       /* See if there are any errors.  */
       if (tm_memory_allocation_counter == last_counter)
       {
 
          printf("ERROR: Invalid counter value(s). Error allocating/deallocating "
-                "memory!\n");
+                "memory!\r\n");
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", tm_memory_allocation_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n\r\n", tm_memory_allocation_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = tm_memory_allocation_counter;

@@ -85,7 +85,7 @@ void setup_interrupt(void)
    HwiP_Object hwiObj;
    if (HwiP_construct(&hwiObj, &hwiParams) != SystemP_SUCCESS)
    {
-      printf("Failed to register interrupt\n");
+      printf("Failed to register interrupt\r\n");
       while (1)
          ;
    }
@@ -96,7 +96,7 @@ void setup_interrupt(void)
 
 void threadx_main(ULONG arg)
 {
-   main_sync(); /* Startet den Benchmark-Test */
+   main_message_isr_test(); /* Startet den Benchmark-Test */
 }
 
 int rtos_main_threadx(void)
@@ -104,6 +104,9 @@ int rtos_main_threadx(void)
    /* init SOC specific modules */
    System_init();
    Board_init();
+   Drivers_open();
+   Board_driversOpen();
+   /* Initialize our UART application parameters */
    /* enable this when interrupts are needed. */
    test_interrupt_handler = tm_isr_message_handler;
    setup_interrupt();
@@ -117,9 +120,9 @@ void tx_application_define(void* first_unused_memory)
 {
    UINT status;
 
-   printf("Initializing ThreadX system...\n");
+   printf("Initializing ThreadX system...\r\n");
 
-   printf("Starting Main Thread...\n");
+   printf("Starting Main Thread...\r\n");
 
    status = tx_thread_create(&main_thread,         /* Pointer to the main thread object. */
                              "main_thread",        /* Name of the task for debugging purposes. */

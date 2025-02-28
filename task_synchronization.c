@@ -107,13 +107,13 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       relative_time = relative_time + TM_TEST_DURATION;
 
       /* Print results to the stdio window.  */
-      printf("**** Task Synchronistation Test **** Relative Time: %lu\n", relative_time);
+      printf("**** Task Synchronistation Test **** Relative Time: %lu\r\n", relative_time);
 
       /* Calculate the total of all the counters. */
       total = task1_counter + task2_counter;
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\n\n", total - last_total);
+      printf("Time Period Total:  %lu\r\n\r\n", total - last_total);
 
       /* Print the PMU Report */
       tm_pmu_profile_print("SEM_A_perf");
@@ -160,7 +160,7 @@ static void task_synchronisation_initialize(void)
  ********************************************************************************/
 int main_sync(void)
 {
-   printf("[Main] Starting Synchronisation Test.\n");
+   printf("[Main] Starting Synchronisation Test.\r\n");
 
    /* Call tm_initialize(), passing our task_synchronisation_initialize.
     * The real implementation of tm_initialize() will do RTOS setup,
@@ -170,7 +170,7 @@ int main_sync(void)
 
    /* In many RTOSes, tm_initialize() might not return. If it does here,
     * we just print a message. */
-   printf("[Main] tm_initialize returned, threads started.\n");
+   printf("[Main] tm_initialize returned, threads started.\r\n");
 
    return 0;
 }
