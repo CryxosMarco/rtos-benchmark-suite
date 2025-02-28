@@ -94,7 +94,7 @@ void main_task(void* pvParameters)
    setup_interrupt();
 
    /* Call the main Thread-Metric function */
-   main_message_test();
+   main_message_task_test();
 
    /* Delete thread after completion */
    k_thread_abort(k_current_get());
