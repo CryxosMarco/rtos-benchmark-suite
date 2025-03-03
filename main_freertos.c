@@ -88,7 +88,7 @@ void setup_interrupt(void)
    /* Construct the interrupt */
    if (HwiP_construct(&hwiObj, &hwiParams) != SystemP_SUCCESS)
    {
-      printf("Failed to register interrupt\n");
+      printf("Failed to register interrupt\r\n");
       while (1)
          ; /* Halt if interrupt registration fails */
    }
@@ -102,7 +102,7 @@ void main_task(void* pvParameters)
 {
 
    /* Start Thread-Metric tests */
-   printf("Starting Thread-Metric tests...\n");
+   printf("Starting Thread-Metric tests...\r\n");
    test_interrupt_handler = tm_isr_message_handler;
    setup_interrupt();
    main_inheritance();
@@ -113,7 +113,7 @@ void main_task(void* pvParameters)
 
 int rtos_main_freertos(void)
 {
-   printf("Initializing FreeRTOS system...\n");
+   printf("Initializing FreeRTOS system...\r\n");
    /* Initialize board and system */
    System_init();
    Board_init();
@@ -133,7 +133,7 @@ int rtos_main_freertos(void)
    /* If the scheduler returns, it indicates an error */
    for (;;)
    {
-      /* printf("Scheduler returned unexpectedly\n"); */
+      /* printf("Scheduler returned unexpectedly\r\n"); */
    }
 }
 

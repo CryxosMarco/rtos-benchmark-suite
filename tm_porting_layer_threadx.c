@@ -484,7 +484,7 @@ void tm_time_init(void)
    /* Start the timer */
    // TimerP_start(gTimerBaseAddr[CONFIG_TIMER0]);
 
-   // DebugP_log("tm_time_init: Timer started.\r\n");
+   // DebugP_log("tm_time_init: Timer started.\r\r\n");
 }
 
 /*******************************************************************************

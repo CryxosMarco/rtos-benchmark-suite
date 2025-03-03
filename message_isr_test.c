@@ -164,7 +164,7 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
       if (compute_checksum(message_received_arr, MESSAGE_SIZE - 1) != message_received_arr[MESSAGE_SIZE - 1])
       {
          valid = 0;
-         printf("Message integrity error in iteration %d: checksum mismatch\n", i);
+         printf("Message integrity error in iteration %d: checksum mismatch\r\n", i);
       }
 
       if (!valid)
@@ -175,9 +175,9 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
    }
 
    /* After all iterations, report the results */
-   printf("==== ISR-to-Task Benchmark Complete ====\n");
-   printf("Total messages processed: %lu\n", tm_isr_to_task_counter);
-   printf("Total interrupts processed: %lu\n", tm_isr_counter);
+   printf("==== ISR-to-Task Benchmark Complete ====\r\n");
+   printf("Total messages processed: %lu\r\n", tm_isr_to_task_counter);
+   printf("Total interrupts processed: %lu\r\n", tm_isr_counter);
 
    /* Print PMU results for measurements */
    for (i = 0; i < ITERATION_COUNT; i++)
