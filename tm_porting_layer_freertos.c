@@ -636,4 +636,5 @@ double calculate_iteration_time(unsigned long time_sec, unsigned long count_diff
    double result = numerator / denominator;
    return result;
 }
+
 #endif /* USING_FREERTOS */

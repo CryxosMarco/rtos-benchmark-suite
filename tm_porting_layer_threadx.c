@@ -727,4 +727,25 @@ void tm_pmu_profile_print(const char* name)
    PMU_profilePrintEntry(name);
 }
 
+/*
+ * Helper function: calculate_iteration_time
+ *   Parameters:
+ *     time_sec  - the time interval in seconds (e.g., TM_TEST_DURATION)
+ *     count_diff - the number of iterations (or count difference) during that interval
+ *   Returns:
+ *     The average time per iteration in microseconds.
+ */
+double calculate_iteration_time(unsigned long time_sec, unsigned long count_diff)
+{
+   if (count_diff == 0)
+   {
+      return 0.0; // Avoid division by zero
+   }
+   // result = ((double) (time_sec) * 1000000U) / (double) count_diff;
+   double numerator = ((double) time_sec) * 1000000.0;
+   double denominator = (double) count_diff;
+   double result = numerator / denominator;
+   return result;
+}
+
 #endif /* USING_THREADX */
