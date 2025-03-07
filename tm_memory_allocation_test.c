@@ -145,7 +145,7 @@ void tm_memory_allocation_thread_report(void)
                 "memory!\r\n");
       }
 
-      unsigned long diff = tm_memory_allocation_counter - last_total;
+      unsigned long diff = tm_memory_allocation_counter - last_counter;
       /* Calculate the average time per iteration using the helper function */
       iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
 

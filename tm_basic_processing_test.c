@@ -165,7 +165,7 @@ void tm_basic_processing_thread_report(void)
          printf("ERROR: Invalid counter value(s). Basic processing thread died!\r\n");
       }
 
-      unsigned long diff = tm_basic_processing_counter - last_total;
+      unsigned long diff = tm_basic_processing_counter - last_counter;
       /* Calculate the average time per iteration using the helper function */
       iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
 

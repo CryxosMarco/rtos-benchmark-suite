@@ -77,10 +77,9 @@ void tm_critical_section_reporting_thread(void* p1, void* p2, void* p3)
    (void) p1;
    (void) p2;
    (void) p3;
-   unsigned long last_counter;
-   unsigned long relative_time;
-   last_counter = 0;
-   relative_time = 0;
+   unsigned long last_counter = 0;
+   unsigned long relative_time = 0;
+   double iteration_time_us = 0;
    while (1)
    {
       tm_thread_sleep(TM_TEST_DURATION);

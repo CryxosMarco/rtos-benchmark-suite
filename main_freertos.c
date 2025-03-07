@@ -105,7 +105,7 @@ void main_task(void* pvParameters)
    printf("Starting Thread-Metric tests...\r\n");
    test_interrupt_handler = tm_interrupt_preemption_handler;
    setup_interrupt();
-   tm_main_two();
+   tm_main_one();
 
    /* Delete this task when finished */
    vTaskDelete(NULL);
