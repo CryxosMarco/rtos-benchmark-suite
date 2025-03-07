@@ -63,6 +63,11 @@ void tm_critical_section_benchmark_thread(void* p1, void* p2, void* p3)
       }
       tm_enter_critical_section();
       critical_section_counter++;
+      /* busy work loop to have some blocked time*/
+      for (int i = 0; i < 1000; i++)
+      {
+         __asm__ volatile("nop");
+      }
       tm_exit_critical_section();
       if (critical_section_counter < ITERATION_COUNT + 1)
       {
