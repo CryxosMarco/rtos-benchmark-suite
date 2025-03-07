@@ -216,6 +216,8 @@ void reporting_thread_entry(void* p1, void* p2, void* p3)
    unsigned long last_total_sent = 0;
    unsigned long last_total_received = 0;
    unsigned long relative_time = 0;
+   double iteration_time_us_send = 0;
+   double iteration_time_us_receive = 0;
 
    while (1)
    {
@@ -232,6 +234,11 @@ void reporting_thread_entry(void* p1, void* p2, void* p3)
       printf("Messages Received in Period: %lu\r\n", period_received);
       printf("Integrity Errors: %lu\r\n", integrity_errors_counter);
 
+      /* Calculate the average time per iteration using the helper function */
+      iteration_time_us_send = calculate_iteration_time(TM_TEST_DURATION, period_sent);
+      printf("Average Time per Send: %f us\r\n", iteration_time_us_send);
+      iteration_time_us_receive = calculate_iteration_time(TM_TEST_DURATION, period_received);
+      printf("Average Time per Receive: %f us\r\n", iteration_time_us_receive);
 #ifdef OBSERVE
       /* Print per-thread execution counts */
       printf("\nPer-Producer Execution Counts:\r\n");
