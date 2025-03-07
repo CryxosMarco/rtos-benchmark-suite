@@ -103,9 +103,9 @@ void main_task(void* pvParameters)
 
    /* Start Thread-Metric tests */
    printf("Starting Thread-Metric tests...\r\n");
-   test_interrupt_handler = tm_isr_message_handler;
+   test_interrupt_handler = tm_interrupt_preemption_handler;
    setup_interrupt();
-   main_inheritance();
+   tm_main_two();
 
    /* Delete this task when finished */
    vTaskDelete(NULL);
@@ -113,10 +113,12 @@ void main_task(void* pvParameters)
 
 int rtos_main_freertos(void)
 {
-   printf("Initializing FreeRTOS system...\r\n");
    /* Initialize board and system */
    System_init();
    Board_init();
+   Drivers_open();
+   Board_driversOpen();
+   printf("Initializing FreeRTOS system...\r\n");
 
    /* Create main task */
    BaseType_t status = xTaskCreate(main_task, "MainTask", MAIN_TASK_STACK_SIZE, NULL, MAIN_TASK_PRI, NULL);
