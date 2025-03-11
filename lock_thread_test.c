@@ -91,17 +91,12 @@ void tm_thread_locking_reporting_thread(void* p1, void* p2, void* p3)
    (void) p3;
    unsigned long last_counter = 0;
    unsigned long relative_time = 0;
-   double iteration_time_us = 0;
 
    while (1)
    {
       tm_thread_sleep(TM_TEST_DURATION);
       relative_time += TM_TEST_DURATION;
       printf("**** Thread Locking Benchmark **** Relative Time: %lu\r\n", relative_time);
-
-      unsigned long diff = thread_locking_counter - last_counter;
-      /* Calculate the average time per iteration using the helper function */
-      iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
 
       if (thread_locking_counter == last_counter)
       {
@@ -110,7 +105,6 @@ void tm_thread_locking_reporting_thread(void* p1, void* p2, void* p3)
       else
       {
          printf("Locking Operations in Period: %lu\r\n", thread_locking_counter - last_counter);
-         printf("Average Time per Iteration:    %f us\r\n\r\n", iteration_time_us);
       }
 
       /* Print PMU profile results on the first reporting interval */

@@ -248,7 +248,7 @@ extern "C"
    /* Low latency print function */
    void lowLatencyPrint(const char* format, ...);
    /* Calculate the time per iteration */
-   double calculate_iteration_time(unsigned long time_sec, unsigned long count_diff);
+   // double calculate_iteration_time(unsigned long time_sec, unsigned long count_diff);
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

@@ -90,7 +90,6 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
    unsigned long total;
    unsigned long relative_time;
    unsigned long last_total;
-   double iteration_time_us = 0;
 
    /* Initialize the last total.  */
    last_total = 0;
@@ -113,15 +112,10 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       /* Calculate the total of all the counters. */
       total = task1_counter + task2_counter;
 
-      unsigned long diff = total - last_total;
-      /* Calculate the average time per iteration using the helper function */
-      iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
-
       /* Show the time period total.  */
       printf("Time Period Total:  %lu\r\n", total - last_total);
       printf("Task1 Counter:  %lu\r\n", task1_counter);
       printf("Task2 Counter:  %lu\r\n", task2_counter);
-      printf("Average Time per Iteration:    %f us\r\n\r\n", iteration_time_us);
 
       /* Print the PMU Report */
       tm_pmu_profile_print("SEM_A_perf");

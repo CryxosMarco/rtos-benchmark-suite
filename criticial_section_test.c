@@ -84,23 +84,18 @@ void tm_critical_section_reporting_thread(void* p1, void* p2, void* p3)
    (void) p3;
    unsigned long last_counter = 0;
    unsigned long relative_time = 0;
-   double iteration_time_us = 0;
+   
    while (1)
    {
       tm_thread_sleep(TM_TEST_DURATION);
       relative_time = relative_time + TM_TEST_DURATION;
       printf("**** Critical Section Benchmark **** Relative Time: %lu\r\n", relative_time);
 
-      unsigned long diff = critical_section_counter - last_counter;
-      /* Calculate the average time per iteration using the helper function */
-      iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
-
       if (critical_section_counter == last_counter)
       {
          printf("ERROR: Invalid counter value(s). Error getting/putting semaphore!\r\n");
       }
       printf("Time Period Total:  %lu\r\n\r\n", critical_section_counter - last_counter);
-      printf("Average Time per Iteration:    %f us\r\n\r\n", iteration_time_us);
 
       if (last_counter == 0)
       {

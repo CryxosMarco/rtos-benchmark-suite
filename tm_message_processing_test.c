@@ -128,7 +128,6 @@ void tm_message_processing_thread_report(void)
 
    unsigned long last_counter;
    unsigned long relative_time;
-   double iteration_time_us = 0;
 
    /* Initialize the last counter.  */
    last_counter = 0;
@@ -156,13 +155,8 @@ void tm_message_processing_thread_report(void)
                 "messages!\r\n");
       }
 
-      unsigned long diff = tm_message_processing_counter - last_counter;
-      /* Calculate the average time per iteration using the helper function */
-      iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
-
       /* Show the time period total.  */
       printf("Time Period Total:  %lu\r\n", tm_message_processing_counter - last_counter);
-      printf("Average Time per Iteration:    %f us\r\n\r\n", iteration_time_us);
 
       /* Save the last counter.  */
       last_counter = tm_message_processing_counter;

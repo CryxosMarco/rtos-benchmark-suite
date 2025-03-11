@@ -228,7 +228,6 @@ void tm_preemptive_thread_report(void)
    unsigned long relative_time;
    unsigned long last_total;
    unsigned long average;
-   double iteration_time_us = 0;
 
    /* Initialize the last total.  */
    last_total = 0;
@@ -270,13 +269,8 @@ void tm_preemptive_thread_report(void)
                 tm_preemptive_thread_4_counter);
       }
 
-      unsigned long diff = total - last_total;
-      /* Calculate the average time per iteration using the helper function */
-      iteration_time_us = calculate_iteration_time(TM_TEST_DURATION, diff);
-
       /* Show the time period total.  */
       printf("Time Period Total:  %lu\r\n\r\n", total - last_total);
-      printf("Average Time per Iteration:    %f us\r\n\r\n", iteration_time_us);
 
       /* Save the last total.  */
       last_total = total;
