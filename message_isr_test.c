@@ -107,7 +107,7 @@ void tm_isr_message_handler(void)
    /* Measure send latency using a precomputed PMU name */
    tm_pmu_profile_start(pmu_send_names[isr_message_counter]);
    tm_queue_send_from_isr(0, message);
-   tm_pmu_profile_end(pmu_send_names[isr_message_counter]);
+   // tm_pmu_profile_end(pmu_send_names[isr_message_counter]);
 
    isr_message_counter++; /* Prepare for next iteration */
 }
@@ -129,9 +129,10 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
       tm_interrupt_raise();
 
       /* Measure receive latency using a precomputed PMU name */
-      tm_pmu_profile_start(pmu_recv_names[i]);
+      // tm_pmu_profile_start(pmu_recv_names[i]);
       tm_queue_receive(0, message_received_arr);
-      tm_pmu_profile_end(pmu_recv_names[i]);
+      tm_pmu_profile_end(pmu_send_names[i]);
+      // tm_pmu_profile_end(pmu_recv_names[i]);
 
       tm_isr_to_task_counter++;
 
