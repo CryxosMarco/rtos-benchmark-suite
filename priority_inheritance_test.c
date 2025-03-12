@@ -126,7 +126,7 @@ static void HighPrioTask(void* p1, void* p2, void* p3)
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
       DBG_PRINT("[HighPrioTask] Cycle %d: Sleeping briefly before attempting mutex.\r\n", i);
-      tm_thread_sleep_ticks(12);
+      tm_thread_sleep_ticks(15);
       DBG_PRINT("[HighPrioTask] Cycle %d: Attempting to acquire mutex.\r\n", i);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
