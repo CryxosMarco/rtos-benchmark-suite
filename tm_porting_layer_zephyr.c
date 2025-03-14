@@ -736,4 +736,5 @@ void tm_pmu_profile_reset(void)
    gProfileObject.logIndex = 0;
 }
 
+
 #endif /* USING_ZEPHYR */

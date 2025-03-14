@@ -75,10 +75,10 @@ static void writer_task2(void* arg1, void* arg2, void* arg3)
    while (1)
    {
       /* wait on SEM_B put form Task1 */
-      tm_pmu_profile_start("SEM_A_perf");
       tm_semaphore_wait(SEM_B);
 
       task2_counter++;
+      tm_pmu_profile_start("SEM_A_perf");
 
       /* Release the first semaphore */
       tm_semaphore_put(SEM_A);
@@ -113,7 +113,9 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       total = task1_counter + task2_counter;
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\r\n\r\n", total - last_total);
+      printf("Time Period Total:  %lu\r\n", total - last_total);
+      printf("Task1 Counter:  %lu\r\n", task1_counter);
+      printf("Task2 Counter:  %lu\r\n", task2_counter);
 
       /* Print the PMU Report */
       tm_pmu_profile_print("SEM_A_perf");
@@ -171,7 +173,6 @@ int main_sync(void)
    /* In many RTOSes, tm_initialize() might not return. If it does here,
     * we just print a message. */
    printf("[Main] tm_initialize returned, threads started.\r\n");
-
    return 0;
 }
 

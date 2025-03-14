@@ -63,6 +63,11 @@ void tm_critical_section_benchmark_thread(void* p1, void* p2, void* p3)
       }
       tm_enter_critical_section();
       critical_section_counter++;
+      /* busy work loop to have some blocked time*/
+      for (int i = 0; i < 1000; i++)
+      {
+         __asm__ volatile("nop");
+      }
       tm_exit_critical_section();
       if (critical_section_counter < ITERATION_COUNT + 1)
       {
@@ -77,20 +82,21 @@ void tm_critical_section_reporting_thread(void* p1, void* p2, void* p3)
    (void) p1;
    (void) p2;
    (void) p3;
-   unsigned long last_counter;
-   unsigned long relative_time;
-   last_counter = 0;
-   relative_time = 0;
+   unsigned long last_counter = 0;
+   unsigned long relative_time = 0;
+   
    while (1)
    {
       tm_thread_sleep(TM_TEST_DURATION);
       relative_time = relative_time + TM_TEST_DURATION;
       printf("**** Critical Section Benchmark **** Relative Time: %lu\r\n", relative_time);
+
       if (critical_section_counter == last_counter)
       {
          printf("ERROR: Invalid counter value(s). Error getting/putting semaphore!\r\n");
       }
       printf("Time Period Total:  %lu\r\n\r\n", critical_section_counter - last_counter);
+
       if (last_counter == 0)
       {
          for (int i = 0; i < ITERATION_COUNT; i++)

@@ -212,7 +212,7 @@ void tm_interrupt_preemption_thread_report(void)
       }
 
       /* Show the total interrupts for the time period.  */
-      printf("Time Period Total:  %lu\r\n\r\n", tm_interrupt_preemption_handler_counter - last_total);
+      printf("Time Period Total:  %lu\r\n", tm_interrupt_preemption_handler_counter - last_total);
 
       /* Save the last total number of interrupts.  */
       last_total = tm_interrupt_preemption_handler_counter;

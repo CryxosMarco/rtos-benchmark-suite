@@ -145,7 +145,7 @@ void tm_memory_allocation_thread_report(void)
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\r\n\r\n", tm_memory_allocation_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n", tm_memory_allocation_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = tm_memory_allocation_counter;

@@ -616,4 +616,5 @@ void tm_pmu_profile_print(const char* name)
    PMU_profilePrintEntry(name);
 }
 
+
 #endif /* USING_FREERTOS */

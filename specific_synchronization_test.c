@@ -99,7 +99,7 @@ void preempting_report_thread(void)
          printf("ERROR: Invalid counter value(s). Error getting/putting "
                 "semaphore!\r\n");
       }
-
+      
       /* Show the time period total.  */
       printf("Time Period Total:  %lu\r\n\r\n", synchronozation_counter - last_counter);
 

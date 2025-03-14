@@ -117,7 +117,7 @@ void tm_synchronization_processing_thread_report(void)
 
    unsigned long last_counter;
    unsigned long relative_time;
-
+   
    /* Initialize the last counter.  */
    last_counter = 0;
 
@@ -147,7 +147,7 @@ void tm_synchronization_processing_thread_report(void)
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\r\n\r\n", tm_synchronization_processing_counter - last_counter);
+      printf("Time Period Total:  %lu\r\n", tm_synchronization_processing_counter - last_counter);
 
       /* Save the last counter.  */
       last_counter = tm_synchronization_processing_counter;

@@ -104,7 +104,7 @@ void tm_thread_locking_reporting_thread(void* p1, void* p2, void* p3)
       }
       else
       {
-         printf("Locking Operations in Period: %lu\r\n\r\n", thread_locking_counter - last_counter);
+         printf("Locking Operations in Period: %lu\r\n", thread_locking_counter - last_counter);
       }
 
       /* Print PMU profile results on the first reporting interval */

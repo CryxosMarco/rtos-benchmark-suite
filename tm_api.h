@@ -111,7 +111,7 @@ extern "C"
 #endif
 /* Define the size used by the queue create function ensure that the maximum queue size macros can hold the size*/
 #ifndef MESSAGE_SIZE
-#define MESSAGE_SIZE 4 /* N x 4 Byte  integers */
+#define MESSAGE_SIZE 32 /* N x 4 Byte  integers */
 #endif
 
    /* Prototype of the test functions */
@@ -132,6 +132,7 @@ extern "C"
    int main_critical_section_test(void);
    int main_thread_locking_test(void);
    int main_uart(void);
+   int main_memory_throughput_test(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be
@@ -246,6 +247,8 @@ extern "C"
    void tm_resume_scheduler(void);
    /* Low latency print function */
    void lowLatencyPrint(const char* format, ...);
+   /* Calculate the time per iteration */
+   // double calculate_iteration_time(unsigned long time_sec, unsigned long count_diff);
 
    /* APIs for interrupt handling */
    void tm_interrupt_raise();

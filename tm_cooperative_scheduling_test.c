@@ -242,7 +242,7 @@ void tm_cooperative_thread_report(void)
       }
 
       /* Show the time period total.  */
-      printf("Time Period Total:  %lu\r\n\r\n", total - last_total);
+      printf("Time Period Total:  %lu\r\n", total - last_total);
 
       /* Save the last total.  */
       last_total = total;

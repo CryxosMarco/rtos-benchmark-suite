@@ -126,7 +126,7 @@ static void HighPrioTask(void* p1, void* p2, void* p3)
    for (int i = 0; i < ITERATION_COUNT; i++)
    {
       DBG_PRINT("[HighPrioTask] Cycle %d: Sleeping briefly before attempting mutex.\r\n", i);
-      tm_thread_sleep_ticks(4);
+      tm_thread_sleep_ticks(15);
       DBG_PRINT("[HighPrioTask] Cycle %d: Attempting to acquire mutex.\r\n", i);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
@@ -137,7 +137,7 @@ static void HighPrioTask(void* p1, void* p2, void* p3)
       {
          DBG_PRINT("[HighPrioTask] Cycle %d: Failed to acquire mutex.\r\n", i);
       }
-      tm_thread_sleep_ticks(1);
+      tm_thread_sleep_ticks(5);
    }
    DBG_PRINT("[HighPrioTask] All cycles complete. Suspending task.\r\n");
    tm_thread_suspend(HIGH_TASK_ID);
@@ -157,7 +157,12 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
    while (1)
    {
       DBG_PRINT("[MedPrioTask] Interference active.\r\n");
-      tm_thread_sleep_ticks(5);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         __asm__ volatile("nop");
+      }
+      tm_thread_sleep_ticks(2);
 
       /* Check if all cycles have been completed */
       if (inversion_count >= ITERATION_COUNT)
@@ -170,11 +175,11 @@ static void MedPrioTask(void* p1, void* p2, void* p3)
          {
             tm_pmu_profile_print(pmu_names[i]);
          }
+         DBG_PRINT("[MedPrioTask] Test ended. Suspending task.\r\n");
+         tm_thread_exit(MED_TASK_ID);
          break;
       }
    }
-   DBG_PRINT("[MedPrioTask] Test ended. Suspending task.\r\n");
-   tm_thread_suspend(MED_TASK_ID);
 }
 
 /*******************************************************************************
