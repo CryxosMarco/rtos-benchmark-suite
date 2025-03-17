@@ -35,9 +35,13 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 #define MUTEX_ID 1
 #define SEM_A 1
 #define SEM_B 2
+#define ITERATION_COUNT 32
 
 unsigned long task1_counter = 0;
 unsigned long task2_counter = 0;
+
+/* Precomputed PMU name arrays for send and receive iterations */
+char pmu_task_sync_names[ITERATION_COUNT][16];
 
 /********************************************************************************
  * TEST TASKS
@@ -56,7 +60,10 @@ static void writer_task1(void* arg1, void* arg2, void* arg3)
    {
       /* wait on SEM_A to put from Task2 */
       tm_semaphore_wait(SEM_A);
-      tm_pmu_profile_end("SEM_A_perf");
+      if (task1_counter < ITERATION_COUNT)
+      {
+         tm_pmu_profile_end(pmu_task_sync_names[task1_counter + 1]);
+      }
 
       task1_counter++;
 
@@ -78,7 +85,10 @@ static void writer_task2(void* arg1, void* arg2, void* arg3)
       tm_semaphore_wait(SEM_B);
 
       task2_counter++;
-      tm_pmu_profile_start("SEM_A_perf");
+      if (task2_counter < ITERATION_COUNT)
+      {
+         tm_pmu_profile_start(pmu_task_sync_names[task2_counter]);
+      }
 
       /* Release the first semaphore */
       tm_semaphore_put(SEM_A);
@@ -118,7 +128,10 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       printf("Task2 Counter:  %lu\r\n", task2_counter);
 
       /* Print the PMU Report */
-      tm_pmu_profile_print("SEM_A_perf");
+      for (int i = 0; i < ITERATION_COUNT; i++)
+      {
+         tm_pmu_profile_print(pmu_task_sync_names[i]);
+      }
 
       /* Save the last total.  */
       last_total = total;
@@ -136,6 +149,13 @@ static void task_synchronisation_initialize(void)
    tm_setup_pmu();
    /* Create the UART mutex. */
    tm_mutex_create(MUTEX_ID);
+
+   /* Precompute PMU names for each iteration so the ISR can avoid runtime formatting */
+   for (int i = 0; i < ITERATION_COUNT; i++)
+   {
+      snprintf(pmu_task_sync_names[i], sizeof(pmu_task_sync_names[i]), "Cycle%02d", i);
+   }
+
    /* Create the semaphore to snychronize tasks.
       The implementation calls a semaphore_get()
       to make it available from the start */
