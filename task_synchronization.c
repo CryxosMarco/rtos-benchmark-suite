@@ -147,7 +147,7 @@ static void task_synchronisation_initialize(void)
    /* Create two tasks, each with a unique ID. Priority is arbitrary.
       Without synchronisation Task1 would start operating before task2.
       we use synchronisation to ensure that task2 can finish printing first*/
-   tm_thread_create(1, 5, writer_task1);
+   tm_thread_create(1, 4, writer_task1);
    tm_thread_create(2, 5, writer_task2);
    tm_thread_create(3, 1, reporting_thread);
 
