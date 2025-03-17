@@ -100,6 +100,7 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
    unsigned long total;
    unsigned long relative_time;
    unsigned long last_total;
+   int once = 0; /* Print the PMU report only once */
 
    /* Initialize the last total.  */
    last_total = 0;
@@ -128,11 +129,14 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       printf("Task2 Counter:  %lu\r\n", task2_counter);
 
       /* Print the PMU Report */
-      for (int i = 0; i < ITERATION_COUNT; i++)
+      if (once == 0)
       {
-         tm_pmu_profile_print(pmu_task_sync_names[i]);
+         for (int i = 0; i < ITERATION_COUNT; i++)
+         {
+            tm_pmu_profile_print(pmu_task_sync_names[i]);
+         }
       }
-
+      once = 1;
       /* Save the last total.  */
       last_total = total;
    }
