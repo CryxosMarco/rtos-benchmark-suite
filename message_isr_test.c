@@ -183,8 +183,8 @@ void tm_receiver_thread_entry(void* p1, void* p2, void* p3)
    /* Print PMU results for measurements */
    for (i = 0; i < ITERATION_COUNT; i++)
    {
-      printf("Receive Latency: ");
-      tm_pmu_profile_print(pmu_recv_names[i]);
+      // printf("Receive Latency: ");
+      // tm_pmu_profile_print(pmu_recv_names[i]);
       printf("Send Latency: ");
       tm_pmu_profile_print(pmu_send_names[i]);
    }
