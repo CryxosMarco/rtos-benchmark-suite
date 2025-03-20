@@ -87,11 +87,11 @@ static void LowPrioTask(void* p1, void* p2, void* p3)
          /* Busy loop until effective priority changes from the nominal value. */
          while (tm_task_priority_get(LOW_TASK_ID) == LOW_TASK_PRIO)
          {
-            tm_pmu_profile_start(pmu_names[i]);
-            // __asm__ volatile("nop");
+            // tm_pmu_profile_start(pmu_names[i]);
+            __asm__ volatile("nop");
          }
 
-         tm_pmu_profile_end(pmu_names[i]);
+         // tm_pmu_profile_end(pmu_names[i]);
 
          DBG_PRINT("[LowPrioTask] Cycle %d: Inheritance detected. Releasing mutex.\r\n", i);
          tm_mutex_put(SHARED_MUTEX_ID);
@@ -128,9 +128,11 @@ static void HighPrioTask(void* p1, void* p2, void* p3)
       DBG_PRINT("[HighPrioTask] Cycle %d: Sleeping briefly before attempting mutex.\r\n", i);
       tm_thread_sleep_ticks(15);
       DBG_PRINT("[HighPrioTask] Cycle %d: Attempting to acquire mutex.\r\n", i);
+      tm_pmu_profile_start(pmu_names[i]);
       if (tm_mutex_get(SHARED_MUTEX_ID) == TM_SUCCESS)
       {
          DBG_PRINT("[HighPrioTask] Cycle %d: Mutex acquired. Releasing mutex again.\r\n", i);
+         tm_pmu_profile_end(pmu_names[i]);
          tm_mutex_put(SHARED_MUTEX_ID);
       }
       else
