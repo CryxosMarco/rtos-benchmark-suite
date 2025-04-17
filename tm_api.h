@@ -111,7 +111,7 @@ extern "C"
 #endif
 /* Define the size used by the queue create function ensure that the maximum queue size macros can hold the size*/
 #ifndef MESSAGE_SIZE
-#define MESSAGE_SIZE 32 /* N x 4 Byte  integers */
+#define MESSAGE_SIZE 4 /* N x 4 Byte  integers. WARNING: USE 4 when using the Thread Metric Message Processing Test */
 #endif
 
    /* Prototype of the test functions */
