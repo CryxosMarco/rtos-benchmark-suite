@@ -23,6 +23,7 @@
 #define BUFFER_SIZE (10 * 1024)     // 10 KB buffer
 #define THROUGHPUT_ITERATIONS 10000 // Number of memcpy iterations per test run
 #define TM_TEST_DURATION 1          // Sleep period for reporting (in milliseconds)
+#define ITERATION_COUNT 32 
 
 /* PMU name used for the throughput measurement. */
 #define PMU_NAME "MEMTST"
@@ -31,26 +32,33 @@
 unsigned char msram_src[BUFFER_SIZE];  //__attribute__((section("R5F_TCMA")));
 unsigned char msram_dest[BUFFER_SIZE]; //__attribute__((section("R5F_TCMA")));
 
+/* Precomputed PMU name arrays for send and receive iterations */
+char pmu_memory_test[ITERATION_COUNT][16];
+
 /* Thread prototypes. */
 void tm_memory_throughput_thread_entry(void* p1, void* p2, void* p3);
 void tm_memory_throughput_thread_report(void* p1, void* p2, void* p3);
 
 /* Initialization prototype. */
-void tm_memory_throughput_initialize(void);
+void memory_throughput_initialize(void);
 
 /* Main entry point. */
 int main_memory_throughput_test(void)
 {
-   tm_initialize(tm_memory_throughput_initialize);
+   tm_initialize(memory_throughput_initialize);
    return 0;
 }
 
 /* Test initialization: setup PMU and create throughput test and reporting threads. */
-void tm_memory_throughput_initialize(void)
+void memory_throughput_initialize(void)
 {
    /* Setup the PMU */
    tm_setup_pmu();
 
+   for (int i = 0; i < ITERATION_COUNT; i++)
+   {
+      snprintf(pmu_memory_test[i], sizeof(pmu_memory_test[i]), "S%02d", i);
+   }
    /* Create and resume the memory throughput test thread (ID: 0). */
    tm_thread_create(0, 10, tm_memory_throughput_thread_entry);
    tm_thread_resume(0);
@@ -73,16 +81,15 @@ void tm_memory_throughput_thread_entry(void* p1, void* p2, void* p3)
 
    while (1)
    {
-      /* Start PMU profiling with the designated name. */
-      tm_pmu_profile_start(PMU_NAME);
-
+      
       for (i = 0; i < THROUGHPUT_ITERATIONS; i++)
       {
+         /* Start PMU profiling with the designated name. */
+         tm_pmu_profile_start(pmu_memory_test[i]);
          memcpy(msram_dest, msram_src, BUFFER_SIZE);
+         /* End PMU profiling. */
+         tm_pmu_profile_end(pmu_memory_test[i]);
       }
-
-      /* End PMU profiling. */
-      tm_pmu_profile_end(PMU_NAME);
 
       /* Sleep before running the next throughput test cycle. */
       tm_thread_sleep(TM_TEST_DURATION);
@@ -102,7 +109,10 @@ void tm_memory_throughput_thread_report(void* p1, void* p2, void* p3)
       relative_time += TM_TEST_DURATION;
       printf("**** Memory Throughput Test **** Relative Time: %lu ms\r\n", relative_time);
       /* Print the PMU profiling results for the throughput test */
-      tm_pmu_profile_print(PMU_NAME);
+      for (int i = 0; i < ITERATION_COUNT; i++)
+      {
+         tm_pmu_profile_print(pmu_memory_test[i]);
+      }
       printf("\r\n");
    }
 }
