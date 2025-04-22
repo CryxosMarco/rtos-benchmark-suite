@@ -111,6 +111,7 @@ void tm_message_processing_thread_0_entry(void* p1, void* p2, void* p3)
       /* Check for invalid message.  */
       if (tm_message_received[3] != tm_message_sent[3])
       {
+         printf("Message values doesnt match, probably wrong message size!\r\n");
          break;
       }
 
