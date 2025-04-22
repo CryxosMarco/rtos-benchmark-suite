@@ -16,7 +16,7 @@
 
 #define TM_TEST_DURATION 30
 /* Enable this to make the same test using standard binary semaphore to sync */
-// #define USE_REFERENCE
+#define USE_REFERENCE
 
 /* Define the counters used in the demo application...  */
 unsigned long synchronozation_counter;
@@ -130,6 +130,8 @@ void specific_synchronization_initialize(void)
    /* Immediately take semaphore 1 so it is empty */
    tm_semaphore_get(1);
 #endif
+   /* Create a semaphore for the test.  */
+   tm_semaphore_create(0);
    /* Initialize the optimizzed rtos synchronization mechanism  */
    init_rtos_sync();
    /* Create thread 0 at priority 5.  */
@@ -142,8 +144,6 @@ void specific_synchronization_initialize(void)
    /* Resume thread 1.  */
    tm_thread_resume(1);
 
-   /* Create a semaphore for the test.  */
-   tm_semaphore_create(0);
 
    preempting_report_thread();
 }
