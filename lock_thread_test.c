@@ -47,7 +47,7 @@ void tm_thread_locking_test_initialize(void)
    tm_thread_resume(0);
 
    /* Create a reporting thread to output benchmark results */
-   tm_thread_create(1, 1, tm_thread_locking_reporting_thread);
+   tm_thread_create(1, 2, tm_thread_locking_reporting_thread);
    tm_thread_resume(1);
 }
 
@@ -60,6 +60,8 @@ void tm_thread_locking_benchmark_thread(void* p1, void* p2, void* p3)
 
    while (1)
    {
+      int count = 1000;
+
       if (thread_locking_counter < ITERATION_COUNT)
       {
          tm_pmu_profile_start(pmu_lock_numbers[thread_locking_counter]);
@@ -69,10 +71,16 @@ void tm_thread_locking_benchmark_thread(void* p1, void* p2, void* p3)
       tm_suspend_scheduler();
       thread_locking_counter++;
       /* busy work loop to have some blocked time*/
-      for (int i = 0; i < 1000; i++)
-      {
-         __asm__ volatile("nop");
-      }
+
+      __asm__ volatile (
+              "1:\n\t"
+              "nop\n\t"
+              "subs %[cnt], %[cnt], #1\n\t"
+              "bne 1b\n\t"
+              : [cnt] "+r" (count)
+              :
+              : "cc"
+          );
       /* Unlock the thread by restarting the scheduler */
       tm_resume_scheduler();
 
