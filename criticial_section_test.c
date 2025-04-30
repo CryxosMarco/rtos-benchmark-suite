@@ -56,7 +56,9 @@ void tm_critical_section_benchmark_thread(void* p1, void* p2, void* p3)
    (void) p3;
 
    while (1)
-   { /* Using the PMU to Measure the first ITERATION_COUNT loops */
+   {
+      int count = 1000;
+      /* Using the PMU to Measure the first ITERATION_COUNT loops */
       if (critical_section_counter < ITERATION_COUNT)
       {
          tm_pmu_profile_start(pmu_crit_numbers[critical_section_counter]);
@@ -64,10 +66,15 @@ void tm_critical_section_benchmark_thread(void* p1, void* p2, void* p3)
       tm_enter_critical_section();
       critical_section_counter++;
       /* busy work loop to have some blocked time*/
-      for (int i = 0; i < 1000; i++)
-      {
-         __asm__ volatile("nop");
-      }
+      __asm__ volatile (
+         "1:\n\t"
+         "nop\n\t"
+         "subs %[cnt], %[cnt], #1\n\t"
+         "bne 1b\n\t"
+         : [cnt] "+r" (count)
+         :
+         : "cc"
+      );
       tm_exit_critical_section();
       if (critical_section_counter < ITERATION_COUNT + 1)
       {
