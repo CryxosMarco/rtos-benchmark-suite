@@ -1,7 +1,7 @@
 /*[CR]******************************************************************************
  *   Priority Inheritance Detection Test Program (Iteration Based, No Stop Task)
  *
- * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
  * This program measures the delay due to priority inheritance over a fixed

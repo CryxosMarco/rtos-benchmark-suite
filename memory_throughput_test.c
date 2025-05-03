@@ -25,9 +25,6 @@
 #define TM_TEST_DURATION 1          // Sleep period for reporting (in milliseconds)
 #define ITERATION_COUNT 32 
 
-/* PMU name used for the throughput measurement. */
-#define PMU_NAME "MEMTST"
-
 /* Place buffers in MSRAM using your linker script section. */
 unsigned char msram_src[BUFFER_SIZE];  //__attribute__((section("R5F_TCMA")));
 unsigned char msram_dest[BUFFER_SIZE]; //__attribute__((section("R5F_TCMA")));

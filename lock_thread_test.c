@@ -8,7 +8,7 @@
  * and unlocks the scheduler while the PMU records the locked duration. This
  * benchmark is intended for comparing multiple RTOSes using a common API.
  *
- * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
  ******************************************************************************/

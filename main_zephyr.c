@@ -1,5 +1,5 @@
 /*[CR]**************************************************************************
-Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
 SPDX-License-Identifier: Apache-2.0
 */
 /*[FH]**************************************************************************
@@ -94,7 +94,7 @@ void main_task(void* pvParameters)
    setup_interrupt();
 
    /* Call the main Thread-Metric function */
-   main_message_task_test();
+   main_critical_section_test();
 
    /* Delete thread after completion */
    k_thread_abort(k_current_get());

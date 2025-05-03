@@ -1,7 +1,7 @@
 /*[CR]******************************************************************************
  * Message Queue Task-to-Task Benchmark
  *
- * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
  * This program tests the performance of message queues used in a RTOS from one

@@ -1,6 +1,7 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation
- *
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+ * 
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.

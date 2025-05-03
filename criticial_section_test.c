@@ -6,7 +6,7 @@
  * single thread that enters and exits the critical section in a loop. The time
  * spent in the critical section is measured using the PMU.
  *
- * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
  ******************************************************************************/

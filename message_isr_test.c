@@ -16,7 +16,7 @@
  *
  * After all iterations, a summary report with the PMU results is printed.
  *
- * Copyright (c) 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
  * SPDX-License-Identifier: Apache-2.0
  *
  ******************************************************************************/

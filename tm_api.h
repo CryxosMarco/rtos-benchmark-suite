@@ -1,6 +1,7 @@
 /***************************************************************************
  * Copyright (c) 2024 Microsoft Corporation
- *
+ * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+
  * This program and the accompanying materials are made available under the
  * terms of the MIT License which is available at
  * https://opensource.org/licenses/MIT.
@@ -18,30 +19,6 @@
 /**************************************************************************/
 /**************************************************************************/
 
-/**************************************************************************/
-/*                                                                        */
-/*  APPLICATION INTERFACE DEFINITION                       RELEASE        */
-/*                                                                        */
-/*    tm_api.h                                            PORTABLE C      */
-/*                                                           6.1.7        */
-/*  AUTHOR                                                                */
-/*                                                                        */
-/*    William E. Lamie, Microsoft Corporation                             */
-/*                                                                        */
-/*  DESCRIPTION                                                           */
-/*                                                                        */
-/*    This file defines the basic Application Interface (API)             */
-/*    implementation source code for the Thread-Metrics performance       */
-/*    test suite. All service prototypes and data structure definitions   */
-/*    are defined in this file.                                           */
-/*                                                                        */
-/*  RELEASE HISTORY                                                       */
-/*                                                                        */
-/*    DATE              NAME                      DESCRIPTION             */
-/*                                                                        */
-/*  10-15-2021     William E. Lamie         Initial Version 6.1.7         */
-/*                                                                        */
-/**************************************************************************/
 #ifndef TM_API_H
 #define TM_API_H
 #include "rtos_config.h"
