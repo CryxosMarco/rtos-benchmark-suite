@@ -110,6 +110,7 @@ extern "C"
    int main_thread_locking_test(void);
    int main_uart(void);
    int main_memory_throughput_test(void);
+   int main_context_switch(void);
 
    /* Define RTOS Neutral APIs. RTOS vendors should fill in the guts of the
       following API. Once this is done the Thread-Metric tests can be

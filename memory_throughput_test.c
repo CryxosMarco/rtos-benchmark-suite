@@ -22,7 +22,6 @@
 /* Define test parameters. */
 #define BUFFER_SIZE (10 * 1024)     // 10 KB buffer
 #define THROUGHPUT_ITERATIONS 10000 // Number of memcpy iterations per test run
-#define TM_TEST_DURATION 1          // Sleep period for reporting (in milliseconds)
 #define ITERATION_COUNT 32 
 
 /* Place buffers in MSRAM using your linker script section. */

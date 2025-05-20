@@ -28,6 +28,7 @@ MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 #include "ti_drivers_config.h"
 #include "tm_api.h"
 #include <HwiP.h>
+#include <kernel/dpl/CacheP.h>
 #include <kernel/dpl/DebugP.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,19 +97,21 @@ void setup_interrupt(void)
 
 void threadx_main(ULONG arg)
 {
-   main_message_isr_test(); /* Startet den Benchmark-Test */
+   main_context_switch(); /* Startet den Benchmark-Test */
 }
 
 int rtos_main_threadx(void)
 {
    /* init SOC specific modules */
+   CacheP_enable(CacheP_TYPE_L1P);
+   CacheP_enable(CacheP_TYPE_L1D);
    System_init();
    Board_init();
    Drivers_open();
    Board_driversOpen();
    /* Initialize our UART application parameters */
    /* enable this when interrupts are needed. */
-   test_interrupt_handler = tm_isr_message_handler;
+   test_interrupt_handler = tm_interrupt_processing_handler;
    setup_interrupt();
 
    /* Enter the ThreadX kernel.  */
