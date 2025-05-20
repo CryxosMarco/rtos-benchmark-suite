@@ -78,7 +78,7 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
       unsigned long delta = context_task1_counter + context_task2_counter - last_count;
       last_count = context_task1_counter + context_task2_counter;
       relative_time = relative_time + TM_TEST_DURATION;
-      printf("**** Critical Section Benchmark **** Relative Time: %lu\r\n", relative_time);
+      printf("**** Context Switch Benchmark **** Relative Time: %lu\r\n", relative_time);
       printf("Time Period Total:  %lu\r\n\r\n", delta);
 
       if (!pmu_done)
