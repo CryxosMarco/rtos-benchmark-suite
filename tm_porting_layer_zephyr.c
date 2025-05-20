@@ -463,7 +463,7 @@ void tm_resume_scheduler()
 /*                        Driver Code                        */
 /* ----------------------------------------------------------*/
 /*
- * Example PMU Driver & Profiling Implementation for Zephyr (Cortex-R5)
+ * PMU Driver & Profiling Implementation for Zephyr (Cortex-R5)
  *
  * This code sets up the PMU at system initialization and provides
  * an API to profile multiple code segments by name. Start/End calls
