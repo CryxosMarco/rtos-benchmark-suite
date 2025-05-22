@@ -48,7 +48,8 @@ volatile unsigned long inversion_count = 0;
 #define LOW_TASK_PRIO 20 /* Nominal low priority */
 
 /*******************************************************************************
- * Debug Macro
+ * Debug Macro, use this to enable or diable the DBG_PRINT function
+ * This must be deactivated for the benchmarking!
  ******************************************************************************/
 // #define DEBUG_PRIO_INHERITANCE_ON
 #ifdef DEBUG_PRIO_INHERITANCE_ON
