@@ -25,7 +25,6 @@
 #include "ti_drivers_config.h"
 #include "tm_api.h"
 #include <drivers/pmu.h>
-#include <kernel/dpl/TimerP.h>
 
 /* Kernel includes */
 #include <FreeRTOS.h>

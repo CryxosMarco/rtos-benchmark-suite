@@ -3,6 +3,15 @@
 This repository contains the source code used to benchmark synchronization primitives and interrupt behavior across different Real-Time Operating Systems (RTOSes).
 
 ---
+## Prerequisits
+
+- This Benchmark is currently only portet for the AM243x and the R5F using TI driver API
+- You can defenitly run this benchmark under different hardware, but you have to change the main_<rtos> files and adjust the driver calls and references there according to your hardware manufacturer.
+- Check the Zephyr documentation for their DPL (Driver Porting Layer) to adjust it properly.
+- Also check the porting layer files as they use PMU drivers you may not have on your hardware.
+- 
+
+---
 
 ## RTOS Selection
 

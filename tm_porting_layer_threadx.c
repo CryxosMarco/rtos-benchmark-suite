@@ -53,7 +53,6 @@
 
 #include "ti_drivers_config.h"
 #include <drivers/pmu.h>
-#include <kernel/dpl/TimerP.h>
 
 /* Define ThreadX mapping constants.  */
 
