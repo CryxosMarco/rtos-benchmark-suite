@@ -1,6 +1,7 @@
 # Benchmark_RTOS
 
 This repository contains the source code used to benchmark synchronization primitives and interrupt behavior across different Real-Time Operating Systems (RTOSes).
+It is based on the [Thread-Metric Benchmark Suite](https://github.com/eclipse-threadx/threadx/tree/master/utility/benchmarks/thread_metric) and is specifically ported for the AM243x/AM64x Evaluation Board of Texas Instruments and for use on the Cortex R5F. This Work is done within the scope of a Master-Thesis by Marco Milenkovic and should not be seen a final verison. This is work in progress and will get future updates and additions.
 
 ---
 ## Prerequisits
@@ -9,7 +10,6 @@ This repository contains the source code used to benchmark synchronization primi
 - You can defenitly run this benchmark under different hardware, but you have to change the main_<rtos> files and adjust the driver calls and references there according to your hardware manufacturer.
 - Check the Zephyr documentation for their DPL (Driver Porting Layer) to adjust it properly.
 - Also check the porting layer files as they use PMU drivers you may not have on your hardware.
-- 
 
 ---
 
