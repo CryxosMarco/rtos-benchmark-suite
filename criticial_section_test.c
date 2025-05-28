@@ -1,13 +1,18 @@
-/*[CR]******************************************************************************
+/*[CR]**************************************************************************
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Critical Section Test
+*/
+/*[CL]**************************************************************************
  * Critical Section Benchmark
  *
  * This test uses the rtos specific mechanisms to enter and exit a critical section
  * and measures the time spent in the critical section. The test is driven by a
  * single thread that enters and exits the critical section in a loop. The time
  * spent in the critical section is measured using the PMU.
- *
- * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
- * SPDX-License-Identifier: Apache-2.0
  *
  ******************************************************************************/
 

@@ -1,13 +1,20 @@
-/*[CR]******************************************************************************
- * Message Queue Task-to-Task Benchmark
+/*[CR]**************************************************************************
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Message Queue from Thread to Thread
+*/
+/*[CL]**************************************************************************
+ * Message Queue Thread to Thread Benchmark
  *
- * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
- * SPDX-License-Identifier: Apache-2.0
+ * This test uses 5 producer threads and 5 consumer threads to send and receive
+ * thorigh a message queue in blocking mode. 
  *
- * This program tests the performance of message queues used in a RTOS from one
- * task to another.
- *
- ******************************************************************************/
+********************************************************************************/
+
+
 /*******************************************************************************
  * includes
  ******************************************************************************/

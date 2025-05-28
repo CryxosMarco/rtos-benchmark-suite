@@ -1,14 +1,18 @@
-/*[CR]******************************************************************************
- * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
- * SPDX-License-Identifier: Apache-2.0
+/*[CR]**************************************************************************
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Specific RTOS synchronisation mechanisms
+*/
+/*[CL]**************************************************************************
  *
  * This program tests the performance of optimized low overhead wait and signal
  * processing in a RTOS.
  *
- *
- *
- *
- ******************************************************************************/
+********************************************************************************/
+
 /*******************************************************************************
  * includes
  ******************************************************************************/

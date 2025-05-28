@@ -67,6 +67,7 @@ static void reporting_thread(void* arg1, void* arg2, void* arg3)
    (void) arg1;
    (void) arg2;
    (void) arg3;
+   
    bool pmu_done = false;
    unsigned long last_count = 0;
    unsigned long relative_time = 0;

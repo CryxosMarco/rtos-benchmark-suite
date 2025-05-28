@@ -1,4 +1,12 @@
-/*[CR]******************************************************************************
+/*[CR]**************************************************************************
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Message Queue from ISR Test
+*/
+/*[CL]**************************************************************************
  * Message Queue ISR-to-Task Benchmark (Single Threaded Test)
  *
  * This test uses a minimal ISR that generates a message with a fixed layout:
@@ -16,10 +24,7 @@
  *
  * After all iterations, a summary report with the PMU results is printed.
  *
- * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
- * SPDX-License-Identifier: Apache-2.0
- *
- ******************************************************************************/
+********************************************************************************/
 
 #include "tm_api.h"
 #include <stdio.h>

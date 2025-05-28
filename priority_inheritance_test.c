@@ -1,8 +1,13 @@
-/*[CR]******************************************************************************
- *   Priority Inheritance Detection Test Program (Iteration Based, No Stop Task)
- *
- * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
- * SPDX-License-Identifier: Apache-2.0
+/*[CR]**************************************************************************
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Priority Inheritance Test
+*/
+/*[CL]**************************************************************************
+ * Message Queue Thread to Thread Benchmark
  *
  * This program measures the delay due to priority inheritance over a fixed
  * number of inversion cycles (ITERATION_COUNT). PMU measurement keys are precomputed,
@@ -13,7 +18,8 @@
  * The high‑priority task triggers the inversion and increments a counter each cycle.
  * The medium‑priority (interference) task continuously runs until all cycles are complete,
  * at which point it prints the PMU measurements and total inversion count.
- ******************************************************************************/
+ *
+********************************************************************************/
 
 /*******************************************************************************
  * includes

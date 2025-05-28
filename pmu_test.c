@@ -14,13 +14,8 @@ CONTENTS: Short description of the file content
 MMI: Marco Milenkovic, IBV, Milenkovic@ibv-augsburg.de
 */
 /*[MP]**************************************************************************
- * Synchronistation Promblem example using tm_api.h
- *
- * Demonstrates:
- *   - How to set up a simple "UART" usage protected by a mutex
- *   - Creating/resuming tasks
- *   - Printing output with printf (simulating UART output)
- *
+ * 
+ * Measuring the PMU Overhead
  *
  ******************************************************************************/
 /*******************************************************************************

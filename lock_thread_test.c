@@ -1,4 +1,12 @@
-/*[CR]******************************************************************************
+/*[CR]**************************************************************************
+Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
+SPDX-License-Identifier: Apache-2.0
+*/
+/*[FH]**************************************************************************
+PROJECT: MASTER THESIS
+MODULE: Critical Section Test
+*/
+/*[CL]**************************************************************************
  * Thread Locking Benchmark
  *
  * This test uses RTOS-specific thread locking functions
@@ -8,10 +16,8 @@
  * and unlocks the scheduler while the PMU records the locked duration. This
  * benchmark is intended for comparing multiple RTOSes using a common API.
  *
- * Copyright (c) Marco Milenkovic 2024 IBV - Echtzeit- und Embedded GmbH & Co. KG
- * SPDX-License-Identifier: Apache-2.0
- *
- ******************************************************************************/
+********************************************************************************/
+
 
 #include "tm_api.h"
 #include <stdio.h>
